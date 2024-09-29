@@ -7,7 +7,7 @@ const hostelSchema = new mongoose.Schema({
   elecUnit: { type: Number, required: true, default: 1 },
   aquaUnit: { type: Number, required: true, default: 1 },
   servicesFee: { type: Number, required: true, default: 0 },
-  hostelId: {
+  hostId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Host",
     require: true,

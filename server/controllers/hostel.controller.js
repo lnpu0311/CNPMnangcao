@@ -3,8 +3,8 @@ const Hostel = require("../models/hostel.model");
 //Lấy data của Hostel, thường dùng tạo danh sách
 const getHostel = async (req, res) => {
   try {
-    const Hostels = await Hostel.find({});
-    res.status(200).json({ success: true, data: Hostels });
+    const hostels = await Hostel.find({});
+    res.status(200).json({ success: true, data: hostels });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -28,7 +28,7 @@ const getHostelById = async (req, res) => {
 const getHostelByHostId = async (req, res) => {
   const { id } = req.params;
   try {
-    const hostel = await Hostel.find({ hostelId: id });
+    const hostel = await Hostel.find({ hostId: id });
     console.log(id);
     if (!hostel) {
       return res
@@ -61,7 +61,7 @@ const createHostel = async (req, res) => {
   if (findHostel) {
     return res
       .status(400)
-      .json({ success: false, message: "Email is available" });
+      .json({ success: false, message: "Hostel is available" });
   }
 
   const newHostel = new Hostel(hostel);

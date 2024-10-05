@@ -25,10 +25,10 @@ const getHostelById = async (req, res) => {
   }
 };
 
-const getHostelByHostId = async (req, res) => {
+const getHostelByLandLordId = async (req, res) => {
   const { id } = req.params;
   try {
-    const hostel = await Hostel.find({ hostId: id });
+    const hostel = await Hostel.find({ landLordId: id });
     console.log(id);
     if (!hostel) {
       return res
@@ -74,4 +74,9 @@ const createHostel = async (req, res) => {
   }
 };
 
-module.exports = { getHostel, createHostel, getHostelById, getHostelByHostId };
+module.exports = {
+  getHostel,
+  createHostel,
+  getHostelById,
+  getHostelByLandLordId,
+};

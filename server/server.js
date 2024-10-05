@@ -31,15 +31,15 @@ connectDB();
 
 //Router
 const tenantRoute = require("./routes/tenant.route.js");
-const hostRoute = require("./routes/host.route.js");
+const landLordRoute = require("./routes/landLord.route.js");
 const hostelRoute = require("./routes/hostel.route.js");
-// const roomRoute = require("./routes/room.route.js");
+const roomRoute = require("./routes/room.route.js");
 
 //Api
 app.use("/api/tenant", tenantRoute);
 app.use("/api/hostel", hostelRoute);
-app.use("/api/host", hostRoute);
-// app.use("/api/room", roomRoute);
+app.use("/api/landLord", landLordRoute);
+app.use("/api/room", roomRoute);
 
 app.listen(PORT, () =>
   console.log(`Server is running on port http://localhost:${PORT}`)

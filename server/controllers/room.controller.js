@@ -39,6 +39,22 @@ const getRoomByHostelId = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+const getRoomByTenantId = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const room = await Room.find({ tenanId: id });
+    console.log(id);
+    if (!room) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Room not found" });
+    }
+    res.status(200).json({ success: true, data: room });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 const createRoom = async (req, res) => {
   const room = req.body;
 
@@ -73,4 +89,10 @@ const createRoom = async (req, res) => {
   }
 };
 
-module.exports = { getRoomByHostelId, getRoom, getRoomById, createRoom };
+module.exports = {
+  getRoomByHostelId,
+  getRoom,
+  getRoomById,
+  getRoomByTenantId,
+  createRoom,
+};

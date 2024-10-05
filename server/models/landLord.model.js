@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const hostSchema = new mongoose.Schema({
+const landLordSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true },
   address: { type: String, required: true },
@@ -10,4 +10,4 @@ const hostSchema = new mongoose.Schema({
   is_varified: { type: Number, default: 0 },
 });
 
-module.exports = mongoose.model(`Host`, hostSchema);
+module.exports = mongoose.model(`LandLord`, landLordSchema);

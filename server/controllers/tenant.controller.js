@@ -1,5 +1,5 @@
 const Tenant = require("../models/tenant.model");
-
+const jwt = require("jsonwebtoken");
 //Lấy data của Tenant, thường dùng tạo danh sách
 const getTenant = async (req, res) => {
   try {
@@ -64,4 +64,38 @@ const createTenant = async (req, res) => {
   }
 };
 
-module.exports = { getTenant, createTenant, getTenantById };
+// Đăng nhập Tenant
+const loginTenant = async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide both email and password",
+    });
+  }
+
+  try {
+    const tenant = await Tenant.findOne({ email });
+
+    if (!tenant) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Invalid email or password" });
+    }
+
+    const token = jwt.sign({ id: tenant._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    res.status(200).json({
+      success: true,
+      token,
+      message: "Login successful",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { getTenant, createTenant, getTenantById, loginTenant };

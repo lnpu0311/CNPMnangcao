@@ -4,12 +4,10 @@
 /node_modules
 /.pnp
 .pnp.js
-<<<<<<< HEAD
-.env
 
-=======
-node_modules/
->>>>>>> Nhao
+
+
+
 # testing
 /coverage
 

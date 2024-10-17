@@ -7,21 +7,24 @@ const bodyParser = require("body-parser");
 const morgan = require("morgan");
 const cors = require("cors");
 
-const allowedOrigins = ["http://localhost:3000"];
+const allowedOrigins = ["http://localhost:3000"]; // Thêm các URL frontend bạn muốn cho phép
+
 app.use(
   cors({
-    origin: (origin, callback) => {
+    origin: function (origin, callback) {
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg =
+          "The CORS policy for this site does not allow access from the specified origin.";
+        return callback(new Error(msg), false);
       }
+      return callback(null, true);
     },
   })
 );
-
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(morgan("combined"));
 
@@ -30,16 +33,14 @@ const connectDB = require("./configs/db.js");
 connectDB();
 
 //Router
-const tenantRoute = require("./routes/tenant.route.js");
-const landLordRoute = require("./routes/landLord.route.js");
 const hostelRoute = require("./routes/hostel.route.js");
 const roomRoute = require("./routes/room.route.js");
+const userRoute = require("./routes/user.route.js");
 
 //Api
-app.use("/api/tenant", tenantRoute);
 app.use("/api/hostel", hostelRoute);
-app.use("/api/landLord", landLordRoute);
 app.use("/api/room", roomRoute);
+app.use("/api/user", userRoute);
 
 app.listen(PORT, () =>
   console.log(`Server is running on port http://localhost:${PORT}`)

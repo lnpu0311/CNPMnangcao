@@ -1,13 +1,15 @@
-import { Box, useColorModeValue } from "@chakra-ui/react";
+import { Box, ChakraProvider, useColorModeValue } from "@chakra-ui/react";
 import { Route, Routes } from "react-router-dom";
 import Template from "./pages/Layout";
+import Home from "./landlord/Home";
+import theme from "./theme";
 function App() {
   return (
-    <Box minH={"100vh"}>
-      <Routes>
-        <Route path="/" element={<Template />} />
-      </Routes>
-    </Box>
+    <ChakraProvider theme={theme}>
+      <Box minH={"100vh"}>
+        <Home />
+      </Box>
+    </ChakraProvider>
   );
 }
 

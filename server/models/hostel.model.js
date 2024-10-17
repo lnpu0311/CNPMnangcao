@@ -7,11 +7,12 @@ const hostelSchema = new mongoose.Schema({
   elecUnit: { type: Number, required: true, default: 1 },
   aquaUnit: { type: Number, required: true, default: 1 },
   servicesFee: { type: Number, required: true, default: 0 },
-  landLordId: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "LandLord",
+    ref: "User",
     require: true,
   },
+  imageUrl: { type: String, required: false },
 });
 
 module.exports = mongoose.model(`Hostel`, hostelSchema);

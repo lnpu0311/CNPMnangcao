@@ -1,51 +1,47 @@
 const jwt = require("jsonwebtoken");
 
-const Admin = require("../models/admin.model");
-const LandLord = require("../models/landLord.model");
-const Tenant = require("../models/tenant.model");
-
-const authMiddleware = (requireAdmin = false) => {
-  return async (req, res, next) => {
-    const token = req.header("Authorization");
-
-    if (!token) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Không có token" });
+const authMiddleware = (allowedRoles = []) => {
+  return (req, res, next) => {
+    // Lấy token từ header
+    const authHeader = req.header("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        success: false,
+        message: "Không có token hoặc token không đúng định dạng",
+      });
     }
 
+    const token = authHeader.split(" ")[1]; // Lấy token sau "Bearer"
+
     try {
-      // Giải mã token
-      const decoded = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET);
-
-      let user;
-      // Xác định loại người dùng là Là admin hay không
-      if (requireAdmin && req.user.is_admin !== 1) {
-        return res.status(403).json({
-          success: false,
-          message: "Truy cập bị từ chối, không phải admin",
-        });
-      } else if (requireAdmin && req.user.is_admin === 1) {
-        user = await Admin.findById(decoded.id);
-      }
-      // Xác định loại người dùng là LandLord hay Tenant từ token
-      if (decoded.model === "landLord") {
-        user = await LandLord.findById(decoded.id);
-      } else if (decoded.model === "tenant") {
-        user = await Tenant.findById(decoded.id);
-      }
-
-      // Nếu không tìm thấy người dùng
-      if (!user) {
+      // Xác thực token và trích xuất dữ liệu trong token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded;
+      console.log("Dữ liệu của token:" + req.user);
+      // Kiểm tra quyền hạn của user dựa trên role
+      if (allowedRoles.length && !allowedRoles.includes(req.user.role)) {
         return res
-          .status(404)
-          .json({ success: false, message: "Người dùng không tồn tại" });
+          .status(403)
+          .json({ success: false, message: "Không có quyền truy cập" });
       }
 
-      req.user = user; // Lưu thông tin người dùng trong request
-      next(); // Cho phép tiếp tục
+      // Tiếp tục quy trình
+      next();
     } catch (error) {
-      return res.status(401).json({ success: false, message: error.message });
+      // Phân loại lỗi JWT
+      if (error.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json({ success: false, message: "Token đã hết hạn" });
+      } else if (error.name === "JsonWebTokenError") {
+        return res
+          .status(401)
+          .json({ success: false, message: "Token không hợp lệ" });
+      } else {
+        return res
+          .status(500)
+          .json({ success: false, message: "Lỗi xác thực token" });
+      }
     }
   };
 };

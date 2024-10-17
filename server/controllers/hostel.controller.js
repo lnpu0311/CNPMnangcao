@@ -25,10 +25,10 @@ const getHostelById = async (req, res) => {
   }
 };
 
-const getHostelByLandLordId = async (req, res) => {
+const getHostelByUserId = async (req, res) => {
   const { id } = req.params;
   try {
-    const hostel = await Hostel.find({ landLordId: id });
+    const hostel = await Hostel.find({ userId: id });
     console.log(id);
     if (!hostel) {
       return res
@@ -40,7 +40,7 @@ const getHostelByLandLordId = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-//Tạo Hostel, dùng để là chức năng đăng ký
+//Tạo Hostel
 const createHostel = async (req, res) => {
   const hostel = req.body;
 
@@ -63,8 +63,19 @@ const createHostel = async (req, res) => {
       .status(400)
       .json({ success: false, message: "Hostel is available" });
   }
-
-  const newHostel = new Hostel(hostel);
+  let imageUrl =
+    "https://asset.cloudinary.com/cnpmnc/17da4fe9a04710f6b649531eef6c33e4"; // Ảnh mặc định
+  if (req.file) {
+    imageUrl = req.file.path; // Lấy URL của ảnh sau khi upload lên Cloudinary
+  }
+  const newHostel = new Hostel({
+    name: hostel.name,
+    address: hostel.address,
+    district: hostel.district,
+    city: hostel.city,
+    imageUrl: imageUrl,
+    userId: req.user.id,
+  });
   try {
     await newHostel.save();
     res.status(200).json({ success: true, data: newHostel });
@@ -78,5 +89,5 @@ module.exports = {
   getHostel,
   createHostel,
   getHostelById,
-  getHostelByLandLordId,
+  getHostelByUserId,
 };

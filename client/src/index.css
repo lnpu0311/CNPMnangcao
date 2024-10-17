@@ -1,0 +1,25 @@
+.navlink {
+  margin-inline-start: 2px;
+  margin-block: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Space between icon and text */
+  padding: 6px;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+  color: #0077b6; /* Default text color */
+  border-radius: 5px;
+  font-size: 18px;
+  height: 50px;
+  font-weight: 600;
+}
+
+.navlink:hover {
+  background-color: #0077b6; /* Light gray-blue color for hover */
+  color: whitesmoke; /* Soft light purple on hover */
+}
+
+.active-navlink {
+  background-color: #0096c7; /* Dark teal background when active */
+  color: white; /* Soft blue text color when active */
+}

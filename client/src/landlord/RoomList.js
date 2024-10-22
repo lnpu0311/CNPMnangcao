@@ -65,8 +65,8 @@ const rooms = [
 ];
 
 const RoomList = () => {
-  const { facilityId } = useParams(); // Lấy facilityId từ URL
-  const navigate = useNavigate(); // Sử dụng hook điều hướng
+  const { facilityId } = useParams();
+  const navigate = useNavigate();
   const {
     isOpen: isOpenRoom,
     onOpen: onOpenRoom,

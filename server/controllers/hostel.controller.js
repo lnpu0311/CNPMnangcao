@@ -43,20 +43,20 @@ const getHostelByUserId = async (req, res) => {
 //Tạo Hostel
 const createHostel = async (req, res) => {
   const hostel = req.body;
-
+  console.log(req.file);
   if (!hostel.name || !hostel.address || !hostel.district || !hostel.city) {
     return res
       .status(400)
       .json({ success: false, message: "Please provide all fields" });
   }
-  if (hostel.elecUnit < 0 || hostel.aqua < 0 || hostel.servicesFee < 0) {
+  if (hostel.elecUnit < 0 || hostel.aqua < 0) {
     return res.status(400).json({
       success: false,
-      message: "elecUnit,aquaUnit and servicesFee must not be less than 0",
+      message: "elecUnit,aquaUnit must not be less than 0",
     });
   }
 
-  const findHostel = await Hostel.findOne({ hostel });
+  const findHostel = await Hostel.findOne({ name: hostel.name });
 
   if (findHostel) {
     return res
@@ -81,7 +81,7 @@ const createHostel = async (req, res) => {
     res.status(200).json({ success: true, data: newHostel });
   } catch (error) {
     console.error("Error in register", error.message);
-    res.status(500).json({ success: false, message: "Server Error" });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 

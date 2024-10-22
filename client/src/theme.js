@@ -39,6 +39,7 @@ const theme = extendTheme({
     }),
   },
   components: {
+
     Box: {
       baseStyle: (props) => ({
         bg: mode("brand.0", "brand.800")(props),

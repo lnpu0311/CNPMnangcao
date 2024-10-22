@@ -65,9 +65,18 @@ const rooms = [
 ];
 
 const RoomList = () => {
-  const { facilityId } = useParams(); // Lấy facilityId từ URL
-  const navigate = useNavigate(); // Sử dụng hook điều hướng
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { facilityId } = useParams();
+  const navigate = useNavigate();
+  const {
+    isOpen: isOpenRoom,
+    onOpen: onOpenRoom,
+    onClose: onCloseRoom,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenContract,
+    onOpen: onOpenContract,
+    onClose: onCloseContract,
+  } = useDisclosure();
   const [newRoom, setNewRoom] = useState({
     title: "",
     name: "",
@@ -112,7 +121,7 @@ const RoomList = () => {
 
   const handleRoomClick = (room) => {
     setSelectedRoom(room);
-    onOpen();
+    onOpenRoom();
   };
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -141,14 +150,14 @@ const RoomList = () => {
       tenantName: "",
       landlordName: "",
     });
-    onClose();
+    onCloseContract();
   };
 
   const handleCreateRoom = () => {
     console.log("Creating Room:", newRoom);
     // Here you can add logic to save the new room to the database
     setNewRoom({ name: "", area: "", price: "", description: "" });
-    onClose();
+    onCloseRoom();
   };
   // Lọc danh sách phòng theo facilityId
   const filteredRooms = rooms.filter(
@@ -169,7 +178,7 @@ const RoomList = () => {
         >
           Quay lại
         </Button>
-        <Button onClick={onOpen} colorScheme="blue" rightIcon={<FaPlus />}>
+        <Button onClick={onOpenRoom} colorScheme="blue" rightIcon={<FaPlus />}>
           Thêm phòng mới
         </Button>
       </Flex>
@@ -237,7 +246,7 @@ const RoomList = () => {
                   colorScheme="blue"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onOpen();
+                    onOpenContract();
                     handleAddRoom(room);
                   }}
                 >
@@ -274,7 +283,7 @@ const RoomList = () => {
         ))}
       </SimpleGrid>
       {/* Modal for Adding New Room */}
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpenRoom} onClose={onCloseRoom}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Thêm phòng mới</ModalHeader>
@@ -362,14 +371,14 @@ const RoomList = () => {
             <Button colorScheme="teal" mr={3} onClick={handleCreateRoom}>
               Tạo phòng
             </Button>
-            <Button variant="ghost" onClick={onClose}>
+            <Button variant="ghost" onClick={onCloseRoom}>
               Hủy
             </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
       {/* Modal for Creating Contract */}
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpenContract} onClose={onCloseContract}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Hợp đồng mới</ModalHeader>
@@ -458,7 +467,7 @@ const RoomList = () => {
             <Button colorScheme="teal" mr={3} onClick={handleCreateContract}>
               Tạo hợp đồng
             </Button>
-            <Button variant="ghost" onClick={onClose}>
+            <Button variant="ghost" onClick={onCloseContract}>
               Hủy
             </Button>
           </ModalFooter>

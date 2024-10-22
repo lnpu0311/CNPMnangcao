@@ -24,6 +24,7 @@ import {
   Button,
   Container,
   useColorMode,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import {
   HamburgerIcon,
@@ -70,6 +71,7 @@ function HomeLayout() {
     name: "Pukachu xinh dep tuyt voi",
   });
   const { colorMode, toggleColorMode } = useColorMode();
+  const iconColor = useColorModeValue("gray.800", "yellow.300");
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -163,7 +165,7 @@ function HomeLayout() {
         top={0}
         left={{ base: 0, md: isNavOpen ? "300px" : "60px" }}
         right={0}
-        zIndex={1}
+        zIndex={10}
       >
         <Box ml={{ base: "0", md: "4" }}>
           <Text
@@ -188,8 +190,14 @@ function HomeLayout() {
             colorScheme="teal"
             variant="ghost"
             mt={4}
+            transition="all 0.2s ease"
+            _hover={{ bg: colorMode === "light" ? "brand.200" : "brand.700" }}
           >
-            {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+            {colorMode === "light" ? (
+              <MoonIcon color={iconColor} />
+            ) : (
+              <SunIcon color={iconColor} />
+            )}
             {colorMode === "light" ? " Dark Mode" : " Light Mode"}
           </Button>
           <Box position="relative">
@@ -364,7 +372,7 @@ function HomeLayout() {
       <GridItem
         as="main"
         area="main"
-        ml={{ base: 0, md: isNavOpen ? "100px" : "50px" }}
+        ml={{ base: 0, md: isNavOpen ? "100px" : "40px" }}
         mt={{ base: 16, md: 0 }}
         p={1}
       >

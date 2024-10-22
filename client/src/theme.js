@@ -34,36 +34,36 @@ const theme = extendTheme({
     }),
   },
   components: {
-    Button: {
-      baseStyle: {
-        fontWeight: "bold",
-      },
-      sizes: {
-        md: {
-          fontSize: "md",
-          px: 4,
-          py: 2,
-        },
-      },
-      variants: {
-        solid: (props) => ({
-          bg: mode("brand.500", "brand.700")(props),
-          color: "white",
-          _hover: {
-            bg: mode("brand.700", "brand.500")(props),
-          },
-        }),
-        outline: (props) => ({
-          borderColor: mode("brand.100", "brand.400")(props),
-          color: mode("brand.600", "brand.100")(props),
-          _hover: {
-            bg: mode("brand.800", "brand.400")(props),
-            borderColor: mode("brand.100", "brand.0")(props),
-            color: "white",
-          },
-        }),
-      },
-    },
+    // Button: {
+    //   baseStyle: {
+    //     fontWeight: "bold",
+    //   },
+    //   sizes: {
+    //     md: {
+    //       fontSize: "md",
+    //       px: 4,
+    //       py: 2,
+    //     },
+    //   },
+    //   variants: {
+    //     solid: (props) => ({
+    //       bg: mode("brand.500", "brand.700")(props),
+    //       color: "white",
+    //       _hover: {
+    //         bg: mode("brand.700", "brand.500")(props),
+    //       },
+    //     }),
+    //     outline: (props) => ({
+    //       borderColor: mode("brand.100", "brand.400")(props),
+    //       color: mode("brand.600", "brand.100")(props),
+    //       _hover: {
+    //         bg: mode("brand.800", "brand.400")(props),
+    //         borderColor: mode("brand.100", "brand.0")(props),
+    //         color: "white",
+    //       },
+    //     }),
+    //   },
+    // },
   },
 });
 

@@ -17,7 +17,7 @@ const authMiddleware = (allowedRoles = []) => {
       // Xác thực token và trích xuất dữ liệu trong token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = decoded;
-      console.log("Dữ liệu của token:" + req.user);
+      console.log("Dữ liệu của token:", req.user);
       // Kiểm tra quyền hạn của user dựa trên role
       if (allowedRoles.length && !allowedRoles.includes(req.user.role)) {
         return res

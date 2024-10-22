@@ -83,6 +83,7 @@ const createUser = async (req, res) => {
     password: hashPassword,
     otpVerfication: verficationCode,
     is_active: true,
+    gender: user.gender,
     imageUrl: imageUrl,
   });
   try {

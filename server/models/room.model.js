@@ -13,6 +13,12 @@ const roomSchema = new mongoose.Schema({
     ref: "Hostel",
     required: true,
   },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    require: true,
+    default: "0",
+  },
 });
 
 module.exports = mongoose.model("Room", roomSchema);

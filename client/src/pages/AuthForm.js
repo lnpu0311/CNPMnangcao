@@ -12,8 +12,11 @@ import {
   Flex,
   Radio,
   RadioGroup,
+  Alert,
+  AlertIcon,
 } from "@chakra-ui/react";
 import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 
 const AuthForm = () => {
   const location = useLocation();
@@ -21,13 +24,17 @@ const AuthForm = () => {
   const [signinIn, setSigninIn] = useState(location.pathname === "/login");
   const [formData, setFormData] = useState({
     name: "",
-    phone: "",
+    numPhone: "",
     email: "",
     role: "",
     password: "",
     confirmPassword: "",
   });
   const [errors, setErrors] = useState({});
+  const [apiMessage, setApiMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+  const [apiLogInMessage, setApiLogInMessage] = useState("");
+  const [isLogInError, setIsLogInError] = useState(false);
 
   useEffect(() => {
     setSigninIn(location.pathname === "/login");
@@ -64,8 +71,9 @@ const AuthForm = () => {
     setFormData((prevData) => ({
       ...prevData,
       name: "",
-      phone: "",
+      numPhone: "",
       email: "",
+      gender: "",
       password: "",
       confirmPassword: "",
       role:
@@ -80,7 +88,9 @@ const AuthForm = () => {
       if (!formData.password) newErrors.password = "Vui lòng điền mật khẩu!";
     } else {
       if (!formData.name) newErrors.name = "Vui lòng điền tên!";
-      if (!formData.phone) newErrors.phone = "Vui lòng điền số điện thoại!";
+      if (!formData.gender) newErrors.gender = "Vui lòng chọn giới tính";
+      if (!formData.numPhone)
+        newErrors.numPhone = "Vui lòng điền số điện thoại!";
       if (!formData.email) newErrors.email = "Vui lòng điền email!";
       if (!formData.password) newErrors.password = "Vui lòng điền mật khẩu!";
       if (formData.password !== formData.confirmPassword) {
@@ -88,18 +98,66 @@ const AuthForm = () => {
       }
     }
     setErrors(newErrors);
+    console.log(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (validateForm()) {
-      console.log("Logging in with:", formData);
+      const data = new FormData();
+      data.append("email", formData.email);
+      data.append("password", formData.password);
+      console.log("Logging in with:", [...data.entries()]);
+      try {
+        const response = await axios.post(
+          `http://localhost:5000/api/user/login`,
+          data,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        setApiLogInMessage("Đăng nhập thành công");
+        setIsLogInError(false);
+        console.log(response.data.data);
+      } catch (error) {
+        setApiLogInMessage(error.response.data.message);
+        setIsLogInError(true);
+        console.error("Lỗi khi gửi yêu cầu:", error);
+      }
     }
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
+    console.log(validateForm());
     if (validateForm()) {
-      console.log("Registering with:", formData);
+      const data = new FormData();
+      data.append("name", formData.name);
+      data.append("email", formData.email);
+      data.append("numPhone", formData.numPhone);
+      data.append("gender", formData.gender);
+      data.append("role", formData.role);
+      data.append("password", formData.password);
+      console.log("Registering with:", [...data.entries()]);
+      try {
+        const response = await axios.post(
+          `http://localhost:5000/api/user`,
+          data,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        console.log("User mới:", response.data.data);
+        setApiMessage("Tạo tài khoản thành công!");
+        setIsError(false);
+      } catch (error) {
+        setApiMessage(error.response.data.message);
+        setIsError(true);
+        console.error("Lỗi khi gửi yêu cầu:", error.response.data.message);
+      }
     }
   };
 
@@ -199,6 +257,16 @@ const AuthForm = () => {
                 <FormErrorMessage>{errors.password}</FormErrorMessage>
               </FormControl>
             </>
+            {/* Display API Error Message */}
+            {apiLogInMessage && (
+              <Alert
+                status={isLogInError ? "error" : "success"}
+                borderRadius={6}
+              >
+                <AlertIcon />
+                {apiLogInMessage}
+              </Alert>
+            )}
             <Button
               bgGradient="linear(to-r, #07c8f9, #0d41e1)"
               _hover={{ bgGradient: "linear(to-l, #07c8f9, #0d41e1)" }}
@@ -215,7 +283,7 @@ const AuthForm = () => {
             alignContent={"center"}
             position="absolute"
             left={signinIn ? "100%" : "0"}
-            transition="all 0.8s cubic-bezier(0.65, 0.05, 0.36, 1)" // More fluid curve
+            transition="all 0.8s cubic-bezier(0.65, 0.05, 0.36, 1)"
             width="50%"
             height="100%"
             p={10}
@@ -225,7 +293,9 @@ const AuthForm = () => {
             <Heading textAlign={"center"} size="lg" mb={6} color="blue.600">
               Đăng Ký
             </Heading>
+
             <>
+              {/* Form Fields */}
               <FormControl
                 variant="floating"
                 isRequired
@@ -250,10 +320,10 @@ const AuthForm = () => {
                 mb={4}
               >
                 <Input
-                  name="phone"
+                  name="numPhone"
                   type="tel"
                   placeholder=" "
-                  value={formData.phone}
+                  value={formData.numPhone}
                   onChange={handleInputChange}
                 />
                 <FormLabel textColor={"black"}>Số điện thoại</FormLabel>
@@ -275,6 +345,23 @@ const AuthForm = () => {
                 />
                 <FormLabel textColor={"black"}>Email</FormLabel>
                 <FormErrorMessage>{errors.email}</FormErrorMessage>
+              </FormControl>
+
+              <FormControl isRequired isInvalid={!!errors.gender} mb={4}>
+                <FormLabel textColor={"black"}>Giới tính</FormLabel>
+                <RadioGroup
+                  name="gender"
+                  value={formData.gender}
+                  onChange={(value) =>
+                    setFormData({ ...formData, gender: value })
+                  }
+                >
+                  <Stack textColor={"black"} direction="row">
+                    <Radio value="male">Nam</Radio>
+                    <Radio value="female">Nữ</Radio>
+                  </Stack>
+                </RadioGroup>
+                <FormErrorMessage>{errors.gender}</FormErrorMessage>
               </FormControl>
 
               <FormControl isRequired isInvalid={!!errors.role} mb={4}>
@@ -328,6 +415,14 @@ const AuthForm = () => {
                 <FormErrorMessage>{errors.confirmPassword}</FormErrorMessage>
               </FormControl>
             </>
+            {/* Display API Error Message */}
+            {apiMessage && (
+              <Alert status={isError ? "error" : "success"} borderRadius={6}>
+                <AlertIcon />
+                {apiMessage}
+              </Alert>
+            )}
+            {/* Submit Button */}
             <Button
               bgGradient="linear(to-r, #07c8f9, #0d41e1)"
               _hover={{ bgGradient: "linear(to-l, #07c8f9, #0d41e1)" }}

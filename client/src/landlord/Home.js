@@ -169,7 +169,7 @@ function HomeLayout() {
       >
         <Box ml={{ base: "0", md: "4" }}>
           <Text
-            bgGradient="linear(to-l, #9fccfa, #0974f1)"
+            bgGradient="linear(to-l, #07c8f9, #0d41e1)"
             bgClip="text"
             fontSize={{ base: "2xl", md: "2xl", lg: "4xl" }}
             fontWeight="bold"

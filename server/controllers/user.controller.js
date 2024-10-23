@@ -85,6 +85,7 @@ const createUser = async (req, res) => {
     is_active: true,
     gender: user.gender,
     imageUrl: imageUrl,
+    landlordId: user.landlordId,
   });
   try {
     await newUser.save();

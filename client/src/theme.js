@@ -32,14 +32,30 @@ const theme = extendTheme({
   styles: {
     global: (props) => ({
       "html, body": {
-        background: mode("brand.300", "brand.900")(props),
+        background: mode("brand.0", "brand.900")(props),
         color: mode("brand.1", "brand.0")(props),
         transition: "background-color 0.2s ease, color 0.2s ease",
+      },
+      "input:-webkit-autofill": {
+        WebkitBoxShadow: `0 0 0px 1000px white inset`,
+        backgroundColor: "white !important",
+        transition: "background-color 5000s ease-in-out 0s",
+      },
+      "&:-webkit-autofill:hover": {
+        WebkitBoxShadow: `0 0 0px 1000px white inset`,
+        backgroundColor: "white !important",
+      },
+      "&:-webkit-autofill:focus": {
+        WebkitBoxShadow: `0 0 0px 1000px white inset`,
+        backgroundColor: "white !important",
+      },
+      "&:-webkit-autofill:active": {
+        WebkitBoxShadow: `0 0 0px 1000px white inset`,
+        backgroundColor: "white !important",
       },
     }),
   },
   components: {
-
     Box: {
       baseStyle: (props) => ({
         bg: mode("brand.0", "brand.800")(props),
@@ -111,6 +127,14 @@ const theme = extendTheme({
               transformOrigin: "left top",
             },
           },
+        },
+      },
+    },
+    Input: {
+      baseStyle: {
+        color: "black",
+        _placeholder: {
+          color: "white",
         },
       },
     },

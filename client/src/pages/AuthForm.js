@@ -104,16 +104,39 @@ const AuthForm = () => {
   };
 
   return (
-    <Flex height="100vh" align="center" justify="flex-end" p={10}>
+    <Flex bg="white" height="100vh" align="center" justify="flex-end" p={10}>
       <Box
-        bg="white"
+        position="relative"
+        overflow="hidden"
+        flex="4" // 4 parts for the left side
+        minHeight="550px"
+        textAlign="center"
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        p={6}
+        mr={6} // Add margin to separate from the forms
+      >
+        <img src="../eco-house-black.png" alt="Eco Green" width="50%" />
+        <Text
+          mt={4}
+          fontSize="xxx-large"
+          fontWeight="bold"
+          bgGradient="linear(to-l, #07c8f9, #0d41e1)"
+          bgClip="text"
+        >
+          Hostel Community
+        </Text>
+      </Box>
+      <Box
         borderRadius="10px"
         boxShadow="dark-lg"
         position="relative"
         overflow="hidden"
         width="800px"
         maxWidth="90%"
-        minHeight="550px"
+        minHeight="650px"
       >
         <Flex
           position="absolute"
@@ -129,12 +152,12 @@ const AuthForm = () => {
             position="absolute"
             left={signinIn ? "50%" : "-100%"}
             right={signinIn ? "0" : "200%"}
-            transition="all 0.6s ease-in-out"
+            transition="all 0.8s cubic-bezier(0.65, 0.05, 0.36, 1)"
             width="50%"
             height="100%"
-            bg="white"
             p={10}
-            display={signinIn ? "block" : "none"}
+            opacity={signinIn ? 1 : 0}
+            zIndex={signinIn ? 2 : 1}
           >
             <Heading textAlign={"center"} size="lg" mb={6} color="blue.600">
               Đăng Nhập
@@ -153,25 +176,6 @@ const AuthForm = () => {
                   placeholder=" "
                   value={formData.email}
                   onChange={handleInputChange}
-                  sx={{
-                    "&:-webkit-autofill": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                      transition: "background-color 5000s ease-in-out 0s",
-                    },
-                    "&:-webkit-autofill:hover": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                    "&:-webkit-autofill:focus": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                    "&:-webkit-autofill:active": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                  }}
                 />
                 <FormLabel textColor={"black"}>Email</FormLabel>
                 <FormErrorMessage>{errors.email}</FormErrorMessage>
@@ -190,33 +194,14 @@ const AuthForm = () => {
                   placeholder=" "
                   value={formData.password}
                   onChange={handleInputChange}
-                  sx={{
-                    "&:-webkit-autofill": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                      transition: "background-color 5000s ease-in-out 0s",
-                    },
-                    "&:-webkit-autofill:hover": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                    "&:-webkit-autofill:focus": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                    "&:-webkit-autofill:active": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                  }}
                 />
                 <FormLabel textColor={"black"}>Mật khẩu</FormLabel>
                 <FormErrorMessage>{errors.password}</FormErrorMessage>
               </FormControl>
             </>
             <Button
-              bg={"brand.600"}
-              _hover={{ background: "brand.800" }}
+              bgGradient="linear(to-r, #07c8f9, #0d41e1)"
+              _hover={{ bgGradient: "linear(to-l, #07c8f9, #0d41e1)" }}
               width="100%"
               mt={4}
               onClick={handleLogin}
@@ -230,12 +215,12 @@ const AuthForm = () => {
             alignContent={"center"}
             position="absolute"
             left={signinIn ? "100%" : "0"}
-            transition="all 0.6s ease-in-out"
+            transition="all 0.8s cubic-bezier(0.65, 0.05, 0.36, 1)" // More fluid curve
             width="50%"
             height="100%"
-            bg="white"
             p={10}
-            display={signinIn ? "none" : "block"}
+            opacity={!signinIn ? 1 : 0}
+            zIndex={!signinIn ? 2 : 1}
           >
             <Heading textAlign={"center"} size="lg" mb={6} color="blue.600">
               Đăng Ký
@@ -248,31 +233,11 @@ const AuthForm = () => {
                 mb={4}
               >
                 <Input
-                  color={"black"}
                   name="name"
                   type="text"
                   placeholder=" "
                   value={formData.name}
                   onChange={handleInputChange}
-                  sx={{
-                    "&:-webkit-autofill": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                      transition: "background-color 5000s ease-in-out 0s",
-                    },
-                    "&:-webkit-autofill:hover": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                    "&:-webkit-autofill:focus": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                    "&:-webkit-autofill:active": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                  }}
                 />
                 <FormLabel textColor={"black"}>Tên</FormLabel>
                 <FormErrorMessage>{errors.name}</FormErrorMessage>
@@ -285,31 +250,11 @@ const AuthForm = () => {
                 mb={4}
               >
                 <Input
-                  color={"black"}
                   name="phone"
                   type="tel"
                   placeholder=" "
                   value={formData.phone}
                   onChange={handleInputChange}
-                  sx={{
-                    "&:-webkit-autofill": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                      transition: "background-color 5000s ease-in-out 0s",
-                    },
-                    "&:-webkit-autofill:hover": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                    "&:-webkit-autofill:focus": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                    "&:-webkit-autofill:active": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                  }}
                 />
                 <FormLabel textColor={"black"}>Số điện thoại</FormLabel>
                 <FormErrorMessage>{errors.phone}</FormErrorMessage>
@@ -322,31 +267,11 @@ const AuthForm = () => {
                 mb={4}
               >
                 <Input
-                  color={"black"}
                   name="email"
                   type="email"
                   placeholder=" "
                   value={formData.email}
                   onChange={handleInputChange}
-                  sx={{
-                    "&:-webkit-autofill": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                      transition: "background-color 5000s ease-in-out 0s",
-                    },
-                    "&:-webkit-autofill:hover": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                    "&:-webkit-autofill:focus": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                    "&:-webkit-autofill:active": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                  }}
                 />
                 <FormLabel textColor={"black"}>Email</FormLabel>
                 <FormErrorMessage>{errors.email}</FormErrorMessage>
@@ -376,31 +301,11 @@ const AuthForm = () => {
                 mb={4}
               >
                 <Input
-                  color={"black"}
                   name="password"
                   type="password"
                   placeholder=" "
                   value={formData.password}
                   onChange={handleInputChange}
-                  sx={{
-                    "&:-webkit-autofill": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                      transition: "background-color 5000s ease-in-out 0s",
-                    },
-                    "&:-webkit-autofill:hover": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                    "&:-webkit-autofill:focus": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                    "&:-webkit-autofill:active": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                  }}
                 />
                 <FormLabel textColor={"black"}>Mật khẩu</FormLabel>
                 <FormErrorMessage>{errors.password}</FormErrorMessage>
@@ -413,39 +318,19 @@ const AuthForm = () => {
                 mb={4}
               >
                 <Input
-                  color={"black"}
                   name="confirmPassword"
                   type="password"
                   placeholder=" "
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  sx={{
-                    "&:-webkit-autofill": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                      transition: "background-color 5000s ease-in-out 0s",
-                    },
-                    "&:-webkit-autofill:hover": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                    "&:-webkit-autofill:focus": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                    "&:-webkit-autofill:active": {
-                      WebkitBoxShadow: `0 0 0px 1000px white inset`,
-                      backgroundColor: "white !important",
-                    },
-                  }}
                 />
                 <FormLabel textColor={"black"}>Nhập lại mật khẩu</FormLabel>
                 <FormErrorMessage>{errors.confirmPassword}</FormErrorMessage>
               </FormControl>
             </>
             <Button
-              bg={"brand.600"}
-              _hover={{ background: "brand.800" }}
+              bgGradient="linear(to-r, #07c8f9, #0d41e1)"
+              _hover={{ bgGradient: "linear(to-l, #07c8f9, #0d41e1)" }}
               width="100%"
               mt={4}
               onClick={handleRegister}
@@ -463,13 +348,9 @@ const AuthForm = () => {
           left="50%"
           width="50%"
           height="100%"
-          transition="transform 0.6s ease-in-out"
+          transition="all 0.8s cubic-bezier(0.65, 0.05, 0.36, 1)"
           transform={signinIn ? "translateX(-100%)" : "translateX(0)"}
-          bgGradient={
-            signinIn
-              ? "linear(to-r, #07c8f9, #0d41e1)"
-              : "linear(to-r, #0968e5, #091970)"
-          }
+          bgGradient={"linear(to-r, #0968e5, #091970)"}
           color="white"
           p={8}
           display="flex"

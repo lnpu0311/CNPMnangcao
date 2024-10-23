@@ -275,7 +275,7 @@ const RoomList = () => {
                     handleCreateBill(room);
                   }}
                 >
-                  Tạo HĐ
+                  Tạo hóa đơn
                 </Button>
               )}
             </Flex>

@@ -21,15 +21,25 @@ import axios from "axios";
 const AuthForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
   const [signinIn, setSigninIn] = useState(location.pathname === "/login");
-  const [formData, setFormData] = useState({
+
+  // Separate formData for login and register
+  const [loginFormData, setLoginFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [registerFormData, setRegisterFormData] = useState({
     name: "",
     numPhone: "",
     email: "",
-    role: "",
+    gender: "",
+    role: "tenant", // default to tenant for registration
     password: "",
     confirmPassword: "",
   });
+
   const [errors, setErrors] = useState({});
   const [apiMessage, setApiMessage] = useState("");
   const [isError, setIsError] = useState(false);
@@ -39,26 +49,34 @@ const AuthForm = () => {
   useEffect(() => {
     setSigninIn(location.pathname === "/login");
 
+    // Load saved formData from localStorage
     const savedFormData = JSON.parse(localStorage.getItem("formData"));
 
     if (savedFormData) {
-      setFormData((prevData) => ({
-        ...prevData,
-        ...savedFormData,
-        role:
-          savedFormData.role ||
-          (location.pathname === "/register" ? "tenant" : ""),
-      }));
-    } else if (location.pathname === "/register") {
-      setFormData((prevData) => ({ ...prevData, role: "tenant" }));
+      if (signinIn) {
+        // For login
+        setLoginFormData(savedFormData);
+      } else {
+        // For register
+        setRegisterFormData(savedFormData);
+      }
     }
-  }, [location.pathname]);
+  }, [location.pathname, signinIn]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    const updatedData = { ...formData, [name]: value };
-    setFormData(updatedData);
-    localStorage.setItem("formData", JSON.stringify(updatedData));
+
+    if (signinIn) {
+      // Update login form data
+      const updatedLoginData = { ...loginFormData, [name]: value };
+      setLoginFormData(updatedLoginData);
+      localStorage.setItem("formData", JSON.stringify(updatedLoginData));
+    } else {
+      // Update register form data
+      const updatedRegisterData = { ...registerFormData, [name]: value };
+      setRegisterFormData(updatedRegisterData);
+      localStorage.setItem("formData", JSON.stringify(updatedRegisterData));
+    }
   };
 
   const handleFormToggle = () => {
@@ -68,78 +86,91 @@ const AuthForm = () => {
       navigate("/login");
     }
 
-    setFormData((prevData) => ({
-      ...prevData,
-      name: "",
-      numPhone: "",
-      email: "",
-      gender: "",
-      password: "",
-      confirmPassword: "",
-      role:
-        prevData.role || (location.pathname === "/register" ? "tenant" : ""),
-    }));
+    // Clear errors and reset form data based on toggle
     setErrors({});
+    if (signinIn) {
+      // Reset register form data
+      setRegisterFormData({
+        name: "",
+        numPhone: "",
+        email: "",
+        gender: "",
+        role: "tenant",
+        password: "",
+        confirmPassword: "",
+      });
+    } else {
+      // Reset login form data
+      setLoginFormData({
+        email: "",
+        password: "",
+      });
+    }
   };
+
   const validateForm = () => {
     const newErrors = {};
+
     if (signinIn) {
-      if (!formData.email) newErrors.email = "Vui lòng điền Email!";
-      if (!formData.password) newErrors.password = "Vui lòng điền mật khẩu!";
+      // Validate login form
+      if (!loginFormData.email) newErrors.email = "Vui lòng điền Email!";
+      if (!loginFormData.password)
+        newErrors.password = "Vui lòng điền mật khẩu!";
     } else {
-      if (!formData.name) newErrors.name = "Vui lòng điền tên!";
-      if (!formData.gender) newErrors.gender = "Vui lòng chọn giới tính";
-      if (!formData.numPhone)
+      // Validate register form
+      if (!registerFormData.name) newErrors.name = "Vui lòng điền tên!";
+      if (!registerFormData.numPhone)
         newErrors.numPhone = "Vui lòng điền số điện thoại!";
-      if (!formData.email) newErrors.email = "Vui lòng điền email!";
-      if (!formData.password) newErrors.password = "Vui lòng điền mật khẩu!";
-      if (formData.password !== formData.confirmPassword) {
+      if (!registerFormData.gender)
+        newErrors.gender = "Vui lòng nhập giới tính";
+      if (!registerFormData.email) newErrors.email = "Vui lòng điền email!";
+      if (!registerFormData.password)
+        newErrors.password = "Vui lòng điền mật khẩu!";
+      if (registerFormData.password !== registerFormData.confirmPassword) {
         newErrors.confirmPassword = "Mật khẩu không khớp.";
       }
     }
+
     setErrors(newErrors);
-    console.log(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleLogin = async () => {
     if (validateForm()) {
-      const data = new FormData();
-      data.append("email", formData.email);
-      data.append("password", formData.password);
-      console.log("Logging in with:", [...data.entries()]);
+      const email = loginFormData.email;
+      const password = loginFormData.password;
+
       try {
         const response = await axios.post(
           `http://localhost:5000/api/user/login`,
-          data,
           {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
+            email: email,
+            password: password,
           }
         );
+        localStorage.setItem("token", response.data.token);
+        console.log(response.data.token);
         setApiLogInMessage("Đăng nhập thành công");
         setIsLogInError(false);
-        console.log(response.data.data);
       } catch (error) {
+        console.log(error);
         setApiLogInMessage(error.response.data.message);
         setIsLogInError(true);
-        console.error("Lỗi khi gửi yêu cầu:", error);
       }
     }
   };
 
   const handleRegister = async () => {
-    console.log(validateForm());
     if (validateForm()) {
       const data = new FormData();
-      data.append("name", formData.name);
-      data.append("email", formData.email);
-      data.append("numPhone", formData.numPhone);
-      data.append("gender", formData.gender);
-      data.append("role", formData.role);
-      data.append("password", formData.password);
-      console.log("Registering with:", [...data.entries()]);
+      data.append("name", registerFormData.name);
+      data.append("email", registerFormData.email);
+      data.append("numPhone", registerFormData.numPhone);
+      data.append("gender", registerFormData.gender);
+      data.append("role", registerFormData.role);
+      data.append("password", registerFormData.password);
+      console.log([...data.entries()]);
+
       try {
         const response = await axios.post(
           `http://localhost:5000/api/user`,
@@ -150,13 +181,12 @@ const AuthForm = () => {
             },
           }
         );
-        console.log("User mới:", response.data.data);
+        console.log(response.data);
         setApiMessage("Tạo tài khoản thành công!");
         setIsError(false);
       } catch (error) {
         setApiMessage(error.response.data.message);
         setIsError(true);
-        console.error("Lỗi khi gửi yêu cầu:", error.response.data.message);
       }
     }
   };
@@ -232,7 +262,7 @@ const AuthForm = () => {
                   name="email"
                   type="email"
                   placeholder=" "
-                  value={formData.email}
+                  value={loginFormData.email}
                   onChange={handleInputChange}
                 />
                 <FormLabel textColor={"black"}>Email</FormLabel>
@@ -250,7 +280,7 @@ const AuthForm = () => {
                   name="password"
                   type="password"
                   placeholder=" "
-                  value={formData.password}
+                  value={loginFormData.password}
                   onChange={handleInputChange}
                 />
                 <FormLabel textColor={"black"}>Mật khẩu</FormLabel>
@@ -306,7 +336,7 @@ const AuthForm = () => {
                   name="name"
                   type="text"
                   placeholder=" "
-                  value={formData.name}
+                  value={registerFormData.name}
                   onChange={handleInputChange}
                 />
                 <FormLabel textColor={"black"}>Tên</FormLabel>
@@ -323,7 +353,7 @@ const AuthForm = () => {
                   name="numPhone"
                   type="tel"
                   placeholder=" "
-                  value={formData.numPhone}
+                  value={registerFormData.numPhone}
                   onChange={handleInputChange}
                 />
                 <FormLabel textColor={"black"}>Số điện thoại</FormLabel>
@@ -340,7 +370,7 @@ const AuthForm = () => {
                   name="email"
                   type="email"
                   placeholder=" "
-                  value={formData.email}
+                  value={registerFormData.email}
                   onChange={handleInputChange}
                 />
                 <FormLabel textColor={"black"}>Email</FormLabel>
@@ -351,9 +381,9 @@ const AuthForm = () => {
                 <FormLabel textColor={"black"}>Giới tính</FormLabel>
                 <RadioGroup
                   name="gender"
-                  value={formData.gender}
+                  value={registerFormData.gender}
                   onChange={(value) =>
-                    setFormData({ ...formData, gender: value })
+                    setRegisterFormData({ ...registerFormData, gender: value })
                   }
                 >
                   <Stack textColor={"black"} direction="row">
@@ -368,9 +398,9 @@ const AuthForm = () => {
                 <FormLabel textColor={"black"}>Bạn là</FormLabel>
                 <RadioGroup
                   name="role"
-                  value={formData.role}
+                  value={registerFormData.role}
                   onChange={(value) =>
-                    setFormData({ ...formData, role: value })
+                    setRegisterFormData({ ...registerFormData, role: value })
                   }
                 >
                   <Stack textColor={"black"} direction="row">
@@ -391,7 +421,7 @@ const AuthForm = () => {
                   name="password"
                   type="password"
                   placeholder=" "
-                  value={formData.password}
+                  value={registerFormData.password}
                   onChange={handleInputChange}
                 />
                 <FormLabel textColor={"black"}>Mật khẩu</FormLabel>
@@ -408,7 +438,7 @@ const AuthForm = () => {
                   name="confirmPassword"
                   type="password"
                   placeholder=" "
-                  value={formData.confirmPassword}
+                  value={registerFormData.confirmPassword}
                   onChange={handleInputChange}
                 />
                 <FormLabel textColor={"black"}>Nhập lại mật khẩu</FormLabel>

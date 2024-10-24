@@ -24,6 +24,7 @@ import {
   Button,
   Container,
   useColorMode,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import {
   HamburgerIcon,
@@ -53,13 +54,8 @@ import {
   BrowserRouter,
   useNavigate,
 } from "react-router-dom";
-import HostelManagement from "./HostelManagement";
-import RoomList from "./RoomList";
 import "../../src/index.css";
 import { IoHomeSharp } from "react-icons/io5";
-import ProfilePage from "./Profile";
-import HomeDashboard from "./HomeDashboard";
-
 function HomeLayout() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [hasNewNotification, setHasNewNotification] = useState(true);
@@ -70,6 +66,12 @@ function HomeLayout() {
     name: "Pukachu xinh dep tuyt voi",
   });
   const { colorMode, toggleColorMode } = useColorMode();
+  const iconColor = useColorModeValue("gray.800", "yellow.300");
+
+  const sidebarColor = useColorModeValue("brand.300", "brand.800");
+  const bgColor = useColorModeValue("brand.0", "brand.5");
+  const headerColor = useColorModeValue("brand.0", "brand.5");
+  const backgroundColor = useColorModeValue("brand.2", "brand.4");
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -141,9 +143,9 @@ function HomeLayout() {
         base: "1fr",
         md: isNavOpen ? "200px 1fr" : "50px 1fr",
       }}
-      bg={"brand.2"}
-      h="auto"
       gap={4}
+      bg={backgroundColor}
+      h="auto"
       color="brand.500"
       fontWeight="bold"
       textAlign="center"
@@ -153,7 +155,7 @@ function HomeLayout() {
         h="70px"
         as="header"
         p={8}
-        bg={"brand.0"}
+        bg={headerColor}
         color={"black"}
         area="header"
         display="flex"
@@ -163,11 +165,11 @@ function HomeLayout() {
         top={0}
         left={{ base: 0, md: isNavOpen ? "300px" : "60px" }}
         right={0}
-        zIndex={1}
+        zIndex={10}
       >
         <Box ml={{ base: "0", md: "4" }}>
           <Text
-            bgGradient="linear(to-l, #9fccfa, #0974f1)"
+            bgGradient="linear(to-l, #07c8f9, #0d41e1)"
             bgClip="text"
             fontSize={{ base: "2xl", md: "2xl", lg: "4xl" }}
             fontWeight="bold"
@@ -188,8 +190,14 @@ function HomeLayout() {
             colorScheme="teal"
             variant="ghost"
             mt={4}
+            transition="all 0.2s ease"
+            _hover={{ bg: colorMode === "light" ? "brand.200" : "brand.700" }}
           >
-            {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+            {colorMode === "light" ? (
+              <MoonIcon color={iconColor} />
+            ) : (
+              <SunIcon color={iconColor} />
+            )}
             {colorMode === "light" ? " Dark Mode" : " Light Mode"}
           </Button>
           
@@ -302,7 +310,7 @@ function HomeLayout() {
       <GridItem
         as="nav"
         p="2"
-        bg="brand.900"
+        bg={"brand.800"}
         area="nav"
         display={{ base: "none", md: "block" }}
         w={isNavOpen ? "300px" : "60px"}
@@ -311,19 +319,10 @@ function HomeLayout() {
       >
         <VStack align="start" spacing={4}>
           <Flex justify="space-between" width="100%">
-            {/* <Text
-              color={"white"}
-              mx="auto"
-              fontSize="2xl"
-              fontWeight="bold"
-              display={isNavOpen ? "block" : "none"}
-            >
-              Menu
-            </Text> */}
             <Image
-              src="../house.png"
+              src="../eco-house.png"
               alt="Logo"
-              boxSize="100px"
+              boxSize="150px"
               mx="auto"
               transition="transform 0.2s"
               _hover={{ transform: "scale(1.1)" }}
@@ -348,12 +347,6 @@ function HomeLayout() {
                   handleMenuClick(item.name);
                   onClose();
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.classList.add("hover");
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.classList.remove("hover");
-                }}
               >
                 {item.icon}
                 {item.name}
@@ -367,11 +360,11 @@ function HomeLayout() {
       <GridItem
         as="main"
         area="main"
-        ml={{ base: 0, md: isNavOpen ? "100px" : "50px" }}
+        ml={{ base: 0, md: isNavOpen ? "100px" : "40px" }}
         mt={{ base: 16, md: 0 }}
         p={1}
       >
-        <Box bg={"white"} mr={{ base: "0", md: "20px" }} p={6}>
+        <Box bg={bgColor} mr={{ base: "0", md: "20px" }} p={6}>
           <Outlet />
         </Box>
       </GridItem>
@@ -379,37 +372,4 @@ function HomeLayout() {
   );
 }
 
-function Home() {
-  return (
-    <Routes>
-      <Route path="/" element={<HomeLayout />}>
-        <Route index element={<HomeDashboard />} />
-        <Route path="facility-management" element={<HostelManagement />} />
-        <Route
-          path="employee-management"
-          element={<Box>Quản lý nhân viên</Box>}
-        />
-        <Route
-          path="request-management"
-          element={<Box>Yêu cầu thuê phòng đang được xử lý.</Box>}
-        />
-        <Route
-          path="revenue-stats"
-          element={<Box>Thống kê doanh thu theo các tháng.</Box>}
-        />
-        <Route
-          path="payment-list"
-          element={<Box>Danh sách các giao dịch thanh toán.</Box>}
-        />
-        <Route
-          path="customer-list"
-          element={<Box>Danh sách khách thuê phòng.</Box>}
-        />
-        <Route path="/room-list/:facilityId" element={<RoomList />} />
-        <Route path="/profile-page" element={<ProfilePage />} />
-      </Route>
-    </Routes>
-  );
-}
-
-export default Home;
+export default HomeLayout;

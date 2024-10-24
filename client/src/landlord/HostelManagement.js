@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Box,
   Button,
@@ -22,48 +23,9 @@ import { useNavigate } from "react-router-dom"; // Import navigation hook
 import { FaPlusCircle } from "react-icons/fa";
 
 // Dữ liệu cơ sở mẫu
-const facilitiesData = [
-  {
-    id: 1,
-    name: "Tên cơ sở 1",
-    address: "Địa chỉ cơ sở 1",
-    imageUrl:
-      "https://plus.unsplash.com/premium_photo-1670591909028-1ea631e317d7?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fHNlYXxlbnwwfHwwfHx8MA%3D%3D",
-  },
-  {
-    id: 2,
-    name: "Tên cơ sở 2",
-    address: "Địa chỉ cơ sở 2",
-    imageUrl: "https://via.placeholder.com/200",
-  },
-  {
-    id: 3,
-    name: "Tên cơ sở 3",
-    address: "Địa chỉ cơ sở 3",
-    imageUrl: "https://via.placeholder.com/100",
-  },
-  {
-    id: 1,
-    name: "Tên cơ sở 1",
-    address: "Địa chỉ cơ sở 1",
-    imageUrl: "https://via.placeholder.com/100",
-  },
-  {
-    id: 2,
-    name: "Tên cơ sở 2",
-    address: "Địa chỉ cơ sở 2",
-    imageUrl: "https://via.placeholder.com/200",
-  },
-  {
-    id: 3,
-    name: "Tên cơ sở 3",
-    address: "Địa chỉ cơ sở 3",
-    imageUrl: "https://via.placeholder.com/100",
-  },
-  // Các cơ sở khác...
-];
 
-// Component FacilityItem
+const token =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGRlYTZkZTk5ZWUxYTRhMzU5YTlmMSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcyOTQ5Mzc5NywiZXhwIjoxNzI5NDk3Mzk3fQ.Xcnyg_kNlqKapdASVQcPjCW3efpPTbKCKLU_8aASW2A";
 const FacilityItem = ({ facility }) => {
   const navigate = useNavigate(); // Sử dụng hook điều hướng
 
@@ -107,11 +69,11 @@ const FacilityItem = ({ facility }) => {
 
 // Component HostelManagement
 const HostelManagement = () => {
-  const [facilities] = useState(facilitiesData);
+  const [facilities, setFacilities] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [formData, setFormData] = useState({
-    branchName: "",
-    detailedAddress: "",
+    name: "",
+    address: "",
     city: "",
     district: "",
     image: null,
@@ -125,11 +87,49 @@ const HostelManagement = () => {
     setFormData({ ...formData, image: e.target.files[0] });
   };
 
-  const handleSubmit = () => {
-    // Add your submit logic here
-    console.log("Form Data Submitted:", formData);
-    onClose(); // Close modal after submission
+  const handleSubmit = async () => {
+    const data = new FormData();
+    data.append("name", formData.name);
+    data.append("address", formData.address);
+    data.append("city", formData.city);
+    data.append("district", formData.district);
+    data.append("image", formData.image);
+    console.log([...data.entries()]);
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/hostel",
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("Cơ sở mới đã được tạo:", response.data);
+      setFacilities((prev) => [...prev, response.data.data]);
+    } catch (error) {
+      console.error("Lỗi khi gửi yêu cầu:", error);
+    }
+    onClose();
   };
+  useEffect(() => {
+    const fetchFacilities = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/hostel", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log(response.data);
+        setFacilities(response.data.data);
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu:", error);
+      }
+    };
+    fetchFacilities();
+  }, []);
   return (
     <Box>
       <Flex justifyContent="center" mb={4}>
@@ -138,7 +138,7 @@ const HostelManagement = () => {
         </Text>
       </Flex>
       <Flex justifyContent="flex-end" mb={6}>
-        <Button onClick={onOpen} bg="brand.800" leftIcon={<FaPlusCircle />}>
+        <Button onClick={onOpen} bg="brand.400" leftIcon={<FaPlusCircle />}>
           Thêm nhà trọ mới
         </Button>
         <Modal isOpen={isOpen} onClose={onClose} size="lg">
@@ -152,9 +152,9 @@ const HostelManagement = () => {
                   <FormLabel>Tên chi nhánh</FormLabel>
                   <Input
                     type="text"
-                    name="branchName"
+                    name="name"
                     placeholder="Nhập tên chi nhánh"
-                    value={formData.branchName}
+                    value={formData.name}
                     onChange={handleInputChange}
                   />
                 </FormControl>
@@ -163,9 +163,9 @@ const HostelManagement = () => {
                   <FormLabel>Địa chỉ chi tiết</FormLabel>
                   <Input
                     type="text"
-                    name="detailedAddress"
+                    name="address"
                     placeholder="Nhập địa chỉ chi tiết"
-                    value={formData.detailedAddress}
+                    value={formData.address}
                     onChange={handleInputChange}
                   />
                 </FormControl>
@@ -205,7 +205,7 @@ const HostelManagement = () => {
             </ModalBody>
 
             <ModalFooter>
-              <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
+              <Button variant={"success"} mr={3} onClick={handleSubmit}>
                 Tạo nhà trọ
               </Button>
               <Button variant="ghost" onClick={onClose}>

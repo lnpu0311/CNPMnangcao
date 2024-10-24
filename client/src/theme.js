@@ -1,5 +1,6 @@
 import { extendTheme } from "@chakra-ui/react";
 import { mode } from "@chakra-ui/theme-tools";
+<<<<<<< HEAD
 
 const activeLabelStyles = {
   transform: "scale(0.85) translateY(-24px)",
@@ -27,10 +28,35 @@ const colors = {
     warning: "#ffd43b", // Yellow warning
     muted: "#6c757d", // Muted text
   },
+=======
+const activeLabelStyles = {
+  transform: "scale(0.85) translateY(-24px)",
+>>>>>>> 698399fe2e154b38077843d9b467d196600d7559
 };
-
 const theme = extendTheme({
-  colors,
+  colors: {
+    brand: {
+      0: "#FFFFFF",
+      1: "#000000",
+      2: "#f7fafc",
+      3: "#c0c0c0",
+      4: "#708090",
+      5: "#2A3439", // medium gray
+      100: "#caf0f8",
+      200: "#ade8f4",
+      300: "#90e0ef",
+      400: "#48cae4",
+      500: "#00b4d8",
+      600: "#0096c7",
+      700: "#0077b6",
+      800: "#023e8a",
+      900: "#03045e",
+      accent: "#ff6b6b", // Red accent
+      success: "#51cf66", // Green success
+      warning: "#ffd43b", // Yellow warning
+      muted: "#6c757d", // Muted text
+    },
+  },
   config: {
     initialColorMode: "light",
     useSystemColorMode: true,
@@ -79,6 +105,31 @@ const theme = extendTheme({
         solid: (props) => ({
           color: mode("brand.1", "brand.0")(props),
         }),
+<<<<<<< HEAD
+=======
+        // outline: (props) => ({
+        //   borderColor: mode("brand.200", "brand.600")(props),
+        //   color: mode("brand.500", "brand.300")(props),
+        //   _hover: {
+        //     bg: mode("brand.200", "brand.700")(props),
+        //     color: "white",
+        //   },
+        // }),
+        // accent: (props) => ({
+        //   bg: mode("brand.accent", "brand.accent")(props),
+        //   color: "white",
+        //   _hover: {
+        //     bg: mode("brand.warning", "brand.warning")(props),
+        //   },
+        // }),
+        // success: (props) => ({
+        //   bg: mode("brand.success", "brand.success")(props),
+        //   color: "white",
+        //   _hover: {
+        //     bg: mode("green.500", "green.500")(props),
+        //   },
+        // }),
+>>>>>>> 698399fe2e154b38077843d9b467d196600d7559
       },
     },
     Form: {

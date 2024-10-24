@@ -83,7 +83,9 @@ const createUser = async (req, res) => {
     password: hashPassword,
     otpVerfication: verficationCode,
     is_active: true,
+    gender: user.gender,
     imageUrl: imageUrl,
+    landlordId: user.landlordId,
   });
   try {
     await newUser.save();
@@ -96,7 +98,7 @@ const createUser = async (req, res) => {
 //Đăng nhập
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
-
+  console.log(req.body);
   if (!email || !password) {
     return res.status(400).json({
       success: false,

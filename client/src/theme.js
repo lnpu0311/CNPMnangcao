@@ -1,4 +1,5 @@
 import { extendTheme } from "@chakra-ui/react";
+import { color } from "framer-motion";
 
 const activeLabelStyles = {
   transform: "scale(0.85) translateY(-24px)",
@@ -89,6 +90,11 @@ const theme = extendTheme({
             },
           },
         },
+      },
+    },
+    Text: {
+      baseStyle: {
+        color: "brand.1", // Đặt màu sắc tại baseStyle
       },
     },
   },

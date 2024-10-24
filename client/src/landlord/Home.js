@@ -25,6 +25,7 @@ import {
   Container,
   useColorMode,
   useColorModeValue,
+  Divider,
 } from "@chakra-ui/react";
 import {
   HamburgerIcon,
@@ -65,13 +66,6 @@ function HomeLayout() {
   const [userData, setUserData] = useState({
     name: "Pukachu xinh dep tuyt voi",
   });
-  const { colorMode, toggleColorMode } = useColorMode();
-  const iconColor = useColorModeValue("gray.800", "yellow.300");
-
-  const sidebarColor = useColorModeValue("brand.300", "brand.800");
-  const bgColor = useColorModeValue("brand.0", "brand.5");
-  const headerColor = useColorModeValue("brand.0", "brand.5");
-  const backgroundColor = useColorModeValue("brand.2", "brand.4");
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -88,7 +82,7 @@ function HomeLayout() {
   const menuItems = [
     { name: "Trang chủ", path: "/", icon: <IoHomeSharp /> },
     {
-      name: "Quản lý nhà trọ",
+      name: "Quản lý cơ sở",
       path: "/hostel-management",
       icon: <FaBuilding />,
     },
@@ -142,7 +136,7 @@ function HomeLayout() {
         md: isNavOpen ? "200px 1fr" : "50px 1fr",
       }}
       gap={4}
-      bg={backgroundColor}
+      bg={"brand.2"}
       h="auto"
       color="brand.500"
       fontWeight="bold"
@@ -153,7 +147,7 @@ function HomeLayout() {
         h="70px"
         as="header"
         p={8}
-        bg={headerColor}
+        bg={"white"}
         color={"black"}
         area="header"
         display="flex"
@@ -182,22 +176,6 @@ function HomeLayout() {
           pr="4"
           display={{ base: "none", md: "flex" }}
         >
-          {" "}
-          <Button
-            onClick={toggleColorMode}
-            colorScheme="teal"
-            variant="ghost"
-            mt={4}
-            transition="all 0.2s ease"
-            _hover={{ bg: colorMode === "light" ? "brand.200" : "brand.700" }}
-          >
-            {colorMode === "light" ? (
-              <MoonIcon color={iconColor} />
-            ) : (
-              <SunIcon color={iconColor} />
-            )}
-            {colorMode === "light" ? " Dark Mode" : " Light Mode"}
-          </Button>
           <Box position="relative">
             <IconButton
               color="brand.1"
@@ -240,18 +218,20 @@ function HomeLayout() {
 
       <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
         <DrawerOverlay />
-        <DrawerContent>
+        <DrawerContent textColor={"white"}>
           <DrawerCloseButton />
-          <DrawerBody>
-            <VStack align="start" spacing={4}>
-              <Flex color={"white"} alignItems="center" gap={2}>
+          <DrawerBody bg={"brand.300"}>
+            <VStack align="start">
+              <Flex alignItems="center" gap={2}>
                 <Avatar
                   size="sm"
                   name={userData.name}
                   src="https://bit.ly/broken-link"
                   cursor="pointer"
                 />
-                <Text fontWeight="bold">{userData.name}</Text>
+                <Text textColor={"white"} fontWeight="bold">
+                  {userData.name}
+                </Text>
                 <IconButton
                   aria-label="Notifications"
                   icon={<BellIcon />}
@@ -262,26 +242,39 @@ function HomeLayout() {
 
               {menuItems.map((item) => (
                 <NavLink
-                  className={({ isActive }) =>
-                    isActive ? "navlink active-navlink" : "navlink"
-                  }
                   to={item.path}
                   key={item.name}
                   onClick={() => {
                     handleMenuClick(item.name);
                     onClose();
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.classList.add("hover");
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.classList.remove("hover");
-                  }}
+                  style={{ width: "100%" }}
                 >
-                  {item.icon}
-                  {item.name}
+                  {({ isActive }) => (
+                    <Flex
+                      borderRadius={8}
+                      align="center"
+                      gap={2}
+                      padding="6px"
+                      height="50px"
+                      fontSize="18px"
+                      fontWeight="600"
+                      marginBlock="10px"
+                      backgroundColor={isActive ? "brand.500" : "transparent"}
+                      textColor={isActive ? "white" : "white"}
+                      transition="background-color 0.2s ease"
+                      _hover={{
+                        backgroundColor: isActive ? "brand.600" : "#0077b6",
+                        textColor: "whitesmoke",
+                      }}
+                    >
+                      <Box as="span">{item.icon}</Box>
+                      <Text>{item.name}</Text>
+                    </Flex>
+                  )}
                 </NavLink>
               ))}
+              <Divider my={4} />
               <Button
                 p={2}
                 variant="ghost"
@@ -329,6 +322,7 @@ function HomeLayout() {
               icon={isNavOpen ? <FaChevronLeft /> : <FaChevronRight />}
               onClick={toggleNav}
               variant="ghost"
+              textColor={"white"}
             />
           </Flex>
           <Collapse in={isNavOpen}>
@@ -360,7 +354,7 @@ function HomeLayout() {
         mt={{ base: 16, md: 0 }}
         p={1}
       >
-        <Box bg={bgColor} mr={{ base: "0", md: "20px" }} p={6}>
+        <Box bg={"white"} mr={{ base: "0", md: "20px" }} p={6}>
           <Outlet />
         </Box>
       </GridItem>

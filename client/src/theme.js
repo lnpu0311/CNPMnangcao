@@ -75,7 +75,7 @@ const theme = extendTheme({
       },
       variants: {
         solid: (props) => ({
-          color: mode("brand.1", "brand.0")(props),
+          color: mode("brand.0", "brand.1")(props),
         }),
 
         // outline: (props) => ({
@@ -141,7 +141,7 @@ const theme = extendTheme({
     },
     Text: {
       baseStyle: (props) => ({
-        color: mode("brand.1", "brand.0")(props),
+        color: mode("brand.0", "brand.1")(props),
       }),
     },
     Link: {

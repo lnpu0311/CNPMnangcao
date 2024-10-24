@@ -177,7 +177,7 @@ const EmployeeManagement = () => {
           onClick={handleAddNew}
           leftIcon={<PlusSquareIcon />}
         >
-          Thêm Mới
+          Thêm nhân viên mới
         </Button>
 
         <Modal isOpen={isOpen} onClose={onClose}>

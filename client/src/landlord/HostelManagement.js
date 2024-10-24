@@ -21,6 +21,7 @@ import {
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom"; // Import navigation hook
 import { FaPlusCircle } from "react-icons/fa";
+import { PlusSquareIcon } from "@chakra-ui/icons";
 
 // Dữ liệu cơ sở mẫu
 
@@ -134,17 +135,19 @@ const HostelManagement = () => {
     <Box>
       <Flex justifyContent="center" mb={4}>
         <Text fontSize="3xl" fontWeight="bold" as={"h2"}>
-          Quản lý nhà trọ
+          Quản lý cơ sở
         </Text>
       </Flex>
       <Flex justifyContent="flex-end" mb={6}>
-        <Button onClick={onOpen} bg="brand.400" leftIcon={<FaPlusCircle />}>
-          Thêm nhà trọ mới
+        <Button onClick={onOpen} colorScheme="blue" leftIcon={<FaPlusCircle />}>
+          Thêm cơ sở mới
         </Button>
         <Modal isOpen={isOpen} onClose={onClose} size="lg">
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader>Biểu mẫu tạo nhà trọ</ModalHeader>
+            <ModalHeader fontSize={"x-large"} textAlign="center">
+              Tạo nhà trọ mới
+            </ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               <VStack spacing={4}>
@@ -205,11 +208,8 @@ const HostelManagement = () => {
             </ModalBody>
 
             <ModalFooter>
-              <Button variant={"success"} mr={3} onClick={handleSubmit}>
+              <Button colorScheme="green" mr={3} onClick={handleSubmit}>
                 Tạo nhà trọ
-              </Button>
-              <Button variant="ghost" onClick={onClose}>
-                Đóng
               </Button>
             </ModalFooter>
           </ModalContent>

@@ -44,14 +44,6 @@ function HomeDashboard() {
           Quick Actions
         </Text>
         <Flex gap={3}>
-          {/* <Button
-            leftIcon={<AddIcon />}
-            colorScheme="blue"
-            variant="solid"
-            onClick={() => navigate("/new-booking")}
-          >
-            Create New Booking
-          </Button> */}
           <Button
             leftIcon={<CalendarIcon />}
             colorScheme="green"

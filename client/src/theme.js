@@ -1,8 +1,10 @@
 import { extendTheme } from "@chakra-ui/react";
 import { mode } from "@chakra-ui/theme-tools";
+
 const activeLabelStyles = {
   transform: "scale(0.85) translateY(-24px)",
 };
+
 const theme = extendTheme({
   colors: {
     brand: {
@@ -75,6 +77,7 @@ const theme = extendTheme({
         solid: (props) => ({
           color: mode("brand.1", "brand.0")(props),
         }),
+
         // outline: (props) => ({
         //   borderColor: mode("brand.200", "brand.600")(props),
         //   color: mode("brand.500", "brand.300")(props),

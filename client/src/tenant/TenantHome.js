@@ -138,7 +138,7 @@ function TenantHome() {
   // Cập nhật menu items cho Tenant
   const menuItems = [
     { name: "Trang chủ", 
-      path: "/", 
+      path: "/tenant", 
       icon: <IoHomeSharp /> },
     {
       name: "Danh sách phòng",
@@ -466,14 +466,6 @@ function TenantHome() {
 
       <GridItem as="main" area="main" mt="4" p={8}>
         <Outlet />
-        <Routes>
-          <Route path="/" element={<TenantDashboard />} />
-          <Route path="/tenant-room-list" element={<TenantRoomList />} />
-          <Route path="/tenant-contract" element={<TenantContract />} />
-          <Route path="/tenant-payments" element={<TenantPayments />} />
-          
-          {/* <Route path="/profile-page" element={<ProfilePage />} /> */}
-        </Routes>
       </GridItem>
     </Grid>
   );

@@ -29,10 +29,42 @@ import {
 
 // Dữ liệu giả cho thanh toán
 const mockPayments = [
-  { id: 1, roomId: 1, date: "2024-09-20", amount: 2000000, type: "Tháng", method: "Paypal", phone: "0123456789" },
-  { id: 2, roomId: 2, date: "2024-09-25", amount: 2000000, type: "Tháng", method: "Visa", phone: "0123456789" },
-  { id: 3, roomId: 3, date: "2024-10-01", amount: 1800000, type: "Tháng", method: "MasterCard", phone: "0987654321" },
-  { id: 4, roomId: 4, date: "2024-10-05", amount: 2200000, type: "Tháng", method: "Paypal", phone: "0987654321" },
+  {
+    id: 1,
+    roomId: 1,
+    date: "2024-09-20",
+    amount: 2000000,
+    type: "Tháng",
+    method: "Paypal",
+    phone: "0123456789",
+  },
+  {
+    id: 2,
+    roomId: 2,
+    date: "2024-09-25",
+    amount: 2000000,
+    type: "Tháng",
+    method: "Visa",
+    phone: "0123456789",
+  },
+  {
+    id: 3,
+    roomId: 3,
+    date: "2024-10-01",
+    amount: 1800000,
+    type: "Tháng",
+    method: "MasterCard",
+    phone: "0987654321",
+  },
+  {
+    id: 4,
+    roomId: 4,
+    date: "2024-10-05",
+    amount: 2200000,
+    type: "Tháng",
+    method: "Paypal",
+    phone: "0987654321",
+  },
 ];
 
 const paymentMethodIcons = {
@@ -47,19 +79,23 @@ function TenantPayments() {
   const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  
+
   const [selectedTimeFrame, setSelectedTimeFrame] = useState("all");
   const [customDate, setCustomDate] = useState("");
   const [filteredPayments, setFilteredPayments] = useState(mockPayments);
 
   const formatInputDate = (input) => {
     // Loại bỏ các ký tự không phải số
-    const numbers = input.replace(/\D/g, '');
-    
+    const numbers = input.replace(/\D/g, "");
+
     // Định dạng thành dd/mm/yyyy
     if (numbers.length <= 2) return numbers;
-    if (numbers.length <= 4) return `${numbers.slice(0, 2)}/${numbers.slice(2)}`;
-    return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}/${numbers.slice(4, 8)}`;
+    if (numbers.length <= 4)
+      return `${numbers.slice(0, 2)}/${numbers.slice(2)}`;
+    return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}/${numbers.slice(
+      4,
+      8
+    )}`;
   };
 
   const handleDateChange = (e) => {
@@ -91,23 +127,25 @@ function TenantPayments() {
     const currentDate = new Date();
 
     if (customDate && isValidDate(customDate)) {
-      const [day, month, year] = customDate.split('/');
+      const [day, month, year] = customDate.split("/");
       const searchDate = new Date(year, month - 1, day);
-      filteredData = mockPayments.filter(payment => {
+      filteredData = mockPayments.filter((payment) => {
         const paymentDate = new Date(payment.date);
         return paymentDate.toDateString() === searchDate.toDateString();
       });
     } else {
       switch (selectedTimeFrame) {
         case "month":
-          filteredData = mockPayments.filter(payment => {
+          filteredData = mockPayments.filter((payment) => {
             const paymentDate = new Date(payment.date);
-            return paymentDate.getMonth() === currentDate.getMonth() &&
-                   paymentDate.getFullYear() === currentDate.getFullYear();
+            return (
+              paymentDate.getMonth() === currentDate.getMonth() &&
+              paymentDate.getFullYear() === currentDate.getFullYear()
+            );
           });
           break;
         case "year":
-          filteredData = mockPayments.filter(payment => {
+          filteredData = mockPayments.filter((payment) => {
             const paymentDate = new Date(payment.date);
             return paymentDate.getFullYear() === currentDate.getFullYear();
           });
@@ -133,11 +171,14 @@ function TenantPayments() {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN');
+    return date.toLocaleDateString("vi-VN");
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
   };
 
   return (
@@ -167,7 +208,6 @@ function TenantPayments() {
             <option value="all">Tất cả</option>
             <option value="month">Tháng này</option>
             <option value="year">Năm nay</option>
-            
           </Select>
         </Box>
         <Box flex={1}>
@@ -180,8 +220,8 @@ function TenantPayments() {
             maxLength={10}
           />
         </Box>
-        <Button 
-          colorScheme="teal" 
+        <Button
+          colorScheme="teal"
           onClick={handleFilter}
           isDisabled={!isValidDate(customDate)}
         >
@@ -204,8 +244,18 @@ function TenantPayments() {
         <Tbody textColor="black">
           {filteredPayments.map((payment, index) => (
             <React.Fragment key={payment.id}>
-              {index > 0 && <Tr><Td colSpan={7}><Divider borderColor="black" borderWidth="1px"/></Td></Tr>}
-              <Tr onClick={() => handlePaymentClick(payment)} cursor="pointer" _hover={{ bg: "gray.50" }}>
+              {index > 0 && (
+                <Tr>
+                  <Td colSpan={7}>
+                    <Divider borderColor="black" borderWidth="1px" />
+                  </Td>
+                </Tr>
+              )}
+              <Tr
+                onClick={() => handlePaymentClick(payment)}
+                cursor="pointer"
+                _hover={{ bg: "gray.50" }}
+              >
                 <Td borderRightWidth={1}>{payment.roomId}</Td>
                 <Td borderRightWidth={1}>{formatDate(payment.date)}</Td>
                 <Td borderRightWidth={1}>{payment.type}</Td>
@@ -213,7 +263,12 @@ function TenantPayments() {
                 <Td borderRightWidth={1}>
                   <Flex alignItems="center">
                     {paymentMethodIcons[payment.method] && (
-                      <Image src={paymentMethodIcons[payment.method]} alt={payment.method} boxSize="20px" mr={2} />
+                      <Image
+                        src={paymentMethodIcons[payment.method]}
+                        alt={payment.method}
+                        boxSize="20px"
+                        mr={2}
+                      />
                     )}
                     {payment.method}
                   </Flex>

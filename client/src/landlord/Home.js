@@ -89,7 +89,7 @@ function HomeLayout() {
     { name: "Trang chủ", path: "/", icon: <IoHomeSharp /> },
     {
       name: "Quản lý nhà trọ",
-      path: "/facility-management",
+      path: "/hostel-management",
       icon: <FaBuilding />,
     },
     {
@@ -99,7 +99,7 @@ function HomeLayout() {
     },
     {
       name: "Quản lý yêu cầu thuê phòng",
-      path: "/request-management",
+      path: "/rental-request",
       icon: <FaFileInvoiceDollar />,
     },
     {
@@ -132,11 +132,9 @@ function HomeLayout() {
     <Grid
       templateAreas={{
         base: `"header" 
-               "main" 
-               `,
+               "main"  `,
         md: `"nav header"
-             "nav main"
-             `,
+             "nav main"`,
       }}
       gridTemplateRows={{ base: "auto 1fr ", md: "70px 1fr " }}
       gridTemplateColumns={{
@@ -200,7 +198,6 @@ function HomeLayout() {
             )}
             {colorMode === "light" ? " Dark Mode" : " Light Mode"}
           </Button>
-          
           <Box position="relative">
             <IconButton
               color="brand.1"
@@ -220,7 +217,6 @@ function HomeLayout() {
               />
             )}
           </Box>
-
           <Menu>
             <MenuButton>
               <Avatar size="sm" name={userData.name} cursor="pointer" />
@@ -355,7 +351,7 @@ function HomeLayout() {
           </Collapse>
         </VStack>
       </GridItem>
-      
+
       {/* content */}
       <GridItem
         as="main"

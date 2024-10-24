@@ -1,7 +1,21 @@
 import React, { useEffect, useState } from "react"; // Thêm useEffect và useState
 import { useNavigate } from "react-router-dom";
-import { Box, Text, VStack, Button, Flex, Image, Modal, ModalOverlay, IconButton, ModalContent, ModalHeader, ModalCloseButton, ModalBody } from "@chakra-ui/react"; // Thêm các thành phần Modal
-import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons"; 
+import {
+  Box,
+  Text,
+  VStack,
+  Button,
+  Flex,
+  Image,
+  Modal,
+  ModalOverlay,
+  IconButton,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+} from "@chakra-ui/react"; // Thêm các thành phần Modal
+import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 
 // Danh sách hình ảnh cho slider
 const images = [
@@ -21,12 +35,14 @@ function TenantDashboard() {
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+    setCurrentImageIndex(
+      (prevIndex) => (prevIndex - 1 + images.length) % images.length
+    );
   };
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % (images.length)); // Giới hạn chỉ số để không vượt quá số lượng hình ảnh
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length); // Giới hạn chỉ số để không vượt quá số lượng hình ảnh
     }, 3000); // Chuyển đổi hình ảnh sau mỗi 3 giây
 
     return () => clearInterval(interval); // Dọn dẹp interval khi component unmount
@@ -42,11 +58,16 @@ function TenantDashboard() {
   };
 
   return (
-    <VStack spacing={4} align="stretch" w="100%"  p={4} alignItems="center">
+    <VStack spacing={4} align="stretch" w="100%" p={4} alignItems="center">
       <Text fontSize="2xl" fontWeight="bold">
         ...gì đó
       </Text>
-      <Flex w="100%" position="relative" alignItems="center" justifyContent="center">
+      <Flex
+        w="100%"
+        position="relative"
+        alignItems="center"
+        justifyContent="center"
+      >
         <IconButton
           icon={<ChevronLeftIcon />}
           onClick={prevImage}
@@ -58,8 +79,8 @@ function TenantDashboard() {
           color="white"
           _hover={{ bg: "rgba(0, 0, 0, 0.7)" }}
         />
-        <Box 
-          w="85%" 
+        <Box
+          w="85%"
           position="relative"
           paddingBottom="47.8125%" // 56.25% của 85% để giữ tỷ lệ 16:9
         >
@@ -70,7 +91,7 @@ function TenantDashboard() {
             top="0"
             left="0"
             w="100%"
-            h="100%"        
+            h="100%"
             objectFit="cover"
             borderRadius="lg"
             onClick={() => openModal(images[currentImageIndex])}
@@ -91,33 +112,35 @@ function TenantDashboard() {
       </Flex>
       {/* Nút Tìm phòng ngay! */}
       <Button
-          colorScheme="yellow"
-          variant="solid"
-          onClick={() => navigate("/tenant-room-list")}
-          position="absolute"
-          top="150"
-          right="1"          
-        >
+        colorScheme="yellow"
+        variant="solid"
+        onClick={() => navigate("/tenant-room-list")}
+        position="absolute"
+        top="150"
+        right="1"
+      >
         Tìm phòng ngay!
       </Button>
 
       {/* Modal để hiển thị hình ảnh lớn */}
       <Modal isOpen={isOpen} onClose={closeModal} size="full">
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>Chi tiết hình ảnh</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody display="flex" justifyContent="center" alignItems="center" > {/* Bỏ padding để hình ảnh chiếm toàn bộ không gian */}
-          <Image 
-            src={selectedImage} 
-            alt="Selected Image" 
-            borderRadius="lg" 
-            boxSize="70%" // Đảm bảo hình ảnh chiếm toàn bộ chiều rộng
-            objectFit="contain" // Đảm bảo hình ảnh không bị méo
-          />
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Chi tiết hình ảnh</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody display="flex" justifyContent="center" alignItems="center">
+            {" "}
+            {/* Bỏ padding để hình ảnh chiếm toàn bộ không gian */}
+            <Image
+              src={selectedImage}
+              alt="Selected Image"
+              borderRadius="lg"
+              boxSize="70%" // Đảm bảo hình ảnh chiếm toàn bộ chiều rộng
+              objectFit="contain" // Đảm bảo hình ảnh không bị méo
+            />
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </VStack>
   );
 }

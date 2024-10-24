@@ -43,8 +43,8 @@ const AuthForm = () => {
 
     if (savedFormData) {
       setFormData((prevData) => ({
-        ...prevData,
-        ...savedFormData,
+        // ...prevData,
+        // ...savedFormData,
         role:
           savedFormData.role ||
           (location.pathname === "/register" ? "tenant" : ""),
@@ -166,7 +166,7 @@ const AuthForm = () => {
       <Box
         position="relative"
         overflow="hidden"
-        flex="4" // 4 parts for the left side
+        flex="4"
         minHeight="550px"
         textAlign="center"
         display="flex"
@@ -174,7 +174,7 @@ const AuthForm = () => {
         alignItems="center"
         justifyContent="center"
         p={6}
-        mr={6} // Add margin to separate from the forms
+        mr={6}
       >
         <img src="../eco-house-black.png" alt="Eco Green" width="50%" />
         <Text

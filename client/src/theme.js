@@ -3,7 +3,7 @@ import { mode } from "@chakra-ui/theme-tools"; // Utility for handling dark/ligh
 
 const colors = {
   brand: {
-    0: "#FFFFFF", // Light background color
+    0: "#DCDCDC", // Light background color
     1: "#000000", // Dark text color
     2: "#efefef", // Light gray
     3: "#c0c0c0", // Dark gray
@@ -15,7 +15,7 @@ const colors = {
     600: "#0096c7",
     700: "#0077b6", // Dark background color for dark mode
     800: "#023e8a",
-    900: "#03045e",
+    900: "#90e0ef",
   },
 };
 

@@ -70,7 +70,7 @@ const Template = () => {
       <GridItem mt={20} h={"1000px"} pl="2" bg="green.300" area={"main"}>
         Main
       </GridItem>
-      {/* Footer */}
+      {/* Footer */}  
       <GridItem pl="2" bg="blue.300" area={"footer"}>
         Footer
       </GridItem>

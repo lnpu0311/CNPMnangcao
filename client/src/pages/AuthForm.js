@@ -14,6 +14,17 @@ import {
   RadioGroup,
   Alert,
   AlertIcon,
+  useDisclosure,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalOverlay,
+  HStack,
+  PinInput,
+  PinInputField,
 } from "@chakra-ui/react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -21,10 +32,10 @@ import axios from "axios";
 const AuthForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const finalRef = React.useRef(null);
   const [signinIn, setSigninIn] = useState(location.pathname === "/login");
 
-  // Separate formData for login and register
   const [loginFormData, setLoginFormData] = useState({
     email: "",
     password: "",
@@ -35,7 +46,7 @@ const AuthForm = () => {
     numPhone: "",
     email: "",
     gender: "",
-    role: "tenant", // default to tenant for registration
+    role: "tenant",
     password: "",
     confirmPassword: "",
   });
@@ -45,7 +56,10 @@ const AuthForm = () => {
   const [isError, setIsError] = useState(false);
   const [apiLogInMessage, setApiLogInMessage] = useState("");
   const [isLogInError, setIsLogInError] = useState(false);
-
+  const [otp, setOtp] = useState("");
+  const [isOtpValid, setIsOtpValid] = useState(true); // To track if the OTP is valid
+  const [canResend, setCanResend] = useState(false);
+  const [remainingTime, setRemainingTime] = useState(60);
   useEffect(() => {
     setSigninIn(location.pathname === "/login");
 
@@ -62,6 +76,22 @@ const AuthForm = () => {
       }
     }
   }, [location.pathname, signinIn]);
+  useEffect(() => {
+    if (!canResend) {
+      const timer = setInterval(() => {
+        setRemainingTime((prevTime) => {
+          if (prevTime === 1) {
+            setCanResend(true);
+            clearInterval(timer);
+            return 60;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer); // Clean up timer on component unmount
+    }
+  }, [canResend]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -191,6 +221,29 @@ const AuthForm = () => {
     }
   };
 
+  const handleResendOTP = () => {
+    setCanResend(false);
+    // Logic to resend the OTP here
+    console.log("OTP has been resent");
+  };
+
+  const handleOtpChange = (value) => {
+    setOtp(value);
+  };
+
+  const handleVerifyOTP = () => {
+    // Mock OTP check logic (Replace this with your actual validation logic)
+    const correctOtp = "1234"; // Example of a correct OTP
+
+    if (otp === correctOtp) {
+      // OTP is correct, redirect to home page
+      navigate("/home");
+    } else {
+      // OTP is incorrect, show an error message and ask to re-enter
+      setIsOtpValid(false);
+      setOtp(""); // Reset OTP input
+    }
+  };
   return (
     <Flex bg="white" height="100vh" align="center" justify="flex-end" p={10}>
       <Box
@@ -298,6 +351,7 @@ const AuthForm = () => {
               </Alert>
             )}
             <Button
+              textColor={"white"}
               bgGradient="linear(to-r, #07c8f9, #0d41e1)"
               _hover={{ bgGradient: "linear(to-l, #07c8f9, #0d41e1)" }}
               width="100%"
@@ -307,7 +361,6 @@ const AuthForm = () => {
               Đăng Nhập
             </Button>
           </Box>
-
           {/* Sign Up Form */}
           <Box
             alignContent={"center"}
@@ -320,7 +373,13 @@ const AuthForm = () => {
             opacity={!signinIn ? 1 : 0}
             zIndex={!signinIn ? 2 : 1}
           >
-            <Heading textAlign={"center"} size="lg" mb={6} color="blue.600">
+            <Heading
+              textAlign={"center"}
+              size="lg"
+              mb={6}
+              color="blue.600"
+              onClick={onOpen}
+            >
               Đăng Ký
             </Heading>
 
@@ -454,14 +513,89 @@ const AuthForm = () => {
             )}
             {/* Submit Button */}
             <Button
+              textColor={"white"}
               bgGradient="linear(to-r, #07c8f9, #0d41e1)"
               _hover={{ bgGradient: "linear(to-l, #07c8f9, #0d41e1)" }}
               width="100%"
               mt={4}
-              onClick={handleRegister}
+              onClick={() => {
+                handleRegister();
+                onOpen();
+              }}
             >
               Đăng Ký
             </Button>
+            {/* OTP */}
+            <Modal
+              finalFocusRef={finalRef}
+              isOpen={isOpen}
+              onClose={onClose}
+              isCentered
+            >
+              <ModalOverlay />
+              <ModalContent>
+                <ModalHeader
+                  textColor={"brand.700"}
+                  textAlign="center"
+                  fontWeight="bold"
+                  fontSize="xl"
+                >
+                  Xác thực mã OTP
+                </ModalHeader>
+                <ModalBody textAlign="center">
+                  <Text mb={4}>
+                    Mã OTP đã được gửi tới địa chỉ email của bạn. Vui lòng kiểm
+                    tra hộp thư và nhập mã để xác thực.
+                  </Text>
+
+                  <Flex justifyContent="center" alignItems="center">
+                    <HStack>
+                      <PinInput
+                        otp
+                        size="lg"
+                        placeholder=""
+                        value={otp}
+                        onChange={handleOtpChange}
+                        isInvalid={!isOtpValid}
+                      >
+                        <PinInputField />
+                        <PinInputField />
+                        <PinInputField />
+                        <PinInputField />
+                      </PinInput>
+                    </HStack>
+                    <Button
+                      ml={4}
+                      size="sm"
+                      colorScheme="blue"
+                      onClick={handleResendOTP}
+                      isDisabled={!canResend}
+                    >
+                      {canResend
+                        ? "Gửi lại mã OTP"
+                        : `Gửi lại sau ${remainingTime}s`}
+                    </Button>
+                  </Flex>
+
+                  {!isOtpValid && (
+                    <Text color="red" mt={2}>
+                      Mã OTP không chính xác. Vui lòng thử lại.
+                    </Text>
+                  )}
+                </ModalBody>
+                <ModalCloseButton />
+
+                <ModalFooter justifyContent="space-between">
+                  <Button colorScheme="red" onClick={onClose}>
+                    Hủy
+                  </Button>
+
+                  <Button colorScheme="green" onClick={handleVerifyOTP}>
+                    Xác nhận
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
           </Box>
         </Flex>
 

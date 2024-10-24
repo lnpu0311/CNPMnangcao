@@ -36,6 +36,7 @@ const getUserByRole = async (req, res) => {
 //Đăng ký, tạo user
 const createUser = async (req, res) => {
   const user = req.body;
+  console.log(req.body);
   // user: {
   //   email,name,numphone,gender,role,password
   // }
@@ -97,8 +98,9 @@ const createUser = async (req, res) => {
 };
 //Đăng nhập
 const loginUser = async (req, res) => {
-  const { email, password } = req.body;
   console.log(req.body);
+  const { email, password } = req.body;
+
   if (!email || !password) {
     return res.status(400).json({
       success: false,

@@ -231,17 +231,21 @@ const AuthForm = () => {
     setOtp(value);
   };
 
-  const handleVerifyOTP = () => {
-    // Mock OTP check logic (Replace this with your actual validation logic)
-    const correctOtp = "1234"; // Example of a correct OTP
-
-    if (otp === correctOtp) {
-      // OTP is correct, redirect to home page
-      navigate("/home");
-    } else {
-      // OTP is incorrect, show an error message and ask to re-enter
-      setIsOtpValid(false);
-      setOtp(""); // Reset OTP input
+  const handleVerifyOTP = async () => {
+    const emailData = registerFormData.email;
+    const otpData = otp;
+    console.log(emailData);
+    try {
+      const response = await axios.post(
+        `http://localhost:5000/api/user/verifyOTP`,
+        {
+          email: emailData,
+          verifyOTP: otpData,
+        }
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
     }
   };
   return (
@@ -531,6 +535,7 @@ const AuthForm = () => {
               isOpen={isOpen}
               onClose={onClose}
               isCentered
+              size="lg"
             >
               <ModalOverlay />
               <ModalContent>
@@ -558,6 +563,8 @@ const AuthForm = () => {
                         onChange={handleOtpChange}
                         isInvalid={!isOtpValid}
                       >
+                        <PinInputField />
+                        <PinInputField />
                         <PinInputField />
                         <PinInputField />
                         <PinInputField />

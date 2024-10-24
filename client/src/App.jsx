@@ -15,6 +15,7 @@ import HostelManagement from "./landlord/HostelManagement"; // Import necessary 
 import RoomList from "./landlord/RoomList"; // Import necessary components
 import ProfilePage from "./landlord/Profile"; // Import ProfilePage
 import EmployeeManagement from "./landlord/EmployeeManagement";
+import RentalRequest from "./landlord/RentalRequests";
 function App() {
   return (
     <ChakraProvider theme={theme}>
@@ -25,15 +26,12 @@ function App() {
           <Route path="*" element={<Navigate to="/login" replace />} />
           <Route path="/" element={<HomeLayout />}>
             <Route index element={<HomeDashboard />} />
-            <Route path="facility-management" element={<HostelManagement />} />
+            <Route path="hostel-management" element={<HostelManagement />} />
             <Route
               path="employee-management"
               element={<EmployeeManagement />}
             />
-            <Route
-              path="request-management"
-              element={<Box>Yêu cầu thuê phòng đang được xử lý.</Box>}
-            />
+            <Route path="rental-request" element={<RentalRequest />} />
             <Route
               path="revenue-stats"
               element={<Box>Thống kê doanh thu theo các tháng.</Box>}

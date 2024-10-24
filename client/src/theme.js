@@ -6,8 +6,8 @@ const activeLabelStyles = {
 const theme = extendTheme({
   colors: {
     brand: {
-      0: "#FFFFFF",
-      1: "#000000",
+      0: "#FFFFFF", //white
+      1: "#000000", //black
       2: "#f7fafc",
       3: "#c0c0c0",
       4: "#708090",
@@ -34,7 +34,7 @@ const theme = extendTheme({
   styles: {
     global: (props) => ({
       "html, body": {
-        background: mode("brand.0", "#18191a")(props),
+        background: mode("brand.0", "brand.5")(props),
         color: mode("brand.1", "brand.1")(props),
         transition: "background-color 0.2s ease, color 0.2s ease",
       },
@@ -130,7 +130,7 @@ const theme = extendTheme({
     },
     Input: {
       baseStyle: (props) => ({
-        color: mode("brand.0", "brand.1")(props),
+        color: mode("brand.1", "brand.1")(props),
         _placeholder: {
           color: mode("brand.4", "brand.5")(props),
         },

@@ -21,7 +21,7 @@ function HomeDashboard() {
   const navigate = useNavigate();
 
   // Dummy data for illustration
-  const facilities = [
+  const hostel = [
     "Facility 1 - Address",
     "Facility 2 - Address",
     "Facility 3 - Address",
@@ -35,55 +35,51 @@ function HomeDashboard() {
 
   return (
     <Box p={5}>
-      {/* Top Section: Welcome & Notifications */}
-
       <Text fontSize="2xl" fontWeight="bold">
         Welcome, user!
       </Text>
 
-      {/* Quick Actions Section */}
       <VStack align="start" spacing={4} mb={5}>
         <Text fontSize="lg" fontWeight="bold">
           Quick Actions
         </Text>
         <Flex gap={3}>
-          <Button
+          {/* <Button
             leftIcon={<AddIcon />}
             colorScheme="blue"
             variant="solid"
             onClick={() => navigate("/new-booking")}
           >
             Create New Booking
-          </Button>
+          </Button> */}
           <Button
             leftIcon={<CalendarIcon />}
             colorScheme="green"
             variant="outline"
-            onClick={() => navigate("/facility-management")}
+            onClick={() => navigate("/hostel-management")}
           >
-            Manage Facilities
+            Quản lý cơ sở
           </Button>
           <Button
             leftIcon={<CheckCircleIcon />}
             colorScheme="teal"
             variant="outline"
-            onClick={() => navigate("/booking-requests")}
+            onClick={() => navigate("/rental-request")}
           >
-            View Booking Requests
+            Danh sách yêu cầu
           </Button>
         </Flex>
       </VStack>
 
-      {/* Facilities Section */}
       <Box mb={5}>
         <Text fontSize="lg" fontWeight="bold" mb={3}>
           Danh sách các cơ sở
         </Text>
         <VStack align="start" spacing={2}>
-          {facilities.map((facility, index) => (
+          {hostel.map((hostel, index) => (
             <Flex key={index} align="center" gap={2}>
               <CalendarIcon color="blue.500" />
-              <Text fontSize="sm">{facility}</Text>
+              <Text fontSize="sm">{hostel}</Text>
             </Flex>
           ))}
         </VStack>

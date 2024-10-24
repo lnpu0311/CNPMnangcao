@@ -89,7 +89,7 @@ function HomeLayout() {
     { name: "Trang chủ", path: "/", icon: <IoHomeSharp /> },
     {
       name: "Quản lý nhà trọ",
-      path: "/facility-management",
+      path: "/hostel-management",
       icon: <FaBuilding />,
     },
     {
@@ -99,7 +99,7 @@ function HomeLayout() {
     },
     {
       name: "Quản lý yêu cầu thuê phòng",
-      path: "/request-management",
+      path: "/rental-request",
       icon: <FaFileInvoiceDollar />,
     },
     {
@@ -132,11 +132,9 @@ function HomeLayout() {
     <Grid
       templateAreas={{
         base: `"header" 
-               "main" 
-               `,
+               "main"  `,
         md: `"nav header"
-             "nav main"
-             `,
+             "nav main"`,
       }}
       gridTemplateRows={{ base: "auto 1fr ", md: "70px 1fr " }}
       gridTemplateColumns={{

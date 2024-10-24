@@ -21,7 +21,7 @@ import {
   FormErrorMessage,
   Text,
   Image,
-  useColorMode,
+  Avatar,
   useColorModeValue,
 } from "@chakra-ui/react";
 import { FaEdit, FaTrash, FaSave } from "react-icons/fa";
@@ -285,12 +285,10 @@ const EmployeeManagement = () => {
               borderRadius="md"
             >
               <Flex flex="2" align="center">
-                <Image
-                  borderRadius="full"
-                  boxSize="80px"
-                  src="https://bit.ly/dan-abramov"
-                  alt={employee.name}
+                <Avatar
                   mr={4}
+                  name={employee.name}
+                  src="https://bit.ly/broken-link"
                 />
                 <Text fontWeight="bold" mr={4}>
                   {employee.name}

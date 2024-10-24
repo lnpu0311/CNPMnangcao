@@ -24,8 +24,11 @@ import {
   Button,
   Container,
   useColorMode,
-  useColorModeValue,
+  Divider,
+  Input,
 } from "@chakra-ui/react";
+import { motion } from "framer-motion";
+import { debounce } from "lodash";
 import {
   HamburgerIcon,
   BellIcon,
@@ -45,6 +48,7 @@ import {
   FaChevronLeft,
   FaPeopleArrows,
   FaPeopleCarry,
+  FaCog,
 } from "react-icons/fa";
 import {
   NavLink,
@@ -53,71 +57,114 @@ import {
   Outlet,
   BrowserRouter,
   useNavigate,
+  Link,
 } from "react-router-dom";
+import TenantRoomList from "./TenantRoomList";
+import TenantContract from "./TenantContract.js";
+import TenantPayments from "./TenantPayments";
+import TenantDashboard from "./TenantDashboard";
 import "../../src/index.css";
+import { Link as RouterLink } from "react-router-dom";
 import { IoHomeSharp } from "react-icons/io5";
-function HomeLayout() {
+
+
+const MotionBox = motion(Box);
+
+function TenantHome() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [hasNewNotification, setHasNewNotification] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(true);
   const navigate = useNavigate();
   const [userData, setUserData] = useState({
-    name: "Pukachu xinh dep tuyt voi",
+    name: "", // Thông tin người dùng
   });
   const { colorMode, toggleColorMode } = useColorMode();
-  const iconColor = useColorModeValue("gray.800", "yellow.300");
-
-  const sidebarColor = useColorModeValue("brand.300", "brand.800");
-  const bgColor = useColorModeValue("brand.0", "brand.5");
-  const headerColor = useColorModeValue("brand.0", "brand.5");
-  const backgroundColor = useColorModeValue("brand.2", "brand.4");
+  
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       setIsAuthenticated(true);
     }
   }, []);
+
   const handleMenuClick = (content) => {
     onClose();
   };
+
   const handleEditProfile = () => {
     navigate(`/profile-page`);
     onClose();
   };
+
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+
+  const handleScroll = () => {
+    const scrollTop = window.scrollY;
+    setIsScrolled(scrollTop > 50);
+  };
+
+  useEffect(() => {
+    const debouncedHandleScroll = debounce(handleScroll, 20);
+    window.addEventListener("scroll", debouncedHandleScroll);
+    return () => window.removeEventListener("scroll", debouncedHandleScroll);
+  }, []);
+
+  const searchVariants = {
+    initial: {
+      width: "30%", // Giảm kích thước xuống
+      height: "40px",
+      position: "relative", // Thay đổi thành relative
+      top: "0",
+      left: "0",
+      transform: "none",
+    },
+    // scrolled: {
+    //   width: "300px",
+    //   height: "40px",
+    //   position: "relative",
+    //   top: "0",
+    //   left: "0",
+    //   transform: "translateX(0)",
+    //   transition: {
+    //     type: "spring",
+    //     stiffness: 1000,
+    //     damping: 100,
+    //   },
+    // },
+  };
+
+  // Cập nhật menu items cho Tenant
   const menuItems = [
-    { name: "Trang chủ", path: "/", icon: <IoHomeSharp /> },
+    { name: "Trang chủ", 
+      path: "/tenant", 
+      icon: <IoHomeSharp /> },
     {
-      name: "Quản lý nhà trọ",
-      path: "/facility-management",
+      name: "Danh sách phòng",
+      path: "/tenant-room-list",
       icon: <FaBuilding />,
     },
     {
-      name: "Quản lý nhân viên",
-      path: "/employee-management",
-      icon: <FaUserTie />,
-    },
-    {
-      name: "Quản lý yêu cầu thuê phòng",
-      path: "/request-management",
+      name: "Thông tin hợp đồng",
+      path: "/tenant-contract",
       icon: <FaFileInvoiceDollar />,
     },
     {
-      name: "Thống kê doanh thu",
-      path: "/revenue-stats",
-      icon: <FaChartLine />,
-    },
-    {
-      name: "Danh sách thanh toán",
-      path: "/payment-list",
+      name: "Lịch sử thanh toán",
+      path: "/tenant-payments",
       icon: <FaMoneyCheckAlt />,
     },
-    {
-      name: "Danh sách khách thuê",
-      path: "/customer-list",
-      icon: <FaPeopleCarry />,
-    },
+    
   ];
+
+  const settingsItem = {
+    name: "Cài đặt",
+    path: "/settings",
+    icon: <FaCog />, 
+  };
+
+  
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -143,9 +190,9 @@ function HomeLayout() {
         base: "1fr",
         md: isNavOpen ? "200px 1fr" : "50px 1fr",
       }}
-      gap={4}
-      bg={backgroundColor}
+      bg={"brand.2"}
       h="auto"
+      gap={4}
       color="brand.500"
       fontWeight="bold"
       textAlign="center"
@@ -154,8 +201,8 @@ function HomeLayout() {
       <GridItem
         h="70px"
         as="header"
-        p={8}
-        bg={headerColor}
+        p={4}
+        bg={"brand.0"}
         color={"black"}
         area="header"
         display="flex"
@@ -165,18 +212,42 @@ function HomeLayout() {
         top={0}
         left={{ base: 0, md: isNavOpen ? "300px" : "60px" }}
         right={0}
-        zIndex={10}
+        zIndex={1}
       >
         <Box ml={{ base: "0", md: "4" }}>
-          <Text
-            bgGradient="linear(to-l, #07c8f9, #0d41e1)"
-            bgClip="text"
-            fontSize={{ base: "2xl", md: "2xl", lg: "4xl" }}
-            fontWeight="bold"
-          >
-            Hostel Community
-          </Text>
+          <RouterLink to="/"> 
+            <Text
+              bgGradient="linear(to-l, #9fccfa, #0974f1)"
+              bgClip="text"
+              fontSize={{ base: "2xl", md: "2xl", lg: "4xl" }}
+              fontWeight="bold"
+            >
+              Hostel Community 
+            </Text>
+          </RouterLink>
         </Box>
+        {/* Searchbar */}
+        <MotionBox
+          variants={searchVariants}
+          initial="initial"
+          animate={isScrolled ? "scrolled" : "initial"}
+          border={1}
+          padding={2}          
+          boxShadow="sm"
+          display="flex"
+          alignItems="center"
+        >
+          <Input
+            placeholder="Tìm kiếm phòng..."
+            size="sm"
+            borderRadius="md"
+            bg="white"
+            mr={2}
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+          />
+          <Button bg="brand.900" size="sm">Tìm</Button>
+        </MotionBox>
 
         <Flex
           alignItems="center"
@@ -189,19 +260,13 @@ function HomeLayout() {
             onClick={toggleColorMode}
             colorScheme="teal"
             variant="ghost"
-            mt={4}
-            transition="all 0.2s ease"
-            _hover={{ bg: colorMode === "light" ? "brand.200" : "brand.700" }}
+            mr={4}
           >
-            {colorMode === "light" ? (
-              <MoonIcon color={iconColor} />
-            ) : (
-              <SunIcon color={iconColor} />
-            )}
+            {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
             {colorMode === "light" ? " Dark Mode" : " Light Mode"}
           </Button>
           
-          <Box position="relative">
+          <Box position="relative" mr={4}>
             <IconButton
               color="brand.1"
               aria-label="Notifications"
@@ -211,12 +276,18 @@ function HomeLayout() {
             />
             {hasNewNotification && (
               <Badge
-                colorScheme="red"
-                position="absolute"
-                top="-1"
-                right="-1"
-                borderRadius="full"
-                boxSize="10px"
+              bg="red"
+              color="white"
+              position="absolute"
+              top="-2px"
+              right="-2px"
+              borderRadius="full"
+              boxSize="12px"
+              border="2px solid white"
+              p={0}
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
               />
             )}
           </Box>
@@ -306,70 +377,98 @@ function HomeLayout() {
           </DrawerBody>
         </DrawerContent>
       </Drawer>
+
       {/* sidebar */}
       <GridItem
         as="nav"
         p="2"
-        bg={"brand.800"}
+        bg="brand.900"
         area="nav"
         display={{ base: "none", md: "block" }}
-        w={isNavOpen ? "300px" : "60px"}
+        w={isNavOpen ? "auto" : "60px"}
         position="fixed"
         h={"100%"}
       >
-        <VStack align="start" spacing={4}>
+        <VStack align="start" mt={2} h="100%" justifyContent="space-between">
           <Flex justify="space-between" width="100%">
-            <Image
-              src="../eco-house.png"
-              alt="Logo"
-              boxSize="150px"
-              mx="auto"
-              transition="transform 0.2s"
-              _hover={{ transform: "scale(1.1)" }}
-              display={isNavOpen ? "block" : "none"}
-            />
-            <IconButton
-              aria-label="Toggle Nav"
-              icon={isNavOpen ? <FaChevronLeft /> : <FaChevronRight />}
-              onClick={toggleNav}
-              variant="ghost"
-            />
-          </Flex>
-          <Collapse in={isNavOpen}>
-            {menuItems.map((item) => (
+              {/* <Text
+                color={"black"}
+                mx="auto"
+                fontSize="2xl"
+                fontWeight="bold"
+                display={isNavOpen ? "block" : "none"}
+              >
+                Menu
+              </Text> */}
+              <Image
+                src="../house.png"
+                alt="Logo"
+                boxSize="100px"
+                mx="auto"
+                transition="transform 0.2s"
+                _hover={{ transform: "scale(1.1)" }}
+                display={isNavOpen ? "block" : "none"}
+              />
+              <IconButton
+              
+                aria-label="Toggle Nav"
+                icon={isNavOpen ? <FaChevronLeft /> : <FaChevronRight />}
+                onClick={toggleNav}
+                variant="ghost"
+              />
+            </Flex >
+
+              {menuItems.map((item) => (
+                <NavLink
+                  className={({ isActive }) =>
+                    isActive ? "navlink active-navlink" : "navlink"
+                  }
+                  to={item.path}
+                  key={item.name}
+                >
+                  <Flex
+                    alignItems="center"
+                    justifyContent={isNavOpen ? "start" : "center"}
+                    
+                  >
+                    {item.icon}
+                    <Collapse in={isNavOpen} animateOpacity>
+                      <Text >{item.name}</Text>
+                    </Collapse>
+                  </Flex>
+                </NavLink>
+              ))}
+
+            {/* Setting */}
+            <Divider borderColor="black" borderWidth="1px"/>
+            <Flex justifyContent="center" width="100%" mb={2}> {/* Căn giữa mục cài đặt và thêm marginBottom */}
               <NavLink
                 className={({ isActive }) =>
                   isActive ? "navlink active-navlink" : "navlink"
                 }
-                to={item.path}
-                key={item.name}
-                onClick={() => {
-                  handleMenuClick(item.name);
-                  onClose();
-                }}
+                to={settingsItem.path} 
+                key={settingsItem.name}
               >
-                {item.icon}
-                {item.name}
+                <Flex
+                  alignItems="center"
+                  justifyContent="center" 
+                >
+                  {settingsItem.icon}
+                  <Collapse in={isNavOpen} animateOpacity>
+                    <Text>{settingsItem.name}</Text>
+                  </Collapse>
+                </Flex>
               </NavLink>
-            ))}
-          </Collapse>
-        </VStack>
+            </Flex>
+            </VStack>
+
       </GridItem>
-      
-      {/* content */}
-      <GridItem
-        as="main"
-        area="main"
-        ml={{ base: 0, md: isNavOpen ? "100px" : "40px" }}
-        mt={{ base: 16, md: 0 }}
-        p={1}
-      >
-        <Box bg={bgColor} mr={{ base: "0", md: "20px" }} p={6}>
-          <Outlet />
-        </Box>
+
+      <GridItem as="main" area="main" mt="4" p={8}>
+        <Outlet />
       </GridItem>
     </Grid>
   );
 }
 
-export default HomeLayout;
+export default TenantHome;

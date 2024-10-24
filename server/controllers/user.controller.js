@@ -49,21 +49,26 @@ const createUser = async (req, res) => {
   ) {
     return res
       .status(400)
-      .json({ success: false, message: "Please provide all fields" });
+      .json({ success: false, message: "Vui lòng điền đủ thông tin" });
   }
   if (user.numPhone.length !== 10) {
     return res
       .status(400)
-      .json({ success: false, message: "Phone number must be 10 characters" });
+      .json({ success: false, message: "Số điện thoại phải có 10 chữ số" });
   }
 
   const isAvailable = await User.findOne({ email: user.email });
 
-  if (isAvailable) {
+  if (isAvailable && isAvailable.is_verified) {
     return res
       .status(400)
-      .json({ success: false, message: "Email đã tồn tại" });
+      .json({ success: false, message: "Tài khoản đã tồn tại" });
   }
+
+  if (isAvailable && !isAvailable.is_verified) {
+    await User.findOneAndDelete({ email: isAvailable.email });
+  }
+
   const hashPassword = await bcrypt.hash(user.password, 10);
   const verficationCode = Math.floor(
     100000 + Math.random() * 900000
@@ -96,6 +101,7 @@ const createUser = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 //Đăng nhập
 const loginUser = async (req, res) => {
   console.log(req.body);
@@ -183,9 +189,10 @@ const updateActive = async (req, res) => {
 };
 //Xác thực Email OTP
 const verifyOTP = async (req, res) => {
-  const { userID, verifyOTP } = req.body;
+  const { email, verifyOTP } = req.body;
+  console.log(req.body);
   try {
-    const user = await User.findById(userID);
+    const user = await User.findOne({ email: email });
     if (!user) {
       return res
         .status(404)
@@ -197,7 +204,7 @@ const verifyOTP = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Mã OTP không chính xác" });
     }
-    const updateUser = await User.findByIdAndUpdate(userID, {
+    const updateUser = await User.findByIdAndUpdate(user.id, {
       is_verified: true,
     });
     res.status(200).json({

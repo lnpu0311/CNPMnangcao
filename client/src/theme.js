@@ -1,15 +1,19 @@
 import { extendTheme } from "@chakra-ui/react";
 import { mode } from "@chakra-ui/theme-tools";
+
 const activeLabelStyles = {
   transform: "scale(0.85) translateY(-24px)",
 };
+
 const theme = extendTheme({
   colors: {
     brand: {
-      0: "#FFFFFF",
-      1: "#000000",
+      0: "#FFFFFF", //white
+      1: "#000000", //black
       2: "#f7fafc",
       3: "#c0c0c0",
+      4: "#708090",
+      5: "#2A3439", // medium gray
       100: "#caf0f8",
       200: "#ade8f4",
       300: "#90e0ef",
@@ -32,8 +36,8 @@ const theme = extendTheme({
   styles: {
     global: (props) => ({
       "html, body": {
-        background: mode("brand.0", "brand.900")(props),
-        color: mode("brand.1", "brand.0")(props),
+        background: mode("brand.0", "brand.5")(props),
+        color: mode("brand.1", "brand.1")(props),
         transition: "background-color 0.2s ease, color 0.2s ease",
       },
       "input:-webkit-autofill": {
@@ -71,34 +75,31 @@ const theme = extendTheme({
       },
       variants: {
         solid: (props) => ({
-          bg: mode("brand.500", "brand.700")(props),
-          color: "white",
-          _hover: {
-            bg: mode("brand.600", "brand.500")(props),
-          },
+          color: mode("brand.1", "brand.0")(props),
         }),
-        outline: (props) => ({
-          borderColor: mode("brand.200", "brand.600")(props),
-          color: mode("brand.500", "brand.300")(props),
-          _hover: {
-            bg: mode("brand.200", "brand.700")(props),
-            color: "white",
-          },
-        }),
-        accent: (props) => ({
-          bg: mode("brand.accent", "brand.accent")(props),
-          color: "white",
-          _hover: {
-            bg: mode("brand.warning", "brand.warning")(props),
-          },
-        }),
-        success: (props) => ({
-          bg: mode("brand.success", "brand.success")(props),
-          color: "white",
-          _hover: {
-            bg: mode("brand.success", "brand.600")(props),
-          },
-        }),
+
+        // outline: (props) => ({
+        //   borderColor: mode("brand.200", "brand.600")(props),
+        //   color: mode("brand.500", "brand.300")(props),
+        //   _hover: {
+        //     bg: mode("brand.200", "brand.700")(props),
+        //     color: "white",
+        //   },
+        // }),
+        // accent: (props) => ({
+        //   bg: mode("brand.accent", "brand.accent")(props),
+        //   color: "white",
+        //   _hover: {
+        //     bg: mode("brand.warning", "brand.warning")(props),
+        //   },
+        // }),
+        // success: (props) => ({
+        //   bg: mode("brand.success", "brand.success")(props),
+        //   color: "white",
+        //   _hover: {
+        //     bg: mode("green.500", "green.500")(props),
+        //   },
+        // }),
       },
     },
     Form: {
@@ -131,16 +132,16 @@ const theme = extendTheme({
       },
     },
     Input: {
-      baseStyle: {
-        color: "black",
+      baseStyle: (props) => ({
+        color: mode("brand.1", "brand.1")(props),
         _placeholder: {
-          color: "white",
+          color: mode("brand.4", "brand.5")(props),
         },
-      },
+      }),
     },
     Text: {
       baseStyle: (props) => ({
-        color: mode("brand.0", "brand.1")(props),
+        color: mode("brand.1", "brand.0")(props),
       }),
     },
     Link: {
@@ -155,22 +156,9 @@ const theme = extendTheme({
     Modal: {
       baseStyle: (props) => ({
         dialog: {
-          bg: mode("brand.0", "brand.800")(props),
+          bg: mode("brand.4", "brand.5")(props),
           color: mode("brand.1", "brand.0")(props),
         },
-      }),
-    },
-    Table: {
-      baseStyle: (props) => ({
-        th: {
-          bg: mode("brand.500", "brand.700")(props),
-          color: "white",
-        },
-        td: {
-          bg: mode("brand.0", "brand.800")(props),
-          color: mode("brand.1", "brand.0")(props),
-        },
-        borderColor: mode("brand.3", "brand.600")(props),
       }),
     },
   },

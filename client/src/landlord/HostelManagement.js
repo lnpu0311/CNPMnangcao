@@ -101,29 +101,29 @@ const HostelManagement = () => {
         data,
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Gửi token vào headers
-            "Content-Type": "multipart/form-data", // Đảm bảo gửi đúng content type
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
           },
         }
       );
 
       console.log("Cơ sở mới đã được tạo:", response.data);
-      setFacilities((prev) => [...prev, response.data.data]); // Cập nhật danh sách cơ sở
+      setFacilities((prev) => [...prev, response.data.data]);
     } catch (error) {
       console.error("Lỗi khi gửi yêu cầu:", error);
     }
-    onClose(); // Đóng modal sau khi submit
+    onClose();
   };
   useEffect(() => {
     const fetchFacilities = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/hostel", {
           headers: {
-            Authorization: `Bearer ${token}`, // Thêm token vào headers
+            Authorization: `Bearer ${token}`,
           },
         });
         console.log(response.data);
-        setFacilities(response.data.data); // Cập nhật state với dữ liệu từ API
+        setFacilities(response.data.data);
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu:", error);
       }
@@ -138,7 +138,7 @@ const HostelManagement = () => {
         </Text>
       </Flex>
       <Flex justifyContent="flex-end" mb={6}>
-        <Button onClick={onOpen} bg="brand.800" leftIcon={<FaPlusCircle />}>
+        <Button onClick={onOpen} bg="brand.400" leftIcon={<FaPlusCircle />}>
           Thêm nhà trọ mới
         </Button>
         <Modal isOpen={isOpen} onClose={onClose} size="lg">
@@ -205,7 +205,7 @@ const HostelManagement = () => {
             </ModalBody>
 
             <ModalFooter>
-              <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
+              <Button variant={"success"} mr={3} onClick={handleSubmit}>
                 Tạo nhà trọ
               </Button>
               <Button variant="ghost" onClick={onClose}>

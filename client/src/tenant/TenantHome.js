@@ -67,7 +67,6 @@ import "../../src/index.css";
 import { Link as RouterLink } from "react-router-dom";
 import { IoHomeSharp } from "react-icons/io5";
 
-
 const MotionBox = motion(Box);
 
 function TenantHome() {
@@ -80,7 +79,7 @@ function TenantHome() {
     name: "", // Thông tin người dùng
   });
   const { colorMode, toggleColorMode } = useColorMode();
-  
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -137,9 +136,7 @@ function TenantHome() {
 
   // Cập nhật menu items cho Tenant
   const menuItems = [
-    { name: "Trang chủ", 
-      path: "/tenant", 
-      icon: <IoHomeSharp /> },
+    { name: "Trang chủ", path: "/tenant", icon: <IoHomeSharp /> },
     {
       name: "Danh sách phòng",
       path: "/tenant-room-list",
@@ -155,16 +152,13 @@ function TenantHome() {
       path: "/tenant-payments",
       icon: <FaMoneyCheckAlt />,
     },
-    
   ];
 
   const settingsItem = {
     name: "Cài đặt",
     path: "/settings",
-    icon: <FaCog />, 
+    icon: <FaCog />,
   };
-
-  
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -215,14 +209,14 @@ function TenantHome() {
         zIndex={1}
       >
         <Box ml={{ base: "0", md: "4" }}>
-          <RouterLink to="/"> 
+          <RouterLink to="/">
             <Text
               bgGradient="linear(to-l, #9fccfa, #0974f1)"
               bgClip="text"
               fontSize={{ base: "2xl", md: "2xl", lg: "4xl" }}
               fontWeight="bold"
             >
-              Hostel Community 
+              Hostel Community
             </Text>
           </RouterLink>
         </Box>
@@ -232,7 +226,7 @@ function TenantHome() {
           initial="initial"
           animate={isScrolled ? "scrolled" : "initial"}
           border={1}
-          padding={2}          
+          padding={2}
           boxShadow="sm"
           display="flex"
           alignItems="center"
@@ -246,7 +240,9 @@ function TenantHome() {
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
           />
-          <Button bg="brand.900" size="sm">Tìm</Button>
+          <Button bg="brand.900" size="sm">
+            Tìm
+          </Button>
         </MotionBox>
 
         <Flex
@@ -265,7 +261,6 @@ function TenantHome() {
             {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
             {colorMode === "light" ? " Dark Mode" : " Light Mode"}
           </Button>
-          
           <Box position="relative" mr={4}>
             <IconButton
               color="brand.1"
@@ -276,22 +271,21 @@ function TenantHome() {
             />
             {hasNewNotification && (
               <Badge
-              bg="red"
-              color="white"
-              position="absolute"
-              top="-2px"
-              right="-2px"
-              borderRadius="full"
-              boxSize="12px"
-              border="2px solid white"
-              p={0}
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
+                bg="red"
+                color="white"
+                position="absolute"
+                top="-2px"
+                right="-2px"
+                borderRadius="full"
+                boxSize="12px"
+                border="2px solid white"
+                p={0}
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
               />
             )}
           </Box>
-
           <Menu>
             <MenuButton>
               <Avatar size="sm" name={userData.name} cursor="pointer" />
@@ -391,7 +385,7 @@ function TenantHome() {
       >
         <VStack align="start" mt={2} h="100%" justifyContent="space-between">
           <Flex justify="space-between" width="100%">
-              {/* <Text
+            {/* <Text
                 color={"black"}
                 mx="auto"
                 fontSize="2xl"
@@ -400,68 +394,64 @@ function TenantHome() {
               >
                 Menu
               </Text> */}
-              <Image
-                src="../house.png"
-                alt="Logo"
-                boxSize="100px"
-                mx="auto"
-                transition="transform 0.2s"
-                _hover={{ transform: "scale(1.1)" }}
-                display={isNavOpen ? "block" : "none"}
-              />
-              <IconButton
-              
-                aria-label="Toggle Nav"
-                icon={isNavOpen ? <FaChevronLeft /> : <FaChevronRight />}
-                onClick={toggleNav}
-                variant="ghost"
-              />
-            </Flex >
+            <Image
+              src="../house.png"
+              alt="Logo"
+              boxSize="100px"
+              mx="auto"
+              transition="transform 0.2s"
+              _hover={{ transform: "scale(1.1)" }}
+              display={isNavOpen ? "block" : "none"}
+            />
+            <IconButton
+              aria-label="Toggle Nav"
+              icon={isNavOpen ? <FaChevronLeft /> : <FaChevronRight />}
+              onClick={toggleNav}
+              variant="ghost"
+            />
+          </Flex>
 
-              {menuItems.map((item) => (
-                <NavLink
-                  className={({ isActive }) =>
-                    isActive ? "navlink active-navlink" : "navlink"
-                  }
-                  to={item.path}
-                  key={item.name}
-                >
-                  <Flex
-                    alignItems="center"
-                    justifyContent={isNavOpen ? "start" : "center"}
-                    
-                  >
-                    {item.icon}
-                    <Collapse in={isNavOpen} animateOpacity>
-                      <Text >{item.name}</Text>
-                    </Collapse>
-                  </Flex>
-                </NavLink>
-              ))}
-
-            {/* Setting */}
-            <Divider borderColor="black" borderWidth="1px"/>
-            <Flex justifyContent="center" width="100%" mb={2}> {/* Căn giữa mục cài đặt và thêm marginBottom */}
-              <NavLink
-                className={({ isActive }) =>
-                  isActive ? "navlink active-navlink" : "navlink"
-                }
-                to={settingsItem.path} 
-                key={settingsItem.name}
+          {menuItems.map((item) => (
+            <NavLink
+              className={({ isActive }) =>
+                isActive ? "navlink active-navlink" : "navlink"
+              }
+              to={item.path}
+              key={item.name}
+            >
+              <Flex
+                alignItems="center"
+                justifyContent={isNavOpen ? "start" : "center"}
               >
-                <Flex
-                  alignItems="center"
-                  justifyContent="center" 
-                >
-                  {settingsItem.icon}
-                  <Collapse in={isNavOpen} animateOpacity>
-                    <Text>{settingsItem.name}</Text>
-                  </Collapse>
-                </Flex>
-              </NavLink>
-            </Flex>
-            </VStack>
+                {item.icon}
+                <Collapse in={isNavOpen} animateOpacity>
+                  <Text>{item.name}</Text>
+                </Collapse>
+              </Flex>
+            </NavLink>
+          ))}
 
+          {/* Setting */}
+          <Divider borderColor="black" borderWidth="1px" />
+          <Flex justifyContent="center" width="100%" mb={2}>
+            {" "}
+            {/* Căn giữa mục cài đặt và thêm marginBottom */}
+            <NavLink
+              className={({ isActive }) =>
+                isActive ? "navlink active-navlink" : "navlink"
+              }
+              to={settingsItem.path}
+              key={settingsItem.name}
+            >
+              <Flex alignItems="center" justifyContent="center">
+                {settingsItem.icon}
+                <Collapse in={isNavOpen} animateOpacity>
+                  <Text>{settingsItem.name}</Text>
+                </Collapse>
+              </Flex>
+            </NavLink>
+          </Flex>
+        </VStack>
       </GridItem>
 
       <GridItem as="main" area="main" mt="4" p={8}>

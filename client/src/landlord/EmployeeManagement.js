@@ -25,7 +25,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { FaEdit, FaTrash, FaSave } from "react-icons/fa";
-import { PlusSquareIcon } from "@chakra-ui/icons";
+import { EditIcon, PlusSquareIcon } from "@chakra-ui/icons";
 
 const EmployeeManagement = () => {
   const toast = useToast();
@@ -163,7 +163,6 @@ const EmployeeManagement = () => {
       isClosable: true,
     });
   };
-  const backgroundColor = useColorModeValue("brand.2", "brand.4");
   return (
     <Box>
       <Text fontSize="xx-large" fontWeight="bold" as={"h2"}>
@@ -173,31 +172,20 @@ const EmployeeManagement = () => {
       {/* Add New Employee */}
       <Flex justifyContent={"flex-end"} mb={8}>
         <Button
-          colorScheme="blue"
+          colorScheme="green"
           onClick={handleAddNew}
           leftIcon={<PlusSquareIcon />}
         >
           Thêm nhân viên mới
         </Button>
 
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal isCentered isOpen={isOpen} onClose={onClose}>
           <ModalOverlay />
           <ModalContent>
             <ModalHeader textAlign={"center"}>Thêm Nhân Viên Mới</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               <Stack spacing={4}>
-                <FormControl isRequired isInvalid={!!errors.email}>
-                  <FormLabel>Email</FormLabel>
-                  <Input
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="Nhập email"
-                  />
-                  <FormErrorMessage>{errors.email}</FormErrorMessage>
-                </FormControl>
                 <FormControl isRequired isInvalid={!!errors.name}>
                   <FormLabel>Tên</FormLabel>
                   <Input
@@ -208,6 +196,17 @@ const EmployeeManagement = () => {
                     placeholder="Nhập tên"
                   />
                   <FormErrorMessage>{errors.name}</FormErrorMessage>
+                </FormControl>
+                <FormControl isRequired isInvalid={!!errors.email}>
+                  <FormLabel>Email</FormLabel>
+                  <Input
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="Nhập email"
+                  />
+                  <FormErrorMessage>{errors.email}</FormErrorMessage>
                 </FormControl>
 
                 <FormControl isRequired isInvalid={!!errors.phone}>
@@ -260,10 +259,10 @@ const EmployeeManagement = () => {
             </ModalBody>
 
             <ModalFooter>
-              <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
+              <Button colorScheme="green" mr={3} onClick={handleSubmit}>
                 Lưu
               </Button>
-              <Button variant="ghost" onClick={onClose}>
+              <Button colorScheme="red" onClick={onClose}>
                 Hủy
               </Button>
             </ModalFooter>
@@ -276,8 +275,8 @@ const EmployeeManagement = () => {
         <Stack spacing={4}>
           {employees.map((employee) => (
             <Flex
-              boxShadow="md"
-              bg={backgroundColor}
+              boxShadow="lg"
+              bg={"brand.2"}
               key={employee.id}
               justify="space-between"
               align="center"
@@ -290,7 +289,7 @@ const EmployeeManagement = () => {
                   name={employee.name}
                   src="https://bit.ly/broken-link"
                 />
-                <Text fontWeight="bold" mr={4}>
+                <Text textColor={"brand.4"} fontWeight="bold" mr={4}>
                   {employee.name}
                 </Text>
               </Flex>
@@ -299,12 +298,12 @@ const EmployeeManagement = () => {
                 <Text fontWeight="bold" mr={2}>
                   Số điện thoại:
                 </Text>
-                <Text fontWeight="bold" mr={4}>
+                <Text textColor="brand.4" fontWeight="bold" mr={4}>
                   {employee.phone}
                 </Text>
               </Flex>
 
-              <Flex flex="2" align="center">
+              <Flex flex="3" align="center">
                 <Text fontWeight="bold" mr={2}>
                   Cơ sở:
                 </Text>
@@ -315,9 +314,10 @@ const EmployeeManagement = () => {
                       handleHostelChange(employee.id, e.target.value)
                     }
                     placeholder="Sửa cơ sở trực thuộc"
+                    textColor={"black"}
                   />
                 ) : (
-                  <Text>{employee.hostel}</Text>
+                  <Text textColor={"brand.4"}>{employee.hostel}</Text>
                 )}
               </Flex>
 
@@ -326,14 +326,14 @@ const EmployeeManagement = () => {
                   <IconButton
                     aria-label="Lưu"
                     icon={<FaSave />}
-                    colorScheme="green"
+                    colorScheme="blue"
                     onClick={() => saveHostelChange(employee.id)}
                   />
                 ) : (
                   <IconButton
                     aria-label="Chỉnh Sửa"
                     icon={<FaEdit />}
-                    colorScheme="green"
+                    colorScheme="blue"
                     onClick={() => toggleEdit(employee.id)}
                   />
                 )}

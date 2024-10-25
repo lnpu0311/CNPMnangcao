@@ -116,6 +116,7 @@ function HomeLayout() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsAuthenticated(false);
+    navigate(`/register`);
   };
 
   const toggleNav = () => {
@@ -220,7 +221,7 @@ function HomeLayout() {
         <DrawerOverlay />
         <DrawerContent textColor={"white"}>
           <DrawerCloseButton />
-          <DrawerBody bg={"brand.300"}>
+          <DrawerBody bg={"brand.800"}>
             <VStack align="start">
               <Flex alignItems="center" gap={2}>
                 <Avatar
@@ -261,7 +262,6 @@ function HomeLayout() {
                       fontWeight="600"
                       marginBlock="10px"
                       backgroundColor={isActive ? "brand.500" : "transparent"}
-                      textColor={isActive ? "white" : "white"}
                       transition="background-color 0.2s ease"
                       _hover={{
                         backgroundColor: isActive ? "brand.600" : "#0077b6",
@@ -269,7 +269,7 @@ function HomeLayout() {
                       }}
                     >
                       <Box as="span">{item.icon}</Box>
-                      <Text>{item.name}</Text>
+                      <Text textColor="white">{item.name}</Text>
                     </Flex>
                   )}
                 </NavLink>

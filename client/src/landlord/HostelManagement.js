@@ -61,14 +61,13 @@ const FacilityItem = ({ facility }) => {
           </Text>
         </Box>
       </Flex>
-      <Button onClick={handleEditClick} variant={"solid"} colorScheme="green">
+      <Button onClick={handleEditClick} variant={"solid"} colorScheme="blue">
         Chỉnh sửa
       </Button>
     </Flex>
   );
 };
 
-// Component HostelManagement
 const HostelManagement = () => {
   const [facilities, setFacilities] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -139,7 +138,11 @@ const HostelManagement = () => {
         </Text>
       </Flex>
       <Flex justifyContent="flex-end" mb={6}>
-        <Button onClick={onOpen} colorScheme="blue" leftIcon={<FaPlusCircle />}>
+        <Button
+          onClick={onOpen}
+          colorScheme="green"
+          leftIcon={<FaPlusCircle />}
+        >
           Thêm cơ sở mới
         </Button>
         <Modal isOpen={isOpen} onClose={onClose} size="lg">
@@ -210,6 +213,9 @@ const HostelManagement = () => {
             <ModalFooter>
               <Button colorScheme="green" mr={3} onClick={handleSubmit}>
                 Tạo nhà trọ
+              </Button>
+              <Button colorScheme="red" onClick={onClose}>
+                Hủy
               </Button>
             </ModalFooter>
           </ModalContent>

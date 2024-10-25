@@ -139,8 +139,6 @@ function HomeLayout() {
       gap={4}
       bg={"brand.2"}
       h="auto"
-      color="brand.500"
-      fontWeight="bold"
       textAlign="center"
     >
       {/* header */}
@@ -200,14 +198,20 @@ function HomeLayout() {
             <MenuButton>
               <Avatar size="sm" name={userData.name} cursor="pointer" />
             </MenuButton>
-            <MenuList color="brown">
-              <MenuItem onClick={handleEditProfile}>
+            <MenuButton>
+              <Text fontWeight={600}>{userData.name}</Text>
+            </MenuButton>
+            <MenuList textColor={"brand.500"}>
+              <MenuItem
+                onClick={handleEditProfile}
+                leftIcon={<EditIcon />}
+                iconSpacing="8px"
+              >
                 Chỉnh sửa thông tin cá nhân
               </MenuItem>
               <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
             </MenuList>
           </Menu>
-          <Text>{userData.name}</Text>
         </Flex>
         <IconButton
           aria-label="Open Menu"

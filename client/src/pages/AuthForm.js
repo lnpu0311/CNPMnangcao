@@ -119,10 +119,8 @@ const AuthForm = () => {
       navigate("/login");
     }
 
-    // Clear errors and reset form data based on toggle
     setErrors({});
     if (signinIn) {
-      // Reset register form data
       setRegisterFormData({
         name: "",
         numPhone: "",
@@ -133,7 +131,6 @@ const AuthForm = () => {
         confirmPassword: "",
       });
     } else {
-      // Reset login form data
       setLoginFormData({
         email: "",
         password: "",

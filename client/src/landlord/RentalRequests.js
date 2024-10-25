@@ -36,7 +36,13 @@ const RentalRequest = () => {
   const backgroundColor = useColorModeValue("brand.2", "brand.4");
   return (
     <Box>
-      <Text fontSize="xx-large" fontWeight="bold" as={"h2"} mb={12}>
+      <Text
+        textColor={"brand.700"}
+        fontSize="xx-large"
+        fontWeight="bold"
+        as={"h2"}
+        mb={12}
+      >
         Quản lý yêu cầu thuê phòng
       </Text>
 

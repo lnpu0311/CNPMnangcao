@@ -26,7 +26,7 @@ import {
   PinInput,
   PinInputField,
 } from "@chakra-ui/react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, NavLink } from "react-router-dom";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
@@ -397,11 +397,20 @@ const AuthForm = () => {
               bgGradient="linear(to-r, #07c8f9, #0d41e1)"
               _hover={{ bgGradient: "linear(to-l, #07c8f9, #0d41e1)" }}
               width="100%"
-              mt={4}
+              mt={3}
               onClick={handleLogin}
             >
               Đăng Nhập
             </Button>
+            <Flex
+              fontWeight={"semibold"}
+              textColor={"brand.700"}
+              mt={3}
+              justifyContent="flex-end"
+              width="100%"
+            >
+              <NavLink to={`/forgot-password`}>Quên mật khẩu?</NavLink>
+            </Flex>
           </Box>
           {/* Sign Up Form */}
           <Box

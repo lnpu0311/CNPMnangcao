@@ -36,7 +36,7 @@ const getUserByRole = async (req, res) => {
 //Đăng ký, tạo user
 const createUser = async (req, res) => {
   const user = req.body;
-  user.email = user.email.toLowerCase();
+  let email = user.email.toLowerCase();
   if (
     !user.email ||
     !user.name ||
@@ -54,7 +54,7 @@ const createUser = async (req, res) => {
       .json({ success: false, message: "Số điện thoại phải có 10 chữ số" });
   }
 
-  const isAvailable = await User.findOne({ email: user.email });
+  const isAvailable = await User.findOne({ email: email });
 
   if (isAvailable && isAvailable.is_verified) {
     return res
@@ -79,7 +79,7 @@ const createUser = async (req, res) => {
   }
 
   const newUser = new User({
-    email: user.email,
+    email: email,
     name: user.name,
     numPhone: user.numPhone,
     role: user.role,
@@ -104,7 +104,8 @@ const createUser = async (req, res) => {
 const loginUser = async (req, res) => {
   console.log(req.body);
   const { email, password } = req.body;
-  email = email.toLowerCase();
+  let emailLowCase = email.toLowerCase();
+  console.log(emailLowCase);
   if (!email || !password) {
     return res.status(400).json({
       success: false,
@@ -113,7 +114,7 @@ const loginUser = async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: emailLowCase });
 
     if (!user) {
       return res

@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import theme from "./theme";
 import AuthForm from "./pages/AuthForm";
-import HomeLayout from "./landlord/Home"; // Import HomeLayout if it's a separate component
+import LandlordHome from "./landlord/Home"; // Import HomeLayout if it's a separate component
 import HomeDashboard from "./landlord/HomeDashboard"; // Import HomeDashboard if needed
 import HostelManagement from "./landlord/HostelManagement"; // Import necessary components
 import RoomList from "./landlord/RoomList"; // Import necessary components
@@ -29,7 +29,7 @@ function App() {
           <Route path="/register" element={<AuthForm isRegister={true} />} />
           <Route path="/login" element={<AuthForm isRegister={false} />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
-          <Route path="/" element={<HomeLayout />}>
+          <Route path="/" element={<LandlordHome />}>
             <Route index element={<HomeDashboard />} />
             <Route path="hostel-management" element={<HostelManagement />} />
             <Route

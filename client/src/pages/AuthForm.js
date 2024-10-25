@@ -28,6 +28,7 @@ import {
 } from "@chakra-ui/react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 const AuthForm = () => {
   const location = useLocation();
@@ -165,6 +166,19 @@ const AuthForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleLoginComplete = (e) => {
+    const role = e;
+
+    if (role === "tenant") {
+      navigate(`/tenant`);
+    } else if (role === "landlord" || role === "manager") {
+      navigate(`/`);
+    } else if (role === "admin") {
+      navigate("/home");
+    }
+    onClose();
+  };
+
   const handleLogin = async () => {
     if (validateForm()) {
       const email = loginFormData.email;
@@ -178,8 +192,13 @@ const AuthForm = () => {
             password: password,
           }
         );
-        localStorage.setItem("token", response.data.token);
-        console.log(response.data.token);
+
+        const token = response.data.token;
+
+        const user = jwtDecode(token);
+        localStorage.setItem("token", token);
+        console.log("decode jwt:", user);
+        handleLoginComplete(user.role);
         setApiLogInMessage("Đăng nhập thành công");
         setIsLogInError(false);
       } catch (error) {

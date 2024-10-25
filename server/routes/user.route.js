@@ -8,6 +8,7 @@ const {
   updateActive,
   verifyOTP,
   updateUser,
+  resendOtp,
 } = require("../controllers/user.controller");
 const upload = require("../middlewares/uploadImage");
 const router = express.Router();
@@ -20,6 +21,7 @@ router.post("/activeAccount", authMiddleware(["admin"]), updateActive);
 router.post("/", upload.single("image"), createUser);
 router.post("/login", loginUser);
 router.post("/verifyOTP", verifyOTP);
+router.post("/resendOtp", resendOtp);
 
 //Chỉnh sửa thông tin (Tenant và Landlord)
 router.post(

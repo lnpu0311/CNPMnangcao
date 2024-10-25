@@ -53,10 +53,12 @@ const AuthForm = () => {
   });
 
   const [errors, setErrors] = useState({});
-  const [apiMessage, setApiMessage] = useState("");
   const [isError, setIsError] = useState(false);
-  const [apiLogInMessage, setApiLogInMessage] = useState("");
   const [isLogInError, setIsLogInError] = useState(false);
+  const [isOtpMessage, setIsOtpMessage] = useState("");
+
+  const [apiMessage, setApiMessage] = useState("");
+  const [apiLogInMessage, setApiLogInMessage] = useState("");
   const [otp, setOtp] = useState("");
   const [isOtpValid, setIsOtpValid] = useState(true); // To track if the OTP is valid
   const [canResend, setCanResend] = useState(false);
@@ -196,9 +198,12 @@ const AuthForm = () => {
         const token = response.data.token;
 
         const user = jwtDecode(token);
+
         localStorage.setItem("token", token);
-        console.log("decode jwt:", user);
+        localStorage.setItem("role", user.role);
+
         handleLoginComplete(user.role);
+
         setApiLogInMessage("Đăng nhập thành công");
         setIsLogInError(false);
       } catch (error) {
@@ -218,7 +223,6 @@ const AuthForm = () => {
       data.append("gender", registerFormData.gender);
       data.append("role", registerFormData.role);
       data.append("password", registerFormData.password);
-      console.log([...data.entries()]);
 
       try {
         const response = await axios.post(
@@ -230,7 +234,9 @@ const AuthForm = () => {
             },
           }
         );
-        console.log(response.data);
+
+        onOpen();
+
         setApiMessage("Tạo tài khoản thành công!");
         setIsError(false);
       } catch (error) {
@@ -240,10 +246,21 @@ const AuthForm = () => {
     }
   };
 
-  const handleResendOTP = () => {
+  const handleResendOTP = async () => {
     setCanResend(false);
+    setIsOtpValid("true");
     // Logic to resend the OTP here
-    console.log("OTP has been resent");
+    try {
+      const email = registerFormData.email;
+      const response = await axios.post(
+        "http://localhost:5000/api/user/resendOtp",
+        { email: email }
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.log(error);
+      setIsOtpMessage("Lỗi gửi mã otp");
+    }
   };
 
   const handleOtpChange = (value) => {
@@ -253,7 +270,6 @@ const AuthForm = () => {
   const handleVerifyOTP = async () => {
     const emailData = registerFormData.email;
     const otpData = otp;
-    console.log(emailData);
     try {
       const response = await axios.post(
         `http://localhost:5000/api/user/verifyOTP`,
@@ -262,8 +278,14 @@ const AuthForm = () => {
           verifyOTP: otpData,
         }
       );
+      setIsOtpValid("true");
+      setIsOtpMessage("");
+      setApiMessage("Xác thực email thành công");
+      onClose();
       console.log(response.data);
     } catch (error) {
+      setIsOtpValid("false");
+      setIsOtpMessage(error.response.data.message);
       console.error(error);
     }
   };
@@ -543,7 +565,6 @@ const AuthForm = () => {
               mt={4}
               onClick={() => {
                 handleRegister();
-                onOpen();
               }}
             >
               Đăng Ký
@@ -602,14 +623,19 @@ const AuthForm = () => {
                     </Button>
                   </Flex>
 
-                  {!isOtpValid && (
-                    <Text color="red" mt={2}>
-                      Mã OTP không chính xác. Vui lòng thử lại.
-                    </Text>
+                  <ModalCloseButton />
+                  {/* Display API Error Message */}
+                  {isOtpMessage && (
+                    <Alert
+                      status={isOtpValid ? "error" : "success"}
+                      borderRadius={6}
+                      mt={6}
+                    >
+                      <AlertIcon />
+                      {isOtpMessage}
+                    </Alert>
                   )}
                 </ModalBody>
-                <ModalCloseButton />
-
                 <ModalFooter justifyContent="space-between">
                   <Button colorScheme="red" onClick={onClose}>
                     Hủy

@@ -19,6 +19,7 @@ import TenantContract from "./tenant/TenantContract";
 import TenantPayments from "./tenant/TenantPayments";
 import TenantDashboard from "./tenant/TenantDashboard";
 import TenantHome from "./tenant/TenantHome";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -29,9 +30,23 @@ function App() {
           <Route path="/register" element={<AuthForm isRegister={true} />} />
           <Route path="/login" element={<AuthForm isRegister={false} />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
-          <Route path="/" element={<LandlordHome />}>
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute rolesRequired={["landlord", "manager"]}>
+                <LandlordHome />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<HomeDashboard />} />
-            <Route path="hostel-management" element={<HostelManagement />} />
+            <Route
+              path="hostel-management"
+              element={
+                <ProtectedRoute rolesRequired={["landlord"]}>
+                  <HostelManagement />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="employee-management"
               element={<EmployeeManagement />}
@@ -53,7 +68,14 @@ function App() {
             <Route path="/profile-page" element={<ProfilePage />} />
 
             <Route index element={<HomeDashboard />} />
-            <Route path="hostel-management" element={<HostelManagement />} />
+            <Route
+              path="hostel-management"
+              element={
+                <ProtectedRoute rolesRequired={["landlord"]}>
+                  <HostelManagement />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="employee-management"
               element={<EmployeeManagement />}
@@ -76,7 +98,14 @@ function App() {
           </Route>
 
           {/* Tenant routes */}
-          <Route path="/tenant" element={<TenantHome />}>
+          <Route
+            path="/tenant"
+            element={
+              <ProtectedRoute rolesRequired={[`tenant`]}>
+                <TenantHome />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<TenantDashboard />} />
             <Route path="tenant-room-list" element={<TenantRoomList />} />
             <Route path="tenant-contract" element={<TenantContract />} />

@@ -36,7 +36,7 @@ function HomeDashboard() {
   return (
     <Box p={5}>
       <Text fontSize="2xl" fontWeight="bold">
-        Welcome, user!
+        Welcome, username!
       </Text>
 
       <VStack align="start" spacing={4} mb={5}>

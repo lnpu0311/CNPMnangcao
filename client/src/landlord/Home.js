@@ -56,7 +56,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import "../../src/index.css";
-import { IoHomeSharp } from "react-icons/io5";
+import { IoHomeSharp, IoLogOut } from "react-icons/io5";
 function HomeLayout() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [hasNewNotification, setHasNewNotification] = useState(true);
@@ -201,15 +201,23 @@ function HomeLayout() {
             <MenuButton>
               <Text fontWeight={600}>{userData.name}</Text>
             </MenuButton>
-            <MenuList textColor={"brand.500"}>
+            <MenuList width={"300px"} textColor={"brand.500"}>
               <MenuItem
+                fontWeight={"bold"}
                 onClick={handleEditProfile}
                 leftIcon={<EditIcon />}
                 iconSpacing="8px"
               >
                 Chỉnh sửa thông tin cá nhân
               </MenuItem>
-              <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
+              <MenuItem
+                leftIcon={<IoLogOut />}
+                iconSpacing="8px"
+                fontWeight={"bold"}
+                onClick={handleLogout}
+              >
+                Đăng xuất
+              </MenuItem>
             </MenuList>
           </Menu>
         </Flex>
@@ -237,12 +245,12 @@ function HomeLayout() {
                 <Text textColor={"white"} fontWeight="bold">
                   {userData.name}
                 </Text>
-                <IconButton
+                {/* <IconButton
                   aria-label="Notifications"
                   icon={<BellIcon />}
                   variant="ghost"
                   _hover={{ bg: "gray.400" }}
-                />
+                /> */}
               </Flex>
 
               {menuItems.map((item) => (
@@ -280,6 +288,7 @@ function HomeLayout() {
               ))}
               <Divider my={4} />
               <Button
+                textColor={"brand.0"}
                 p={2}
                 variant="ghost"
                 onClick={handleEditProfile}
@@ -288,6 +297,7 @@ function HomeLayout() {
                 Chỉnh sửa thông tin cá nhân
               </Button>
               <Button
+                textColor={"brand.0"}
                 p={2}
                 variant="ghost"
                 onClick={handleLogout}
@@ -307,6 +317,7 @@ function HomeLayout() {
         area="nav"
         display={{ base: "none", md: "block" }}
         w={isNavOpen ? "300px" : "60px"}
+        transition="width 0.5s ease-in-out"
         position="fixed"
         h={"100%"}
       >
@@ -317,15 +328,17 @@ function HomeLayout() {
               alt="Logo"
               boxSize="150px"
               mx="auto"
-              transition="transform 0.2s"
+              transition="transform 0.7s"
               _hover={{ transform: "scale(1.1)" }}
               display={isNavOpen ? "block" : "none"}
             />
             <IconButton
               aria-label="Toggle Nav"
               icon={isNavOpen ? <FaChevronLeft /> : <FaChevronRight />}
+              transition="width 0.5s ease-in-out"
               onClick={toggleNav}
               variant="ghost"
+              _hover={{ bg: "brand.500" }}
               textColor={"white"}
             />
           </Flex>

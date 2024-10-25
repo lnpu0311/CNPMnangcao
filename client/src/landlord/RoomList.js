@@ -178,13 +178,13 @@ const RoomList = () => {
         >
           Quay lại
         </Button>
-        <Button onClick={onOpenRoom} colorScheme="blue" rightIcon={<FaPlus />}>
+        <Button onClick={onOpenRoom} colorScheme="green" rightIcon={<FaPlus />}>
           Thêm phòng mới
         </Button>
       </Flex>
 
       <Text fontSize="2xl" fontWeight="bold" mb={4}>
-        Danh sách phòng cho cơ sở ID: {facilityId}
+        Danh sách phòng của cơ sở: {facilityId}
       </Text>
 
       <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={6}>
@@ -286,10 +286,10 @@ const RoomList = () => {
       <Modal isOpen={isOpenRoom} onClose={onCloseRoom}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Thêm phòng mới</ModalHeader>
+          <ModalHeader textAlign={"center"}>Thêm phòng mới</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <FormControl mb={3}>
+            <FormControl mb={2} isRequired>
               <FormLabel>Tiêu đề bài đăng </FormLabel>
               <Input
                 name="title"
@@ -298,8 +298,7 @@ const RoomList = () => {
                 placeholder="Nhập tiêu đề bài đăng"
               />
             </FormControl>
-            <Text> Tên chi nhánh: {facilityId}</Text>
-            <FormControl mb={3}>
+            <FormControl mb={2} isRequired>
               <FormLabel>Tên phòng</FormLabel>
               <Input
                 name="name"
@@ -308,7 +307,7 @@ const RoomList = () => {
                 placeholder="Nhập tên phòng"
               />
             </FormControl>
-            <FormControl mb={3}>
+            <FormControl mb={2} isRequired>
               <FormLabel>Diện tích (m²)</FormLabel>
               <Input
                 type="number"
@@ -318,7 +317,7 @@ const RoomList = () => {
                 placeholder="Nhập diện tích phòng"
               />
             </FormControl>
-            <FormControl mb={3}>
+            <FormControl mb={2} isRequired>
               <FormLabel>Số tiền cọc (VND)</FormLabel>
               <Input
                 type="number"
@@ -328,7 +327,7 @@ const RoomList = () => {
                 placeholder="Nhập giá tiền cọc"
               />
             </FormControl>
-            <FormControl mb={3}>
+            <FormControl mb={2} isRequired>
               <FormLabel>Giá phòng (VND)</FormLabel>
               <Input
                 type="number"
@@ -338,7 +337,7 @@ const RoomList = () => {
                 placeholder="Nhập giá phòng"
               />
             </FormControl>
-            <FormControl mb={3}>
+            <FormControl mb={2} isRequired>
               <FormLabel>Số điện thoại liên hệ:</FormLabel>
               <Input
                 type="number"
@@ -348,16 +347,16 @@ const RoomList = () => {
                 placeholder="Nhập số"
               />
             </FormControl>
-            <FormControl>
+            <FormControl isRequired>
               <FormLabel>Mô tả chi tiết</FormLabel>
-              <Input
+              <Textarea
                 name="description"
                 value={newRoom.description}
                 onChange={handleInputChange}
                 placeholder="Nhập mô tả phòng"
               />
             </FormControl>
-            <FormControl>
+            <FormControl isRequired>
               <FormLabel>Thêm hình ảnh</FormLabel>
               <Input
                 type="file"
@@ -368,10 +367,10 @@ const RoomList = () => {
             </FormControl>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="teal" mr={3} onClick={handleCreateRoom}>
+            <Button colorScheme="green" mr={3} onClick={handleCreateRoom}>
               Tạo phòng
             </Button>
-            <Button variant="ghost" onClick={onCloseRoom}>
+            <Button colorScheme="red" onClick={onCloseRoom}>
               Hủy
             </Button>
           </ModalFooter>

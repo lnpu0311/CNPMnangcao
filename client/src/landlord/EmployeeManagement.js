@@ -294,7 +294,7 @@ const EmployeeManagement = () => {
                   name={employee.name}
                   src="https://bit.ly/broken-link"
                 />
-                <Text textColor={"brand.4"} fontWeight="bold" mr={4}>
+                <Text textColor={"brand.4"} mr={4}>
                   {employee.name}
                 </Text>
               </Flex>
@@ -303,7 +303,7 @@ const EmployeeManagement = () => {
                 <Text fontWeight="bold" mr={2}>
                   Số điện thoại:
                 </Text>
-                <Text textColor="brand.4" fontWeight="bold" mr={4}>
+                <Text textColor="brand.4" mr={4}>
                   {employee.phone}
                 </Text>
               </Flex>

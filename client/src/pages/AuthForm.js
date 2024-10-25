@@ -397,7 +397,7 @@ const AuthForm = () => {
               bgGradient="linear(to-r, #07c8f9, #0d41e1)"
               _hover={{ bgGradient: "linear(to-l, #07c8f9, #0d41e1)" }}
               width="100%"
-              mt={3}
+              mt={2}
               onClick={handleLogin}
             >
               Đăng Nhập
@@ -568,7 +568,7 @@ const AuthForm = () => {
               bgGradient="linear(to-r, #07c8f9, #0d41e1)"
               _hover={{ bgGradient: "linear(to-l, #07c8f9, #0d41e1)" }}
               width="100%"
-              mt={4}
+              mt={2}
               onClick={() => {
                 handleRegister();
               }}

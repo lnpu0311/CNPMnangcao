@@ -574,13 +574,12 @@ const AuthForm = () => {
                     <Button
                       ml={4}
                       size="sm"
+                      variant={"outline"}
                       colorScheme="blue"
                       onClick={handleResendOTP}
                       isDisabled={!canResend}
                     >
-                      {canResend
-                        ? "Gửi lại mã OTP"
-                        : `Gửi lại sau ${remainingTime}s`}
+                      {canResend ? "Gửi lại OTP" : ` ${remainingTime}s`}
                     </Button>
                   </Flex>
 
@@ -628,7 +627,7 @@ const AuthForm = () => {
             <Heading size="md">
               {signinIn ? "Chưa có tài khoản?" : "Đã có tài khoản?"}
             </Heading>
-            <Text>
+            <Text textColor={"brand.0"}>
               {signinIn
                 ? "Hãy đăng ký để có thể sử dụng dịch vụ của chúng tôi."
                 : "Hãy đăng nhập để sử dụng dịch vụ của chúng tôi."}

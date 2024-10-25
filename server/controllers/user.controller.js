@@ -1,7 +1,7 @@
 const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const sendVerficationCode = require("../middlewares/sendEmail");
+const sendverificationCode = require("../middlewares/sendEmail");
 const { use } = require("../configs/email.config");
 //Lấy toàn bộ User
 const getUser = async (req, res) => {
@@ -36,10 +36,7 @@ const getUserByRole = async (req, res) => {
 //Đăng ký, tạo user
 const createUser = async (req, res) => {
   const user = req.body;
-  console.log(req.body);
-  // user: {
-  //   email,name,numphone,gender,role,password
-  // }
+  user.email = user.email.toLowerCase();
   if (
     !user.email ||
     !user.name ||
@@ -70,10 +67,10 @@ const createUser = async (req, res) => {
   }
 
   const hashPassword = await bcrypt.hash(user.password, 10);
-  const verficationCode = Math.floor(
+  const verificationCode = Math.floor(
     100000 + Math.random() * 900000
   ).toString();
-
+  const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
   // Xử lý ảnh upload
   let imageUrl =
     "https://asset.cloudinary.com/cnpmnc/17da4fe9a04710f6b649531eef6c33e4"; // Ảnh mặc định
@@ -87,7 +84,8 @@ const createUser = async (req, res) => {
     numPhone: user.numPhone,
     role: user.role,
     password: hashPassword,
-    otpVerfication: verficationCode,
+    otpVerification: verificationCode,
+    otpExpires: otpExpires,
     is_active: true,
     gender: user.gender,
     imageUrl: imageUrl,
@@ -95,7 +93,7 @@ const createUser = async (req, res) => {
   });
   try {
     await newUser.save();
-    sendVerficationCode(user.email, verficationCode);
+    sendverificationCode(user.email, verificationCode);
     res.status(200).json({ success: true, data: newUser });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -106,7 +104,7 @@ const createUser = async (req, res) => {
 const loginUser = async (req, res) => {
   console.log(req.body);
   const { email, password } = req.body;
-
+  email = email.toLowerCase();
   if (!email || !password) {
     return res.status(400).json({
       success: false,
@@ -190,7 +188,7 @@ const updateActive = async (req, res) => {
 //Xác thực Email OTP
 const verifyOTP = async (req, res) => {
   const { email, verifyOTP } = req.body;
-  console.log(req.body);
+
   try {
     const user = await User.findOne({ email: email });
     if (!user) {
@@ -199,14 +197,19 @@ const verifyOTP = async (req, res) => {
         .json({ success: false, message: "Tài khoản không tồn tại" });
     }
 
-    if (user.otpVerfication !== verifyOTP) {
+    if (user.otpVerification !== verifyOTP) {
       return res
         .status(404)
         .json({ success: false, message: "Mã OTP không chính xác" });
     }
-    const updateUser = await User.findByIdAndUpdate(user.id, {
-      is_verified: true,
-    });
+    const updateUser = await User.findByIdAndUpdate(
+      user.id,
+      {
+        is_verified: true,
+        $unset: { otpVerification: "", otpExpires: "" }, // Xóa cả mã OTP và thời gian hết hạn
+      },
+      { new: true }
+    );
     res.status(200).json({
       success: true,
       message: "Xác thực thành công",
@@ -217,6 +220,30 @@ const verifyOTP = async (req, res) => {
   }
 };
 
+const resendOtp = async (req, res) => {
+  const { email } = req.body;
+  console.log(`data gửi về:`, req.body);
+  console.log(email);
+  const verificationCode = Math.floor(
+    100000 + Math.random() * 900000
+  ).toString();
+  const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+  try {
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Tài khoản không tồn tại" });
+    }
+
+    await User.findByIdAndUpdate(user.id, {
+      otpVerification: verificationCode,
+      otpExpires: otpExpires,
+    });
+  } catch (error) {}
+  sendverificationCode(email, verificationCode);
+};
+
 module.exports = {
   getUser,
   getUserByRole,
@@ -225,4 +252,5 @@ module.exports = {
   updateActive,
   verifyOTP,
   updateUser,
+  resendOtp,
 };

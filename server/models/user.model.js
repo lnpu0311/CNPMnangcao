@@ -18,7 +18,8 @@ const userSchema = new mongoose.Schema({
     default: "tenant",
   },
   is_active: { type: Boolean, required: true, default: true },
-  otpVerfication: { type: String, required: true },
+  otpVerification: { type: String, required: true },
+  otpExpires: { type: Date },
   is_verified: { type: Boolean, required: true, default: false },
   imageUrl: {
     type: String,

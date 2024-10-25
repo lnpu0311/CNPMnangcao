@@ -19,11 +19,8 @@ import {
   Text,
   Image,
 } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom"; // Import navigation hook
+import { useNavigate } from "react-router-dom";
 import { FaPlusCircle } from "react-icons/fa";
-import { PlusSquareIcon } from "@chakra-ui/icons";
-
-// Dữ liệu cơ sở mẫu
 
 const token =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGRlYTZkZTk5ZWUxYTRhMzU5YTlmMSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcyOTQ5Mzc5NywiZXhwIjoxNzI5NDk3Mzk3fQ.Xcnyg_kNlqKapdASVQcPjCW3efpPTbKCKLU_8aASW2A";
@@ -133,7 +130,12 @@ const HostelManagement = () => {
   return (
     <Box>
       <Flex justifyContent="center" mb={4}>
-        <Text fontSize="3xl" fontWeight="bold" as={"h2"}>
+        <Text
+          textColor={"brand.700"}
+          fontSize="xx-large"
+          fontWeight="bold"
+          as={"h2"}
+        >
           Quản lý cơ sở
         </Text>
       </Flex>
@@ -149,7 +151,7 @@ const HostelManagement = () => {
           <ModalOverlay />
           <ModalContent>
             <ModalHeader fontSize={"x-large"} textAlign="center">
-              Tạo nhà trọ mới
+              Tạo cơ sở mới
             </ModalHeader>
             <ModalCloseButton />
             <ModalBody>
@@ -159,7 +161,7 @@ const HostelManagement = () => {
                   <Input
                     type="text"
                     name="name"
-                    placeholder="Nhập tên chi nhánh"
+                    placeholder="Nhập tên cơ sở"
                     value={formData.name}
                     onChange={handleInputChange}
                   />
@@ -212,7 +214,7 @@ const HostelManagement = () => {
 
             <ModalFooter>
               <Button colorScheme="green" mr={3} onClick={handleSubmit}>
-                Tạo nhà trọ
+                Tạo cơ sở
               </Button>
               <Button colorScheme="red" onClick={onClose}>
                 Hủy

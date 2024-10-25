@@ -165,7 +165,12 @@ const EmployeeManagement = () => {
   };
   return (
     <Box>
-      <Text fontSize="xx-large" fontWeight="bold" as={"h2"}>
+      <Text
+        textColor={"brand.700"}
+        fontSize="xx-large"
+        fontWeight="bold"
+        as={"h2"}
+      >
         Quản lý nhân viên
       </Text>
 

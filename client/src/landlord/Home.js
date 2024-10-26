@@ -222,6 +222,7 @@ function HomeLayout() {
           </Menu>
         </Flex>
         <IconButton
+          variant={"ghost"}
           aria-label="Open Menu"
           icon={<HamburgerIcon />}
           display={{ base: "flex", md: "none" }}
@@ -270,24 +271,26 @@ function HomeLayout() {
                       gap={2}
                       padding="6px"
                       height="50px"
-                      fontSize="18px"
-                      fontWeight="600"
-                      marginBlock="10px"
+                      fontWeight="bold"
+                      marginBlock="5px"
                       backgroundColor={isActive ? "brand.500" : "transparent"}
                       transition="background-color 0.2s ease"
                       _hover={{
-                        backgroundColor: isActive ? "brand.600" : "#0077b6",
-                        textColor: "whitesmoke",
+                        backgroundColor: isActive ? "brand.600" : "brand.700",
+                        textColor: "gray.300",
                       }}
                     >
                       <Box as="span">{item.icon}</Box>
-                      <Text textColor="white">{item.name}</Text>
+                      <Text textColor={isActive ? "brand.0" : "brand.2"}>
+                        {item.name}
+                      </Text>
                     </Flex>
                   )}
                 </NavLink>
               ))}
               <Divider my={4} />
               <Button
+                _hover={{ bgColor: "brand.700", textColor: "gray.300" }}
                 textColor={"brand.0"}
                 p={2}
                 variant="ghost"
@@ -297,6 +300,7 @@ function HomeLayout() {
                 Chỉnh sửa thông tin cá nhân
               </Button>
               <Button
+                _hover={{ bgColor: "brand.700", textColor: "gray.300" }}
                 textColor={"brand.0"}
                 p={2}
                 variant="ghost"
@@ -367,11 +371,11 @@ function HomeLayout() {
       <GridItem
         as="main"
         area="main"
-        ml={{ base: 0, md: isNavOpen ? "100px" : "40px" }}
+        ml={{ base: 0, md: isNavOpen ? "100px" : "10px" }}
         mt={{ base: 16, md: 0 }}
         p={1}
       >
-        <Box bg={"white"} mr={{ base: "0", md: "20px" }} p={6}>
+        <Box bg={"white"} mr={{ base: "0", md: "10px" }} p={6}>
           <Outlet />
         </Box>
       </GridItem>

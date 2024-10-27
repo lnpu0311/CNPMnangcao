@@ -8,8 +8,8 @@ const {
   forgotPassword,
   resetPassword
 } = require("../controllers/auth.controller");
-
-router.post("/register", createUser);
+const upload = require("../middlewares/uploadImage");
+router.post("/register", upload.single("imageUrl"), createUser);
 router.post("/login", loginUser);
 router.post("/verify-otp", verifyOTP);
 router.post("/resend-otp", resendOtp);

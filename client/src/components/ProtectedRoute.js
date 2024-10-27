@@ -1,11 +1,24 @@
 import { Navigate } from "react-router-dom";
 
-const ProtectedRoute = ({ children, rolesRequired }) => {
+import { jwtDecode } from "jwt-decode";
+
+const isTokenExpired = (token) => {
+  if (!token) return true;
+
+  try {
+    const decoded = jwtDecode(token);
+    return decoded.exp * 1000 < Date.now(); // True nếu token hết hạn
+  } catch (error) {
+    return true; // Lỗi khi giải mã cũng coi như token hết hạn
+  }
+};
+
+const ProtectedRoute = ({ children, rolesRequired = [] }) => {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
   // Nếu không có token, chuyển hướng tới trang đăng nhập
-  if (!token) {
+  if (!token || isTokenExpired(token)) {
     return <Navigate to="/login" />;
   }
 

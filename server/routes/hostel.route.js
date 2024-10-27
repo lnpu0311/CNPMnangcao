@@ -10,7 +10,7 @@ const upload = require("../middlewares/uploadImage");
 const router = express.Router();
 
 //Quản trị Admin
-router.get("/", authMiddleware(["admin"]), getHostel);
+router.get("/", authMiddleware(["admin", "landlord"]), getHostel);
 router.get("/:id", authMiddleware(["admin"]), getHostelById);
 //Quản trị
 router.get(

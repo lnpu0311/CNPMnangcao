@@ -222,15 +222,11 @@ const AuthForm = () => {
       data.append("password", registerFormData.password);
 
       try {
-        const response = await axios.post(
-          `http://localhost:5000/api/user`,
-          data,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        await axios.post(`http://localhost:5000/api/user`, data, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
 
         onOpen();
 

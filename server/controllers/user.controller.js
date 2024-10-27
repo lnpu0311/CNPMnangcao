@@ -67,7 +67,9 @@ const updateActive = async (req, res) => {
   }
 };
 
-
+//Xác thực Email OTP
+const verifyOTP = async (req, res) => {
+  const { email, verifyOTP } = req.body;
   try {
     const user = await User.findOne({ email: email });
     if (!user) {

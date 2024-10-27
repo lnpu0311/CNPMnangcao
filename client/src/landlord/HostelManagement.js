@@ -22,8 +22,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { FaPlusCircle } from "react-icons/fa";
 
-const token =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGRlYTZkZTk5ZWUxYTRhMzU5YTlmMSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcyOTQ5Mzc5NywiZXhwIjoxNzI5NDk3Mzk3fQ.Xcnyg_kNlqKapdASVQcPjCW3efpPTbKCKLU_8aASW2A";
+const token = localStorage.getItem("token");
 const FacilityItem = ({ facility }) => {
   const navigate = useNavigate(); // Sử dụng hook điều hướng
 
@@ -42,19 +41,27 @@ const FacilityItem = ({ facility }) => {
       borderRadius="md"
       shadow={"lg"}
     >
-      <Flex alignItems="center">
+      <Flex>
         <Image
+          borderRadius={8}
           src={facility.imageUrl}
           alt={facility.name}
-          boxSize="100px"
+          boxSize="200px"
           mr={4}
+          objectFit={"cover"}
         />
-        <Box textAlign={"left"}>
-          <Text fontSize="2xl" fontWeight="bold" color="blue.500">
+        <Box
+          textAlign="left"
+          display="flex"
+          flexDirection="column"
+          alignItems="flex-start"
+          justifyContent={"flex-start"}
+        >
+          <Text fontSize="x-large" fontWeight="bold" color="blue.500">
             {facility.name}
           </Text>
           <Text fontSize="md" color="gray.600">
-            {facility.address}
+            Địa chỉ: {facility.address}
           </Text>
         </Box>
       </Flex>

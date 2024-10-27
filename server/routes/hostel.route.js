@@ -21,7 +21,7 @@ router.get(
 //Đăng cơ sở (chỉ landlord)
 router.post(
   "/",
-  authMiddleware(["admin"]),
+  authMiddleware(["landlord"]),
   upload.single("image"),
   createHostel
 );

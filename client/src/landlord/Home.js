@@ -56,7 +56,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import "../../src/index.css";
-import { IoHomeSharp } from "react-icons/io5";
+import { IoHomeSharp, IoLogOut } from "react-icons/io5";
 function HomeLayout() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [hasNewNotification, setHasNewNotification] = useState(true);
@@ -201,19 +201,28 @@ function HomeLayout() {
             <MenuButton>
               <Text fontWeight={600}>{userData.name}</Text>
             </MenuButton>
-            <MenuList textColor={"brand.500"}>
+            <MenuList width={"300px"} textColor={"brand.500"}>
               <MenuItem
+                fontWeight={"bold"}
                 onClick={handleEditProfile}
                 leftIcon={<EditIcon />}
                 iconSpacing="8px"
               >
                 Chỉnh sửa thông tin cá nhân
               </MenuItem>
-              <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
+              <MenuItem
+                leftIcon={<IoLogOut />}
+                iconSpacing="8px"
+                fontWeight={"bold"}
+                onClick={handleLogout}
+              >
+                Đăng xuất
+              </MenuItem>
             </MenuList>
           </Menu>
         </Flex>
         <IconButton
+          variant={"ghost"}
           aria-label="Open Menu"
           icon={<HamburgerIcon />}
           display={{ base: "flex", md: "none" }}
@@ -237,12 +246,12 @@ function HomeLayout() {
                 <Text textColor={"white"} fontWeight="bold">
                   {userData.name}
                 </Text>
-                <IconButton
+                {/* <IconButton
                   aria-label="Notifications"
                   icon={<BellIcon />}
                   variant="ghost"
                   _hover={{ bg: "gray.400" }}
-                />
+                /> */}
               </Flex>
 
               {menuItems.map((item) => (
@@ -262,24 +271,27 @@ function HomeLayout() {
                       gap={2}
                       padding="6px"
                       height="50px"
-                      fontSize="18px"
-                      fontWeight="600"
-                      marginBlock="10px"
+                      fontWeight="bold"
+                      marginBlock="5px"
                       backgroundColor={isActive ? "brand.500" : "transparent"}
                       transition="background-color 0.2s ease"
                       _hover={{
-                        backgroundColor: isActive ? "brand.600" : "#0077b6",
-                        textColor: "whitesmoke",
+                        backgroundColor: isActive ? "brand.600" : "brand.700",
+                        textColor: "gray.300",
                       }}
                     >
                       <Box as="span">{item.icon}</Box>
-                      <Text textColor="white">{item.name}</Text>
+                      <Text textColor={isActive ? "brand.0" : "brand.2"}>
+                        {item.name}
+                      </Text>
                     </Flex>
                   )}
                 </NavLink>
               ))}
               <Divider my={4} />
               <Button
+                _hover={{ bgColor: "brand.700", textColor: "gray.300" }}
+                textColor={"brand.0"}
                 p={2}
                 variant="ghost"
                 onClick={handleEditProfile}
@@ -288,6 +300,8 @@ function HomeLayout() {
                 Chỉnh sửa thông tin cá nhân
               </Button>
               <Button
+                _hover={{ bgColor: "brand.700", textColor: "gray.300" }}
+                textColor={"brand.0"}
                 p={2}
                 variant="ghost"
                 onClick={handleLogout}
@@ -307,6 +321,7 @@ function HomeLayout() {
         area="nav"
         display={{ base: "none", md: "block" }}
         w={isNavOpen ? "300px" : "60px"}
+        transition="width 0.5s ease-in-out"
         position="fixed"
         h={"100%"}
       >
@@ -317,15 +332,17 @@ function HomeLayout() {
               alt="Logo"
               boxSize="150px"
               mx="auto"
-              transition="transform 0.2s"
+              transition="transform 0.7s"
               _hover={{ transform: "scale(1.1)" }}
               display={isNavOpen ? "block" : "none"}
             />
             <IconButton
               aria-label="Toggle Nav"
               icon={isNavOpen ? <FaChevronLeft /> : <FaChevronRight />}
+              transition="width 0.5s ease-in-out"
               onClick={toggleNav}
               variant="ghost"
+              _hover={{ bg: "brand.500" }}
               textColor={"white"}
             />
           </Flex>
@@ -354,11 +371,11 @@ function HomeLayout() {
       <GridItem
         as="main"
         area="main"
-        ml={{ base: 0, md: isNavOpen ? "100px" : "40px" }}
+        ml={{ base: 0, md: isNavOpen ? "100px" : "10px" }}
         mt={{ base: 16, md: 0 }}
         p={1}
       >
-        <Box bg={"white"} mr={{ base: "0", md: "20px" }} p={6}>
+        <Box bg={"white"} mr={{ base: "0", md: "10px" }} p={6}>
           <Outlet />
         </Box>
       </GridItem>

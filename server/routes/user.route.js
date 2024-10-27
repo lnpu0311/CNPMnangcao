@@ -9,6 +9,7 @@ const {
   verifyOTP,
   updateUser,
   resendOtp,
+  forgotPasword,
 } = require("../controllers/user.controller");
 const upload = require("../middlewares/uploadImage");
 const router = express.Router();
@@ -22,7 +23,7 @@ router.post("/", upload.single("image"), createUser);
 router.post("/login", loginUser);
 router.post("/verifyOTP", verifyOTP);
 router.post("/resendOtp", resendOtp);
-
+router.post("/forgotPass", forgotPasword);
 //Chỉnh sửa thông tin (Tenant và Landlord)
 router.post(
   "/updateUser",

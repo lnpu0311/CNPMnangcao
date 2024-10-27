@@ -6,10 +6,11 @@ const {
   verifyOTP,
   resendOtp,
   forgotPassword,
-  resetPassword
+  resetPassword,
 } = require("../controllers/auth.controller");
+const upload = require("../middlewares/uploadImage");
 
-router.post("/register", createUser);
+router.post("/register", upload.single("image"), createUser);
 router.post("/login", loginUser);
 router.post("/verify-otp", verifyOTP);
 router.post("/resend-otp", resendOtp);
@@ -17,4 +18,3 @@ router.post("/resend-otp", resendOtp);
 //router.post("/reset-password", resetPassword);
 
 module.exports = router;
-

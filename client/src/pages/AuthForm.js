@@ -227,7 +227,7 @@ const AuthForm = () => {
         numPhone: registerFormData.numPhone,
         gender: registerFormData.gender,
         role: registerFormData.role,
-        password: registerFormData.password
+        password: registerFormData.password,
       });
 
       try {
@@ -236,7 +236,7 @@ const AuthForm = () => {
           data,
           {
             headers: {
-              "Content-Type": "application/json",
+              "Content-Type": "multipart/form-data",
             },
           }
         );
@@ -245,7 +245,10 @@ const AuthForm = () => {
         setApiMessage("Tạo tài khoản thành công!");
         setIsError(false);
       } catch (error) {
-        console.error("Registration error:", error.response?.data || error.message);
+        console.error(
+          "Registration error:",
+          error.response?.data || error.message
+        );
         setApiMessage(error.response?.data?.message || "Đã xảy ra lỗi");
         setIsError(true);
       }

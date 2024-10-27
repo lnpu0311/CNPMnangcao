@@ -13,8 +13,6 @@ const router = express.Router();
 router.get("/", authMiddleware(["admin"]), getUser);
 router.get("/:role", authMiddleware(["admin"]), getUserByRole);
 router.post("/activeAccount", authMiddleware(["admin"]), updateActive);
-
-
 //Chỉnh sửa thông tin (Tenant và Landlord)
 router.post(
   "/updateUser",

@@ -67,10 +67,30 @@ const updateActive = async (req, res) => {
   }
 };
 
+
+  try {
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      res
+        .status(400)
+        .json({ success: false, message: "Không tìm thấy tài khoản" });
+    }
+    const hashPassword = await bcrypt.hash(password, 10);
+    const upadateUser = await User.findByIdAndUpdate(user.id, {
+      password: hashPassword,
+      is_verified: false,
+      otpVerification: verificationCode,
+      otpExpires: otpExpires,
+    });
+    sendverificationCode(email, verificationCode);
+    res.status(200).json({ success: true, data: upadateUser });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 module.exports = {
   getUser,
   getUserByRole,
   updateActive,
   updateUser,
-  
 };

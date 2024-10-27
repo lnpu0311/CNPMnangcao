@@ -185,7 +185,7 @@ const AuthForm = () => {
 
       try {
         const response = await axios.post(
-          `http://localhost:5000/api/user/login`,
+          `http://localhost:5000/api/auth/login`,
           {
             email: email,
             password: password,
@@ -221,23 +221,32 @@ const AuthForm = () => {
       data.append("role", registerFormData.role);
       data.append("password", registerFormData.password);
 
+      console.log("Sending data:", {
+        name: registerFormData.name,
+        email: registerFormData.email,
+        numPhone: registerFormData.numPhone,
+        gender: registerFormData.gender,
+        role: registerFormData.role,
+        password: registerFormData.password
+      });
+
       try {
         const response = await axios.post(
-          `http://localhost:5000/api/user`,
+          `http://localhost:5000/api/auth/register`,
           data,
           {
             headers: {
-              "Content-Type": "multipart/form-data",
+              "Content-Type": "application/json",
             },
           }
         );
-
+        console.log("Response:", response.data);
         onOpen();
-
         setApiMessage("Tạo tài khoản thành công!");
         setIsError(false);
       } catch (error) {
-        setApiMessage(error.response.data.message);
+        console.error("Registration error:", error.response?.data || error.message);
+        setApiMessage(error.response?.data?.message || "Đã xảy ra lỗi");
         setIsError(true);
       }
     }

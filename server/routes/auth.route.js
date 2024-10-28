@@ -14,7 +14,7 @@ router.post("/register", upload.single("image"), createUser);
 router.post("/login", loginUser);
 router.post("/verify-otp", verifyOTP);
 router.post("/resend-otp", resendOtp);
-//router.post("/forgot-password", forgotPassword);
-//router.post("/reset-password", resetPassword);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 module.exports = router;

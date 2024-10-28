@@ -71,23 +71,34 @@ const updateActive = async (req, res) => {
 const verifyOTP = async (req, res) => {
   const { email, verifyOTP } = req.body;
   try {
-    const user = await User.findOne({ email: email });
-    if (!user) {
-      res
-        .status(400)
-        .json({ success: false, message: "Không tìm thấy tài khoản" });
-    }
-    const hashPassword = await bcrypt.hash(password, 10);
-    const upadateUser = await User.findByIdAndUpdate(user.id, {
-      password: hashPassword,
-      is_verified: false,
-      otpVerification: verificationCode,
-      otpExpires: otpExpires,
+    const user = await User.findOne({ 
+      email: email,
+      otpVerification: verifyOTP,
+      otpExpires: { $gt: Date.now() }
     });
-    sendverificationCode(email, verificationCode);
-    res.status(200).json({ success: true, data: upadateUser });
+
+    if (!user) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Mã OTP không chính xác hoặc đã hết hạn" 
+      });
+    }
+
+    // Cập nhật trạng thái xác thực
+    await User.findByIdAndUpdate(user._id, {
+      is_verified: true,
+      $unset: { otpVerification: "", otpExpires: "" }
+    });
+
+    return res.status(200).json({ 
+      success: true, 
+      message: "Xác thực OTP thành công"
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
   }
 };
 module.exports = {

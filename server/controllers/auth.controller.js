@@ -126,39 +126,112 @@ const loginUser = async (req, res) => {
       res.status(500).json({ success: false, message: error.message });
     }
   };
-  
+  //Quên mật khẩu 
+  const forgotPassword = async (req,res) => {
+    const {email } = req.body;
+    try {
+      //Tìm user với email 
+      const user = await User.findOne({email:email});
+      if(!user){
+        return res.status(404).json({
+          success:false, 
+          message:"Email không tồn tại trong hệ thống"
+        });
+      }
+      //Tạo mã OTP mới 
+      const verificationCode = Math.floor(100000 + Math.random()*900000).toString();
+      const otpExpires = new Date(Date.now() + 10 * 60 * 1000);  //10 phút
+      //Cập nhật OTP mới vào database 
+      await User.findByIdAndUpdate(user._id,{
+        otpVerification : verificationCode,
+        otpExpires : otpExpires,
+        is_verified : false
+      });
+
+      //Gửi email chứa mã OTP 
+      sendverificationCode(email,verificationCode);
+      
+      res.status (200).json({
+        success:true,
+        message:"Mã xác thực đã được gửi đến email của bạn "
+      });
+    } catch(error){
+      res.status(500).json({
+        success:false,
+        message:"Lỗi server"+ error.message
+      });
+    }
+  };
+  const resetPassword = async (req, res) => {
+    const { email, newPassword, verifyOTP } = req.body;
+    
+    try {
+      // Tìm user với email và OTP hợp lệ
+      const user = await User.findOne({ 
+        email: email,
+        is_verified: true
+      });
+
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          message: "Không thể đặt lại mật khẩu. Vui lòng thử lại"
+        });
+      }
+
+      // Hash mật khẩu mới
+      const hashPassword = await bcrypt.hash(newPassword, 10);
+
+      // Cập nhật mật khẩu và xóa OTP
+      await User.findByIdAndUpdate(user._id, {
+        password: hashPassword,
+        $unset: { otpVerification: "", otpExpires: "" }
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Đặt lại mật khẩu thành công"
+      });
+
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Lỗi server: " + error.message
+      });
+    }
+  };
   //Xác thực Email OTP
 const verifyOTP = async (req, res) => {
     const { email, verifyOTP } = req.body;
-  
     try {
-      const user = await User.findOne({ email: email });
-      if (!user) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Tài khoản không tồn tại" });
-      }
-  
-      if (user.otpVerification !== verifyOTP) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Mã OTP không chính xác" });
-      }
-      const updateUser = await User.findByIdAndUpdate(
-        user.id,
-        {
-          is_verified: true,
-          $unset: { otpVerification: "", otpExpires: "" }, // Xóa cả mã OTP và thời gian hết hạn
-        },
-        { new: true }
-      );
-      res.status(200).json({
-        success: true,
-        message: "Xác thực thành công",
-        data: updateUser,
+      const user = await User.findOne({ 
+        email: email,
+        otpVerification: verifyOTP,
+        otpExpires: { $gt: Date.now() }
       });
+
+      if (!user) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Mã OTP không chính xác hoặc đã hết hạn" 
+        });
+      }
+
+      // Cập nhật trạng thái xác thực
+      await User.findByIdAndUpdate(user._id, {
+        is_verified: true
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Xác thực OTP thành công"
+      });
+
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      return res.status(500).json({
+        success: false,
+        message: "Lỗi server: " + error.message
+      });
     }
   };
   
@@ -190,5 +263,7 @@ const verifyOTP = async (req, res) => {
     createUser,
     loginUser,
     verifyOTP,
-    resendOtp
+    resendOtp,
+    forgotPassword,
+    resetPassword
   }

@@ -86,7 +86,7 @@ const RoomList = () => {
     hostel: "",
     coc: "",
     phone: "",
-    image: "",
+    image: [],
   });
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [contractDetails, setContractDetails] = useState({
@@ -128,6 +128,17 @@ const RoomList = () => {
     setNewRoom((prevRoom) => ({
       ...prevRoom,
       [name]: value,
+    }));
+  };
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 5) {
+      alert("Bạn chỉ có thể tải lên tối đa 5 hình ảnh");
+      return;
+    }
+    setNewRoom((prev) => ({
+      ...prev,
+      images: files,
     }));
   };
   const handleAddTenant = (e) => {
@@ -283,89 +294,101 @@ const RoomList = () => {
         ))}
       </SimpleGrid>
       {/* Modal for Adding New Room */}
-      <Modal isOpen={isOpenRoom} onClose={onCloseRoom}>
+      <Modal isCentered isOpen={isOpenRoom} onClose={onCloseRoom}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader textAlign={"center"}>Thêm phòng mới</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <FormControl mb={2} isRequired>
-              <FormLabel>Tiêu đề bài đăng </FormLabel>
-              <Input
-                name="title"
-                value={newRoom.title}
-                onChange={handleInputChange}
-                placeholder="Nhập tiêu đề bài đăng"
-              />
-            </FormControl>
-            <FormControl mb={2} isRequired>
-              <FormLabel>Tên phòng</FormLabel>
-              <Input
-                name="name"
-                value={newRoom.name}
-                onChange={handleInputChange}
-                placeholder="Nhập tên phòng"
-              />
-            </FormControl>
-            <FormControl mb={2} isRequired>
-              <FormLabel>Diện tích (m²)</FormLabel>
-              <Input
-                type="number"
-                name="area"
-                value={newRoom.area}
-                onChange={handleInputChange}
-                placeholder="Nhập diện tích phòng"
-              />
-            </FormControl>
-            <FormControl mb={2} isRequired>
-              <FormLabel>Số tiền cọc (VND)</FormLabel>
-              <Input
-                type="number"
-                name="coc"
-                value={newRoom.coc}
-                onChange={handleInputChange}
-                placeholder="Nhập giá tiền cọc"
-              />
-            </FormControl>
-            <FormControl mb={2} isRequired>
-              <FormLabel>Giá phòng (VND)</FormLabel>
-              <Input
-                type="number"
-                name="price"
-                value={newRoom.price}
-                onChange={handleInputChange}
-                placeholder="Nhập giá phòng"
-              />
-            </FormControl>
-            <FormControl mb={2} isRequired>
-              <FormLabel>Số điện thoại liên hệ:</FormLabel>
-              <Input
-                type="number"
-                name="phone"
-                value={newRoom.phone}
-                onChange={handleInputChange}
-                placeholder="Nhập số"
-              />
-            </FormControl>
-            <FormControl isRequired>
-              <FormLabel>Mô tả chi tiết</FormLabel>
-              <Textarea
-                name="description"
-                value={newRoom.description}
-                onChange={handleInputChange}
-                placeholder="Nhập mô tả phòng"
-              />
-            </FormControl>
-            <FormControl isRequired>
-              <FormLabel>Thêm hình ảnh</FormLabel>
-              <Input
-                type="file"
-                name="image"
-                value={newRoom.image}
-                onChange={handleInputChange}
-              />
-            </FormControl>
+            <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+              <FormControl mb={2} isRequired>
+                <FormLabel>Tiêu đề bài đăng</FormLabel>
+                <Input
+                  name="title"
+                  value={newRoom.title}
+                  onChange={handleInputChange}
+                  placeholder="Nhập tiêu đề bài đăng"
+                />
+              </FormControl>
+
+              <FormControl mb={2} isRequired>
+                <FormLabel>Tên phòng</FormLabel>
+                <Input
+                  name="name"
+                  value={newRoom.name}
+                  onChange={handleInputChange}
+                  placeholder="Nhập tên phòng"
+                />
+              </FormControl>
+
+              <FormControl mb={2} isRequired>
+                <FormLabel>Diện tích (m²)</FormLabel>
+                <Input
+                  type="number"
+                  name="area"
+                  value={newRoom.area}
+                  onChange={handleInputChange}
+                  placeholder="Nhập diện tích phòng"
+                />
+              </FormControl>
+
+              <FormControl mb={2} isRequired>
+                <FormLabel>Số tiền cọc (VND)</FormLabel>
+                <Input
+                  type="number"
+                  name="coc"
+                  value={newRoom.coc}
+                  onChange={handleInputChange}
+                  placeholder="Nhập giá tiền cọc"
+                />
+              </FormControl>
+
+              <FormControl mb={2} isRequired>
+                <FormLabel>Giá phòng (VND)</FormLabel>
+                <Input
+                  type="number"
+                  name="price"
+                  value={newRoom.price}
+                  onChange={handleInputChange}
+                  placeholder="Nhập giá phòng"
+                />
+              </FormControl>
+
+              <FormControl mb={2} isRequired>
+                <FormLabel>Số điện thoại liên hệ</FormLabel>
+                <Input
+                  type="number"
+                  name="phone"
+                  value={newRoom.phone}
+                  onChange={handleInputChange}
+                  placeholder="Nhập số điện thoại"
+                />
+              </FormControl>
+
+              <FormControl mb={2} isRequired gridColumn="span 2">
+                <FormLabel>Mô tả chi tiết</FormLabel>
+                <Textarea
+                  name="description"
+                  value={newRoom.description}
+                  onChange={handleInputChange}
+                  placeholder="Nhập mô tả phòng"
+                />
+              </FormControl>
+
+              <FormControl mb={2} isRequired gridColumn="span 2">
+                <FormLabel>Thêm hình ảnh</FormLabel>
+                <Input
+                  type="file"
+                  name="images"
+                  onChange={handleImageChange}
+                  multiple // Cho phép chọn nhiều tệp
+                  accept="image/*" // Giới hạn chỉ chọn hình ảnh
+                />
+                <Text mt={2}>Bạn có thể tải lên tối đa 5 hình ảnh</Text>
+              </FormControl>
+            </Grid>
           </ModalBody>
+
           <ModalFooter>
             <Button colorScheme="green" mr={3} onClick={handleCreateRoom}>
               Tạo phòng
@@ -376,6 +399,7 @@ const RoomList = () => {
           </ModalFooter>
         </ModalContent>
       </Modal>
+
       {/* Modal for Creating Contract */}
       <Modal isOpen={isOpenContract} onClose={onCloseContract}>
         <ModalOverlay />

@@ -9,15 +9,15 @@ import {
   Button,
   Input,
   useToast,
-  InputGroup,
-  InputRightElement,
+  IconButton,
 } from "@chakra-ui/react";
+import { EditIcon } from "@chakra-ui/icons";
 
 function ProfilePage() {
   const toast = useToast();
 
-  // Dữ liệu mẫu
-  const [user, setUser] = useState({
+  // Sample user data
+  const [originalUser, setOriginalUser] = useState({
     name: "Pukachu",
     email: "pukachu@example.com",
     phone: "0123456789",
@@ -26,10 +26,20 @@ function ProfilePage() {
     avatar: "https://bit.ly/broken-link",
   });
 
+  const [user, setUser] = useState(originalUser);
   const [isEditing, setIsEditing] = useState(false);
   const [newAvatar, setNewAvatar] = useState(null);
 
-  const toggleEdit = () => setIsEditing(!isEditing);
+  const toggleEdit = () => {
+    if (isEditing) {
+      // If canceling, revert to original user data
+      setUser(originalUser);
+    } else {
+      // Store the original user data when editing starts
+      setOriginalUser(user);
+    }
+    setIsEditing(!isEditing);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,10 +55,12 @@ function ProfilePage() {
     }
   };
 
-  // Cập nhật ảnh đại diện
+  // Update avatar
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
-    setNewAvatar(URL.createObjectURL(file));
+    if (file) {
+      setNewAvatar(URL.createObjectURL(file));
+    }
   };
 
   const handleSave = () => {
@@ -66,21 +78,39 @@ function ProfilePage() {
   };
 
   return (
-    <Box h={"4xl"} maxW="md" mx="auto" p={4} textAlign="center">
-      <Avatar
-        name={user.name}
-        size="2xl"
-        src={newAvatar || user.avatar}
-        mb={4}
-      />
-      {isEditing ? (
-        <Input
+    <Box maxW="md" mx="auto" p={4} textAlign="center">
+      <Box position="relative" display="inline-block">
+        <Avatar
+          name={user.name}
+          size="2xl"
+          src={newAvatar || user.avatar}
+          mb={4}
+        />
+        {isEditing && (
+          <IconButton
+            icon={<EditIcon />}
+            position="absolute"
+            bottom={3}
+            left={20}
+            onClick={() => document.getElementById("avatar-input").click()}
+            aria-label="Chỉnh sửa avatar"
+            size="sm"
+            bg="rgba(0, 0, 0, 0.5)"
+            color="white"
+            borderRadius="50%"
+            _hover={{ bg: "rgba(0, 0, 0, 0.7)" }}
+            _focus={{ outline: "none" }}
+          />
+        )}
+        <input
+          id="avatar-input"
           type="file"
           accept="image/*"
           onChange={handleAvatarChange}
-          mb={4}
+          style={{ display: "none" }}
         />
-      ) : null}
+      </Box>
+
       {isEditing ? (
         <Input
           width="70%"
@@ -98,6 +128,7 @@ function ProfilePage() {
           {user.name}
         </Text>
       )}
+
       <Divider my={4} />
       <VStack spacing={4}>
         <HStack justify="space-between" width="100%">
@@ -147,8 +178,8 @@ function ProfilePage() {
           <Text fontWeight="medium">Mật khẩu:</Text>
           {isEditing ? (
             <Input
-              name="phone"
-              value={user.phone}
+              name="password"
+              value={user.password}
               onChange={handleChange}
               width="70%"
             />

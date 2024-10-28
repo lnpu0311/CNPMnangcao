@@ -258,11 +258,10 @@ const AuthForm = () => {
   const handleResendOTP = async () => {
     setCanResend(false);
     setIsOtpValid("true");
-    // Logic to resend the OTP here
     try {
       const email = registerFormData.email;
       const response = await axios.post(
-        "http://localhost:5000/api/user/resendOtp",
+        "http://localhost:5000/api/auth/resend-otp",
         { email: email }
       );
       console.log(response.data);
@@ -281,7 +280,7 @@ const AuthForm = () => {
     const otpData = otp;
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/user/verifyOTP`,
+        `http://localhost:5000/api/auth/verify-otp`,
         {
           email: emailData,
           verifyOTP: otpData,

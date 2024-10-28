@@ -21,6 +21,8 @@ import TenantDashboard from "./tenant/TenantDashboard";
 import TenantHome from "./tenant/TenantHome";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ForgotPassword from "./pages/ForgotPassword";
+import Receipt from "./landlord/Receipt";
+import TenantList from "./landlord/TenantList";
 
 function App() {
   return (
@@ -28,10 +30,13 @@ function App() {
       <Box minH={"100vh"}>
         {/* Landlord routes */}
         <Routes>
+          {/* Auth routes */}
           <Route path="/register" element={<AuthForm isRegister={true} />} />
           <Route path="/login" element={<AuthForm isRegister={false} />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+
+          {/* Landlord and Manager routes */}
           <Route
             path="/"
             element={
@@ -58,52 +63,17 @@ function App() {
               path="revenue-stats"
               element={<Box>Thống kê doanh thu theo các tháng.</Box>}
             />
-            <Route
-              path="payment-list"
-              element={<Box>Danh sách các giao dịch thanh toán.</Box>}
-            />
-            <Route
-              path="customer-list"
-              element={<Box>Danh sách khách thuê phòng.</Box>}
-            />
-            <Route path="/room-list/:facilityId" element={<RoomList />} />
-            <Route path="/profile-page" element={<ProfilePage />} />
-
-            <Route index element={<HomeDashboard />} />
-            <Route
-              path="hostel-management"
-              element={
-                <ProtectedRoute rolesRequired={["landlord"]}>
-                  <HostelManagement />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="employee-management"
-              element={<EmployeeManagement />}
-            />
-            <Route path="rental-request" element={<RentalRequest />} />
-            <Route
-              path="revenue-stats"
-              element={<Box>Thống kê doanh thu theo các tháng.</Box>}
-            />
-            <Route
-              path="payment-list"
-              element={<Box>Danh sách các giao dịch thanh toán.</Box>}
-            />
-            <Route
-              path="customer-list"
-              element={<Box>Danh sách khách thuê phòng.</Box>}
-            />
-            <Route path="/room-list/:facilityId" element={<RoomList />} />
-            <Route path="/profile-page" element={<ProfilePage />} />
+            <Route path="payment-list" element={<Receipt />} />
+            <Route path="tenant-list" element={<TenantList />} />
+            <Route path="room-list/:facilityId" element={<RoomList />} />
+            <Route path="profile-page" element={<ProfilePage />} />
           </Route>
 
           {/* Tenant routes */}
           <Route
             path="/tenant"
             element={
-              <ProtectedRoute rolesRequired={[`tenant`]}>
+              <ProtectedRoute rolesRequired={["tenant"]}>
                 <TenantHome />
               </ProtectedRoute>
             }
@@ -115,6 +85,7 @@ function App() {
             <Route path="profile-page" element={<ProfilePage />} />
           </Route>
         </Routes>
+
         {/* <Routes>
           <Route path="/register" element={<AuthForm isRegister={true} />} />
           <Route path="/login" element={<AuthForm isRegister={false} />} />

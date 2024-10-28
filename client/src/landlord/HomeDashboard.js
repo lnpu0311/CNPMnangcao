@@ -77,7 +77,6 @@ function HomeDashboard() {
         </VStack>
       </Box>
 
-      {/* Booking Requests Section */}
       <Box mb={5}>
         <Text fontSize="lg" fontWeight="bold" mb={3}>
           Danh sách các yêu cầu thuê phòng

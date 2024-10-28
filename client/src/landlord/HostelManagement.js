@@ -18,17 +18,31 @@ import {
   Flex,
   Text,
   Image,
+  Heading,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { FaPlusCircle } from "react-icons/fa";
 
 const token = localStorage.getItem("token");
-const FacilityItem = ({ facility }) => {
-  const navigate = useNavigate(); // Sử dụng hook điều hướng
+
+const FacilityItem = ({ facility, onDelete }) => {
+  const navigate = useNavigate();
 
   const handleEditClick = () => {
-    // Chuyển hướng đến trang room-list kèm theo ID cơ sở
     navigate(`/room-list/${facility.id}`);
+  };
+
+  const handleDeleteClick = async () => {
+    try {
+      await axios.delete(`http://localhost:5000/api/hostel/${facility.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      onDelete(facility.id); // Gọi hàm onDelete để cập nhật danh sách sau khi xóa
+    } catch (error) {
+      console.error("Lỗi khi xóa cơ sở:", error);
+    }
   };
 
   return (
@@ -50,13 +64,7 @@ const FacilityItem = ({ facility }) => {
           mr={4}
           objectFit={"cover"}
         />
-        <Box
-          textAlign="left"
-          display="flex"
-          flexDirection="column"
-          alignItems="flex-start"
-          justifyContent={"flex-start"}
-        >
+        <Box textAlign="left" display="flex" flexDirection="column">
           <Text fontSize="x-large" fontWeight="bold" color="blue.500">
             {facility.name}
           </Text>
@@ -65,9 +73,16 @@ const FacilityItem = ({ facility }) => {
           </Text>
         </Box>
       </Flex>
-      <Button onClick={handleEditClick} variant={"solid"} colorScheme="blue">
-        Chỉnh sửa
-      </Button>
+      <Flex>
+        <Button onClick={handleEditClick} colorScheme="blue" mr={2}>
+          Chỉnh sửa
+        </Button>
+        {facility.roomCount === 0 && (
+          <Button onClick={handleDeleteClick} colorScheme="red">
+            Xóa cơ sở
+          </Button>
+        )}
+      </Flex>
     </Flex>
   );
 };
@@ -82,6 +97,7 @@ const HostelManagement = () => {
     district: "",
     image: null,
   });
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -98,7 +114,6 @@ const HostelManagement = () => {
     data.append("city", formData.city);
     data.append("district", formData.district);
     data.append("image", formData.image);
-    console.log([...data.entries()]);
     try {
       const response = await axios.post(
         "http://localhost:5000/api/hostel",
@@ -110,14 +125,17 @@ const HostelManagement = () => {
           },
         }
       );
-
-      console.log("Cơ sở mới đã được tạo:", response.data);
       setFacilities((prev) => [...prev, response.data.data]);
     } catch (error) {
       console.error("Lỗi khi gửi yêu cầu:", error);
     }
     onClose();
   };
+
+  const handleDeleteFacility = (id) => {
+    setFacilities((prev) => prev.filter((facility) => facility.id !== id));
+  };
+
   useEffect(() => {
     const fetchFacilities = async () => {
       try {
@@ -126,7 +144,6 @@ const HostelManagement = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log(response.data);
         setFacilities(response.data.data);
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu:", error);
@@ -134,18 +151,18 @@ const HostelManagement = () => {
     };
     fetchFacilities();
   }, []);
+
   return (
     <Box>
-      <Flex justifyContent="center" mb={4}>
-        <Text
-          textColor={"brand.700"}
-          fontSize="xx-large"
-          fontWeight="bold"
-          as={"h2"}
-        >
-          Quản lý cơ sở
-        </Text>
-      </Flex>
+      <Heading
+        textColor={"blue.500"}
+        as="h3"
+        size="lg"
+        mb={{ base: 4, md: 12 }}
+      >
+        Quản Lý Cơ Sở
+      </Heading>
+
       <Flex justifyContent="flex-end" mb={6}>
         <Button
           onClick={onOpen}
@@ -157,7 +174,7 @@ const HostelManagement = () => {
         <Modal isOpen={isOpen} onClose={onClose} size="lg">
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader fontSize={"x-large"} textAlign="center">
+            <ModalHeader fontSize="x-large" textAlign="center">
               Tạo cơ sở mới
             </ModalHeader>
             <ModalCloseButton />
@@ -173,7 +190,6 @@ const HostelManagement = () => {
                     onChange={handleInputChange}
                   />
                 </FormControl>
-
                 <FormControl isRequired>
                   <FormLabel>Địa chỉ chi tiết</FormLabel>
                   <Input
@@ -184,7 +200,6 @@ const HostelManagement = () => {
                     onChange={handleInputChange}
                   />
                 </FormControl>
-
                 <FormControl isRequired>
                   <FormLabel>Thành phố/Tỉnh</FormLabel>
                   <Input
@@ -195,7 +210,6 @@ const HostelManagement = () => {
                     onChange={handleInputChange}
                   />
                 </FormControl>
-
                 <FormControl isRequired>
                   <FormLabel>Quận/Huyện</FormLabel>
                   <Input
@@ -206,7 +220,6 @@ const HostelManagement = () => {
                     onChange={handleInputChange}
                   />
                 </FormControl>
-
                 <FormControl isRequired>
                   <FormLabel>Hình ảnh</FormLabel>
                   <Input
@@ -218,7 +231,6 @@ const HostelManagement = () => {
                 </FormControl>
               </VStack>
             </ModalBody>
-
             <ModalFooter>
               <Button colorScheme="green" mr={3} onClick={handleSubmit}>
                 Tạo cơ sở
@@ -231,7 +243,11 @@ const HostelManagement = () => {
         </Modal>
       </Flex>
       {facilities.map((facility) => (
-        <FacilityItem key={facility.id} facility={facility} />
+        <FacilityItem
+          key={facility.id}
+          facility={facility}
+          onDelete={handleDeleteFacility}
+        />
       ))}
     </Box>
   );

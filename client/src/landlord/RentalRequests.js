@@ -6,6 +6,7 @@ import {
   Button,
   Avatar,
   useColorModeValue,
+  Heading,
 } from "@chakra-ui/react";
 
 const RentalRequest = () => {
@@ -19,14 +20,14 @@ const RentalRequest = () => {
     },
     {
       id: 2,
-      name: "Uyên",
+      name: "Lương Ngọc Phương Uyên",
       phone: "1243412354",
       hostel: "nhà trọ quận 5",
       room: "Phòng 4",
     },
     {
       id: 3,
-      name: "Bảo",
+      name: "Bảo xấu quắc",
       phone: "1234123874",
       hostel: "nhà trọ quận 5",
       room: "Phòng 3",
@@ -36,15 +37,14 @@ const RentalRequest = () => {
   const backgroundColor = useColorModeValue("brand.2", "brand.4");
   return (
     <Box>
-      <Text
-        textColor={"brand.700"}
-        fontSize="xx-large"
-        fontWeight="bold"
-        as={"h2"}
-        mb={12}
+      <Heading
+        textColor={"blue.500"}
+        as="h3"
+        size="lg"
+        mb={{ base: 4, md: 12 }}
       >
-        Quản lý yêu cầu thuê phòng
-      </Text>
+        Quản Lý Yêu Cầu Thuê Phòng
+      </Heading>
 
       <Stack spacing={4}>
         {rentalRequests.map((request) => (
@@ -52,11 +52,12 @@ const RentalRequest = () => {
             key={request.id}
             bg={backgroundColor}
             borderRadius="md"
+            boxShadow={"lg"}
             justify="space-between"
             align="center"
             p={4}
           >
-            <Flex align="center" flex="2">
+            <Flex align="center" flex="3">
               <Avatar name={request.name} src="https://bit.ly/broken-link" />
               <Text fontWeight="bold" ml={4}>
                 {request.name}
@@ -71,10 +72,13 @@ const RentalRequest = () => {
             </Flex>
 
             <Flex align="center" flex="2">
+              <Text mr={2}>Cơ sở: </Text>
               <Text fontWeight="bold">{request.hostel}</Text>
-              <Text ml={2}>{request.room}</Text>
             </Flex>
-
+            <Flex align="center" flex="2">
+              <Text mr={2}>Tên phòng:</Text>
+              <Text fontWeight="bold">{request.room}</Text>
+            </Flex>
             <Flex flex="1" justify="flex-end" gap={2}>
               <Button colorScheme="green">Chấp nhận</Button>
               <Button colorScheme="red">Xóa</Button>

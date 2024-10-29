@@ -1,5 +1,4 @@
 import { extendTheme, Input } from "@chakra-ui/react";
-import { color } from "framer-motion";
 
 const activeLabelStyles = {
   transform: "scale(0.85) translateY(-24px)",
@@ -23,10 +22,7 @@ const theme = extendTheme({
       700: "#0077b6",
       800: "#023e8a",
       900: "#03045e",
-      accent: "#ff6b6b", // Red accent
-      success: "#51cf66", // Green success
-      warning: "#ffd43b", // Yellow warning
-      muted: "#6c757d", // Muted text
+    
     },
   },
 

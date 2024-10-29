@@ -110,6 +110,7 @@ function HomeLayout() {
       icon: <FaChartLine />,
     },
   ];
+  
 
   const handleLogout = () => {
     localStorage.removeItem("token");

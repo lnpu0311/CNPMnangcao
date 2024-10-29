@@ -36,11 +36,13 @@ connectDB();
 const hostelRoute = require("./routes/hostel.route.js");
 const roomRoute = require("./routes/room.route.js");
 const userRoute = require("./routes/user.route.js");
+const authRoutes = require('./routes/auth.route');
 
 //Api
 app.use("/api/hostel", hostelRoute);
 app.use("/api/room", roomRoute);
 app.use("/api/user", userRoute);
+app.use('/api/auth', authRoutes);
 
 app.listen(PORT, () =>
   console.log(`Server is running on port http://localhost:${PORT}`)

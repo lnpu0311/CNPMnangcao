@@ -18,20 +18,31 @@ import {
   Flex,
   Text,
   Image,
+  Heading,
 } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom"; // Import navigation hook
+import { useNavigate } from "react-router-dom";
 import { FaPlusCircle } from "react-icons/fa";
 
-// Dữ liệu cơ sở mẫu
+const token = localStorage.getItem("token");
 
-const token =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MGRlYTZkZTk5ZWUxYTRhMzU5YTlmMSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTcyOTQ5Mzc5NywiZXhwIjoxNzI5NDk3Mzk3fQ.Xcnyg_kNlqKapdASVQcPjCW3efpPTbKCKLU_8aASW2A";
-const FacilityItem = ({ facility }) => {
-  const navigate = useNavigate(); // Sử dụng hook điều hướng
+const FacilityItem = ({ facility, onDelete }) => {
+  const navigate = useNavigate();
 
   const handleEditClick = () => {
-    // Chuyển hướng đến trang room-list kèm theo ID cơ sở
     navigate(`/room-list/${facility.id}`);
+  };
+
+  const handleDeleteClick = async () => {
+    try {
+      await axios.delete(`http://localhost:5000/api/hostel/${facility.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      onDelete(facility.id); // Gọi hàm onDelete để cập nhật danh sách sau khi xóa
+    } catch (error) {
+      console.error("Lỗi khi xóa cơ sở:", error);
+    }
   };
 
   return (
@@ -44,30 +55,38 @@ const FacilityItem = ({ facility }) => {
       borderRadius="md"
       shadow={"lg"}
     >
-      <Flex alignItems="center">
+      <Flex>
         <Image
+          borderRadius={8}
           src={facility.imageUrl}
           alt={facility.name}
-          boxSize="100px"
+          boxSize="200px"
           mr={4}
+          objectFit={"cover"}
         />
-        <Box textAlign={"left"}>
-          <Text fontSize="2xl" fontWeight="bold" color="blue.500">
+        <Box textAlign="left" display="flex" flexDirection="column">
+          <Text fontSize="x-large" fontWeight="bold" color="blue.500">
             {facility.name}
           </Text>
           <Text fontSize="md" color="gray.600">
-            {facility.address}
+            Địa chỉ: {facility.address}
           </Text>
         </Box>
       </Flex>
-      <Button onClick={handleEditClick} variant={"solid"} colorScheme="green">
-        Chỉnh sửa
-      </Button>
+      <Flex>
+        <Button onClick={handleEditClick} colorScheme="blue" mr={2}>
+          Chỉnh sửa
+        </Button>
+        {facility.roomCount === 0 && (
+          <Button onClick={handleDeleteClick} colorScheme="red">
+            Xóa cơ sở
+          </Button>
+        )}
+      </Flex>
     </Flex>
   );
 };
 
-// Component HostelManagement
 const HostelManagement = () => {
   const [facilities, setFacilities] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -78,6 +97,7 @@ const HostelManagement = () => {
     district: "",
     image: null,
   });
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -94,7 +114,6 @@ const HostelManagement = () => {
     data.append("city", formData.city);
     data.append("district", formData.district);
     data.append("image", formData.image);
-    console.log([...data.entries()]);
     try {
       const response = await axios.post(
         "http://localhost:5000/api/hostel",
@@ -106,14 +125,17 @@ const HostelManagement = () => {
           },
         }
       );
-
-      console.log("Cơ sở mới đã được tạo:", response.data);
       setFacilities((prev) => [...prev, response.data.data]);
     } catch (error) {
       console.error("Lỗi khi gửi yêu cầu:", error);
     }
     onClose();
   };
+
+  const handleDeleteFacility = (id) => {
+    setFacilities((prev) => prev.filter((facility) => facility.id !== id));
+  };
+
   useEffect(() => {
     const fetchFacilities = async () => {
       try {
@@ -122,7 +144,6 @@ const HostelManagement = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log(response.data);
         setFacilities(response.data.data);
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu:", error);
@@ -130,21 +151,32 @@ const HostelManagement = () => {
     };
     fetchFacilities();
   }, []);
+
   return (
     <Box>
-      <Flex justifyContent="center" mb={4}>
-        <Text fontSize="3xl" fontWeight="bold" as={"h2"}>
-          Quản lý nhà trọ
-        </Text>
-      </Flex>
+      <Heading
+        textColor={"blue.500"}
+        as="h3"
+        size="lg"
+        mb={{ base: 4, md: 12 }}
+      >
+        Quản Lý Cơ Sở
+      </Heading>
+
       <Flex justifyContent="flex-end" mb={6}>
-        <Button onClick={onOpen} bg="brand.400" leftIcon={<FaPlusCircle />}>
-          Thêm nhà trọ mới
+        <Button
+          onClick={onOpen}
+          colorScheme="green"
+          leftIcon={<FaPlusCircle />}
+        >
+          Thêm cơ sở mới
         </Button>
         <Modal isOpen={isOpen} onClose={onClose} size="lg">
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader>Biểu mẫu tạo nhà trọ</ModalHeader>
+            <ModalHeader fontSize="x-large" textAlign="center">
+              Tạo cơ sở mới
+            </ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               <VStack spacing={4}>
@@ -153,12 +185,11 @@ const HostelManagement = () => {
                   <Input
                     type="text"
                     name="name"
-                    placeholder="Nhập tên chi nhánh"
+                    placeholder="Nhập tên cơ sở"
                     value={formData.name}
                     onChange={handleInputChange}
                   />
                 </FormControl>
-
                 <FormControl isRequired>
                   <FormLabel>Địa chỉ chi tiết</FormLabel>
                   <Input
@@ -169,7 +200,6 @@ const HostelManagement = () => {
                     onChange={handleInputChange}
                   />
                 </FormControl>
-
                 <FormControl isRequired>
                   <FormLabel>Thành phố/Tỉnh</FormLabel>
                   <Input
@@ -180,7 +210,6 @@ const HostelManagement = () => {
                     onChange={handleInputChange}
                   />
                 </FormControl>
-
                 <FormControl isRequired>
                   <FormLabel>Quận/Huyện</FormLabel>
                   <Input
@@ -191,7 +220,6 @@ const HostelManagement = () => {
                     onChange={handleInputChange}
                   />
                 </FormControl>
-
                 <FormControl isRequired>
                   <FormLabel>Hình ảnh</FormLabel>
                   <Input
@@ -203,20 +231,23 @@ const HostelManagement = () => {
                 </FormControl>
               </VStack>
             </ModalBody>
-
             <ModalFooter>
-              <Button variant={"success"} mr={3} onClick={handleSubmit}>
-                Tạo nhà trọ
+              <Button colorScheme="green" mr={3} onClick={handleSubmit}>
+                Tạo cơ sở
               </Button>
-              <Button variant="ghost" onClick={onClose}>
-                Đóng
+              <Button colorScheme="red" onClick={onClose}>
+                Hủy
               </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>
       </Flex>
       {facilities.map((facility) => (
-        <FacilityItem key={facility.id} facility={facility} />
+        <FacilityItem
+          key={facility.id}
+          facility={facility}
+          onDelete={handleDeleteFacility}
+        />
       ))}
     </Box>
   );

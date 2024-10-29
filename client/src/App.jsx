@@ -5,103 +5,83 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
-<<<<<<< HEAD
-import Template from "./pages/Layout";
-import Home from "./landlord/Home";
-=======
->>>>>>> 4f002acf4dbde7d85e67d41a25f389fd73643786
 import theme from "./theme";
 import AuthForm from "./pages/AuthForm";
-import HomeLayout from "./landlord/Home"; // Import HomeLayout if it's a separate component
+import LandlordHome from "./landlord/Home"; // Import HomeLayout if it's a separate component
 import HomeDashboard from "./landlord/HomeDashboard"; // Import HomeDashboard if needed
 import HostelManagement from "./landlord/HostelManagement"; // Import necessary components
 import RoomList from "./landlord/RoomList"; // Import necessary components
 import ProfilePage from "./landlord/Profile"; // Import ProfilePage
 import EmployeeManagement from "./landlord/EmployeeManagement";
-<<<<<<< HEAD
-=======
 import RentalRequest from "./landlord/RentalRequests";
 import TenantRoomList from "./tenant/TenantRoomList";
 import TenantContract from "./tenant/TenantContract";
 import TenantPayments from "./tenant/TenantPayments";
 import TenantDashboard from "./tenant/TenantDashboard";
 import TenantHome from "./tenant/TenantHome";
+import ProtectedRoute from "./components/ProtectedRoute";
+import ForgotPassword from "./pages/ForgotPassword";
+import Receipt from "./landlord/Receipt";
+import TenantList from "./landlord/TenantList";
 
->>>>>>> 4f002acf4dbde7d85e67d41a25f389fd73643786
 function App() {
   return (
     <ChakraProvider theme={theme}>
       <Box minH={"100vh"}>
         {/* Landlord routes */}
         <Routes>
+          {/* Auth routes */}
           <Route path="/register" element={<AuthForm isRegister={true} />} />
           <Route path="/login" element={<AuthForm isRegister={false} />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
-<<<<<<< HEAD
+
           
-          {/* Landlord routes */}
-          <Route path="/landlord" element={<LandlordHome />}>
+          
+
+          {/* Landlord and Manager routes */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute rolesRequired={["landlord", "manager"]}>
+                <LandlordHome />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<HomeDashboard />} />
-            <Route path="facility-management" element={<HostelManagement />} />
-            <Route path="employee-management" element={<EmployeeManagement />} />
-            <Route path="request-management" element={<Box>Yêu cầu thuê phòng đang được xử lý.</Box>} />
-            <Route path="revenue-stats" element={<Box>Thống kê doanh thu theo các tháng.</Box>} />
-            <Route path="payment-list" element={<Box>Danh sách các giao dịch thanh toán.</Box>} />
-            <Route path="customer-list" element={<Box>Danh sách khách thuê phòng.</Box>} />
+            <Route
+              path="hostel-management"
+              element={
+                <ProtectedRoute rolesRequired={["landlord"]}>
+                  <HostelManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="employee-management"
+              element={<EmployeeManagement />}
+            />
+            <Route path="rental-request" element={<RentalRequest />} />
+            <Route
+              path="revenue-stats"
+              element={<Box>Thống kê doanh thu theo các tháng.</Box>}
+            />
+            <Route path="payment-list" element={<Receipt />} />
+            <Route path="tenant-list" element={<TenantList />} />
             <Route path="room-list/:facilityId" element={<RoomList />} />
             <Route path="profile-page" element={<ProfilePage />} />
           </Route>
-          
-=======
-          <Route path="/" element={<HomeLayout />}>
-            <Route index element={<HomeDashboard />} />
-            <Route path="hostel-management" element={<HostelManagement />} />
-            <Route
-              path="employee-management"
-              element={<EmployeeManagement />}
-            />
-            <Route path="rental-request" element={<RentalRequest />} />
-            <Route
-              path="revenue-stats"
-              element={<Box>Thống kê doanh thu theo các tháng.</Box>}
-            />
-            <Route
-              path="payment-list"
-              element={<Box>Danh sách các giao dịch thanh toán.</Box>}
-            />
-            <Route
-              path="customer-list"
-              element={<Box>Danh sách khách thuê phòng.</Box>}
-            />
-            <Route path="/room-list/:facilityId" element={<RoomList />} />
-            <Route path="/profile-page" element={<ProfilePage />} />
 
-            <Route index element={<HomeDashboard />} />
-            <Route path="hostel-management" element={<HostelManagement />} />
-            <Route
-              path="employee-management"
-              element={<EmployeeManagement />}
-            />
-            <Route path="rental-request" element={<RentalRequest />} />
-            <Route
-              path="revenue-stats"
-              element={<Box>Thống kê doanh thu theo các tháng.</Box>}
-            />
-            <Route
-              path="payment-list"
-              element={<Box>Danh sách các giao dịch thanh toán.</Box>}
-            />
-            <Route
-              path="customer-list"
-              element={<Box>Danh sách khách thuê phòng.</Box>}
-            />
-            <Route path="/room-list/:facilityId" element={<RoomList />} />
-            <Route path="/profile-page" element={<ProfilePage />} />
-          </Route>
 
->>>>>>> 4f002acf4dbde7d85e67d41a25f389fd73643786
           {/* Tenant routes */}
-          <Route path="/tenant" element={<TenantHome />}>
+          <Route
+            path="/tenant"
+            element={
+              <ProtectedRoute rolesRequired={["tenant"]}>
+                <TenantHome />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<TenantDashboard />} />
             <Route path="tenant-room-list" element={<TenantRoomList />} />
             <Route path="tenant-contract" element={<TenantContract />} />
@@ -109,34 +89,8 @@ function App() {
             <Route path="profile-page" element={<ProfilePage />} />
           </Route>
         </Routes>
-        {/* <Routes>
-          <Route path="/register" element={<AuthForm isRegister={true} />} />
-          <Route path="/login" element={<AuthForm isRegister={false} />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-          <Route path="/" element={<HomeLayout />}>
-            <Route index element={<HomeDashboard />} />
-            <Route path="hostel-management" element={<HostelManagement />} />
-            <Route
-              path="employee-management"
-              element={<EmployeeManagement />}
-            />
-            <Route path="rental-request" element={<RentalRequest />} />
-            <Route
-              path="revenue-stats"
-              element={<Box>Thống kê doanh thu theo các tháng.</Box>}
-            />
-            <Route
-              path="payment-list"
-              element={<Box>Danh sách các giao dịch thanh toán.</Box>}
-            />
-            <Route
-              path="customer-list"
-              element={<Box>Danh sách khách thuê phòng.</Box>}
-            />
-            <Route path="/room-list/:facilityId" element={<RoomList />} />
-            <Route path="/profile-page" element={<ProfilePage />} />
-          </Route>
-        </Routes> */}
+
+       
       </Box>
     </ChakraProvider>
   );

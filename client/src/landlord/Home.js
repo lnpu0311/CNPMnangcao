@@ -22,18 +22,13 @@ import {
   Text,
   Collapse,
   Button,
-  Container,
-  useColorMode,
-  useColorModeValue,
+  Divider,
 } from "@chakra-ui/react";
 import {
   HamburgerIcon,
   BellIcon,
-  StarIcon,
   ArrowForwardIcon,
   EditIcon,
-  MoonIcon,
-  SunIcon,
 } from "@chakra-ui/icons";
 import {
   FaBuilding,
@@ -44,7 +39,7 @@ import {
   FaChevronRight,
   FaChevronLeft,
   FaPeopleArrows,
-  FaPeopleCarry,
+  FaAddressCard,
 } from "react-icons/fa";
 import {
   NavLink,
@@ -55,7 +50,11 @@ import {
   useNavigate,
 } from "react-router-dom";
 import "../../src/index.css";
-import { IoHomeSharp } from "react-icons/io5";
+import { IoHomeSharp, IoLogOut } from "react-icons/io5";
+import { FaMoneyCheckDollar } from "react-icons/fa6";
+import { MdOutlineMeetingRoom } from "react-icons/md";
+import { RiParentFill } from "react-icons/ri";
+
 function HomeLayout() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [hasNewNotification, setHasNewNotification] = useState(true);
@@ -65,13 +64,6 @@ function HomeLayout() {
   const [userData, setUserData] = useState({
     name: "Pukachu xinh dep tuyt voi",
   });
-  const { colorMode, toggleColorMode } = useColorMode();
-  const iconColor = useColorModeValue("gray.800", "yellow.300");
-
-  const sidebarColor = useColorModeValue("brand.300", "brand.800");
-  const bgColor = useColorModeValue("brand.0", "brand.5");
-  const headerColor = useColorModeValue("brand.0", "brand.5");
-  const backgroundColor = useColorModeValue("brand.2", "brand.4");
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -88,34 +80,34 @@ function HomeLayout() {
   const menuItems = [
     { name: "Trang chủ", path: "/", icon: <IoHomeSharp /> },
     {
-      name: "Quản lý nhà trọ",
+      name: "Quản lý cơ sở",
       path: "/hostel-management",
       icon: <FaBuilding />,
     },
     {
       name: "Quản lý nhân viên",
       path: "/employee-management",
-      icon: <FaUserTie />,
+      icon: <RiParentFill />,
     },
     {
       name: "Quản lý yêu cầu thuê phòng",
       path: "/rental-request",
-      icon: <FaFileInvoiceDollar />,
+      icon: <MdOutlineMeetingRoom />,
+    },
+    {
+      name: "Danh sách khách thuê",
+      path: "/tenant-list",
+      icon: <FaAddressCard />,
+    },
+    {
+      name: "Danh sách thanh toán",
+      path: "/payment-list",
+      icon: <FaMoneyCheckDollar />,
     },
     {
       name: "Thống kê doanh thu",
       path: "/revenue-stats",
       icon: <FaChartLine />,
-    },
-    {
-      name: "Danh sách thanh toán",
-      path: "/payment-list",
-      icon: <FaMoneyCheckAlt />,
-    },
-    {
-      name: "Danh sách khách thuê",
-      path: "/customer-list",
-      icon: <FaPeopleCarry />,
     },
   ];
   
@@ -123,6 +115,7 @@ function HomeLayout() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsAuthenticated(false);
+    navigate(`/register`);
   };
 
   const toggleNav = () => {
@@ -143,10 +136,8 @@ function HomeLayout() {
         md: isNavOpen ? "200px 1fr" : "50px 1fr",
       }}
       gap={4}
-      bg={backgroundColor}
+      bg={"brand.2"}
       h="auto"
-      color="brand.500"
-      fontWeight="bold"
       textAlign="center"
     >
       {/* header */}
@@ -154,7 +145,7 @@ function HomeLayout() {
         h="70px"
         as="header"
         p={8}
-        bg={headerColor}
+        bg={"white"}
         color={"black"}
         area="header"
         display="flex"
@@ -183,22 +174,6 @@ function HomeLayout() {
           pr="4"
           display={{ base: "none", md: "flex" }}
         >
-          {" "}
-          <Button
-            onClick={toggleColorMode}
-            colorScheme="teal"
-            variant="ghost"
-            mt={4}
-            transition="all 0.2s ease"
-            _hover={{ bg: colorMode === "light" ? "brand.200" : "brand.700" }}
-          >
-            {colorMode === "light" ? (
-              <MoonIcon color={iconColor} />
-            ) : (
-              <SunIcon color={iconColor} />
-            )}
-            {colorMode === "light" ? " Dark Mode" : " Light Mode"}
-          </Button>
           <Box position="relative">
             <IconButton
               color="brand.1"
@@ -222,16 +197,31 @@ function HomeLayout() {
             <MenuButton>
               <Avatar size="sm" name={userData.name} cursor="pointer" />
             </MenuButton>
-            <MenuList color="brown">
-              <MenuItem onClick={handleEditProfile}>
+            <MenuButton>
+              <Text fontWeight={600}>{userData.name}</Text>
+            </MenuButton>
+            <MenuList width={"250px"} textColor={"brand.500"}>
+              <MenuItem
+                fontWeight={"bold"}
+                onClick={handleEditProfile}
+                leftIcon={<EditIcon />}
+                iconSpacing="4px"
+              >
                 Chỉnh sửa thông tin cá nhân
               </MenuItem>
-              <MenuItem onClick={handleLogout}>Đăng xuất</MenuItem>
+              <MenuItem
+                leftIcon={<IoLogOut />}
+                iconSpacing="8px"
+                fontWeight={"bold"}
+                onClick={handleLogout}
+              >
+                Đăng xuất
+              </MenuItem>
             </MenuList>
           </Menu>
-          <Text>{userData.name}</Text>
         </Flex>
         <IconButton
+          variant={"ghost"}
           aria-label="Open Menu"
           icon={<HamburgerIcon />}
           display={{ base: "flex", md: "none" }}
@@ -241,49 +231,66 @@ function HomeLayout() {
 
       <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
         <DrawerOverlay />
-        <DrawerContent>
+        <DrawerContent textColor={"white"}>
           <DrawerCloseButton />
-          <DrawerBody>
-            <VStack align="start" spacing={4}>
-              <Flex color={"white"} alignItems="center" gap={2}>
+          <DrawerBody bg={"brand.800"}>
+            <VStack align="start">
+              <Flex alignItems="center" gap={2}>
                 <Avatar
                   size="sm"
                   name={userData.name}
                   src="https://bit.ly/broken-link"
                   cursor="pointer"
                 />
-                <Text fontWeight="bold">{userData.name}</Text>
-                <IconButton
+                <Text textColor={"white"} fontWeight="bold">
+                  {userData.name}
+                </Text>
+                {/* <IconButton
                   aria-label="Notifications"
                   icon={<BellIcon />}
                   variant="ghost"
                   _hover={{ bg: "gray.400" }}
-                />
+                /> */}
               </Flex>
 
               {menuItems.map((item) => (
                 <NavLink
-                  className={({ isActive }) =>
-                    isActive ? "navlink active-navlink" : "navlink"
-                  }
                   to={item.path}
                   key={item.name}
                   onClick={() => {
                     handleMenuClick(item.name);
                     onClose();
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.classList.add("hover");
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.classList.remove("hover");
-                  }}
+                  style={{ width: "100%" }}
                 >
-                  {item.icon}
-                  {item.name}
+                  {({ isActive }) => (
+                    <Flex
+                      borderRadius={8}
+                      align="center"
+                      gap={2}
+                      padding="6px"
+                      height="50px"
+                      fontWeight="bold"
+                      marginBlock="5px"
+                      backgroundColor={isActive ? "brand.500" : "transparent"}
+                      transition="background-color 0.2s ease"
+                      _hover={{
+                        backgroundColor: isActive ? "brand.600" : "brand.700",
+                        textColor: "gray.300",
+                      }}
+                    >
+                      <Box as="span">{item.icon}</Box>
+                      <Text textColor={isActive ? "brand.0" : "brand.2"}>
+                        {item.name}
+                      </Text>
+                    </Flex>
+                  )}
                 </NavLink>
               ))}
+              <Divider my={4} />
               <Button
+                _hover={{ bgColor: "brand.700", textColor: "gray.300" }}
+                textColor={"brand.0"}
                 p={2}
                 variant="ghost"
                 onClick={handleEditProfile}
@@ -292,6 +299,8 @@ function HomeLayout() {
                 Chỉnh sửa thông tin cá nhân
               </Button>
               <Button
+                _hover={{ bgColor: "brand.700", textColor: "gray.300" }}
+                textColor={"brand.0"}
                 p={2}
                 variant="ghost"
                 onClick={handleLogout}
@@ -311,8 +320,10 @@ function HomeLayout() {
         area="nav"
         display={{ base: "none", md: "block" }}
         w={isNavOpen ? "300px" : "60px"}
+        transition="width 0.5s ease-in-out"
         position="fixed"
         h={"100%"}
+        zIndex={10}
       >
         <VStack align="start" spacing={4}>
           <Flex justify="space-between" width="100%">
@@ -321,15 +332,18 @@ function HomeLayout() {
               alt="Logo"
               boxSize="150px"
               mx="auto"
-              transition="transform 0.2s"
+              transition="transform 0.7s"
               _hover={{ transform: "scale(1.1)" }}
               display={isNavOpen ? "block" : "none"}
             />
             <IconButton
               aria-label="Toggle Nav"
               icon={isNavOpen ? <FaChevronLeft /> : <FaChevronRight />}
+              transition="width 0.5s ease-in-out"
               onClick={toggleNav}
               variant="ghost"
+              _hover={{ bg: "brand.500" }}
+              textColor={"white"}
             />
           </Flex>
           <Collapse in={isNavOpen}>
@@ -357,11 +371,11 @@ function HomeLayout() {
       <GridItem
         as="main"
         area="main"
-        ml={{ base: 0, md: isNavOpen ? "100px" : "40px" }}
+        ml={{ base: 0, md: isNavOpen ? "100px" : "10px" }}
         mt={{ base: 16, md: 0 }}
         p={1}
       >
-        <Box bg={bgColor} mr={{ base: "0", md: "20px" }} p={6}>
+        <Box bg={"white"} mr={{ base: "0", md: "10px" }} p={6}>
           <Outlet />
         </Box>
       </GridItem>

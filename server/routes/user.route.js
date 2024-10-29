@@ -3,11 +3,9 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const {
   getUser,
   getUserByRole,
-  createUser,
-  loginUser,
   updateActive,
-  verifyOTP,
   updateUser,
+  changePassword
 } = require("../controllers/user.controller");
 const upload = require("../middlewares/uploadImage");
 const router = express.Router();
@@ -16,10 +14,6 @@ const router = express.Router();
 router.get("/", authMiddleware(["admin"]), getUser);
 router.get("/:role", authMiddleware(["admin"]), getUserByRole);
 router.post("/activeAccount", authMiddleware(["admin"]), updateActive);
-//Đăng ký, Đăng nhập cho Tenant và Landlord
-router.post("/", upload.single("image"), createUser);
-router.post("/login", loginUser);
-router.post("/verifyOTP", verifyOTP);
 
 //Chỉnh sửa thông tin (Tenant và Landlord)
 router.post(
@@ -28,6 +22,14 @@ router.post(
   upload.single("image"),
   updateUser
 );
+
+//Đổi mật khẩu
+router.put(
+  "/change-password",
+  authMiddleware(["tenant", "landlord", "manager"]),
+  changePassword
+);
+
 //Tạo tài khoản Manager (chỉ Landlord làm được)
 router.post("/manager/create", authMiddleware(["landlord"]));
 

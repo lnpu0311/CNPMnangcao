@@ -14,17 +14,29 @@ import {
   RadioGroup,
   Alert,
   AlertIcon,
+  useDisclosure,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalOverlay,
+  HStack,
+  PinInput,
+  PinInputField,
 } from "@chakra-ui/react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, NavLink } from "react-router-dom";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 const AuthForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const finalRef = React.useRef(null);
   const [signinIn, setSigninIn] = useState(location.pathname === "/login");
 
-  // Separate formData for login and register
   const [loginFormData, setLoginFormData] = useState({
     email: "",
     password: "",
@@ -35,17 +47,22 @@ const AuthForm = () => {
     numPhone: "",
     email: "",
     gender: "",
-    role: "tenant", // default to tenant for registration
+    role: "tenant",
     password: "",
     confirmPassword: "",
   });
 
   const [errors, setErrors] = useState({});
-  const [apiMessage, setApiMessage] = useState("");
   const [isError, setIsError] = useState(false);
-  const [apiLogInMessage, setApiLogInMessage] = useState("");
   const [isLogInError, setIsLogInError] = useState(false);
+  const [isOtpMessage, setIsOtpMessage] = useState("");
 
+  const [apiMessage, setApiMessage] = useState("");
+  const [apiLogInMessage, setApiLogInMessage] = useState("");
+  const [otp, setOtp] = useState("");
+  const [isOtpValid, setIsOtpValid] = useState(true); // To track if the OTP is valid
+  const [canResend, setCanResend] = useState(false);
+  const [remainingTime, setRemainingTime] = useState(60);
   useEffect(() => {
     setSigninIn(location.pathname === "/login");
 
@@ -62,6 +79,22 @@ const AuthForm = () => {
       }
     }
   }, [location.pathname, signinIn]);
+  useEffect(() => {
+    if (!canResend) {
+      const timer = setInterval(() => {
+        setRemainingTime((prevTime) => {
+          if (prevTime === 1) {
+            setCanResend(true);
+            clearInterval(timer);
+            return 60;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer); // Clean up timer on component unmount
+    }
+  }, [canResend]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -86,10 +119,8 @@ const AuthForm = () => {
       navigate("/login");
     }
 
-    // Clear errors and reset form data based on toggle
     setErrors({});
     if (signinIn) {
-      // Reset register form data
       setRegisterFormData({
         name: "",
         numPhone: "",
@@ -100,7 +131,6 @@ const AuthForm = () => {
         confirmPassword: "",
       });
     } else {
-      // Reset login form data
       setLoginFormData({
         email: "",
         password: "",
@@ -135,6 +165,19 @@ const AuthForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleLoginComplete = (e) => {
+    const role = e;
+
+    if (role === "tenant") {
+      navigate(`/tenant`);
+    } else if (role === "landlord" || role === "manager") {
+      navigate(`/`);
+    } else if (role === "admin") {
+      navigate("/home");
+    }
+    onClose();
+  };
+
   const handleLogin = async () => {
     if (validateForm()) {
       const email = loginFormData.email;
@@ -142,14 +185,22 @@ const AuthForm = () => {
 
       try {
         const response = await axios.post(
-          `http://localhost:5000/api/user/login`,
+          `http://localhost:5000/api/auth/login`,
           {
             email: email,
             password: password,
           }
         );
-        localStorage.setItem("token", response.data.token);
-        console.log(response.data.token);
+
+        const token = response.data.token;
+
+        const user = jwtDecode(token);
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("role", user.role);
+
+        handleLoginComplete(user.role);
+
         setApiLogInMessage("Đăng nhập thành công");
         setIsLogInError(false);
       } catch (error) {
@@ -169,11 +220,19 @@ const AuthForm = () => {
       data.append("gender", registerFormData.gender);
       data.append("role", registerFormData.role);
       data.append("password", registerFormData.password);
-      console.log([...data.entries()]);
+
+      console.log("Sending data:", {
+        name: registerFormData.name,
+        email: registerFormData.email,
+        numPhone: registerFormData.numPhone,
+        gender: registerFormData.gender,
+        role: registerFormData.role,
+        password: registerFormData.password,
+      });
 
       try {
         const response = await axios.post(
-          `http://localhost:5000/api/user`,
+          `http://localhost:5000/api/auth/register`,
           data,
           {
             headers: {
@@ -181,16 +240,63 @@ const AuthForm = () => {
             },
           }
         );
-        console.log(response.data);
+        console.log("Response:", response.data);
+        onOpen();
         setApiMessage("Tạo tài khoản thành công!");
         setIsError(false);
       } catch (error) {
-        setApiMessage(error.response.data.message);
+        console.error(
+          "Registration error:",
+          error.response?.data || error.message
+        );
+        setApiMessage(error.response?.data?.message || "Đã xảy ra lỗi");
         setIsError(true);
       }
     }
   };
 
+  const handleResendOTP = async () => {
+    setCanResend(false);
+    setIsOtpValid("true");
+    try {
+      const email = registerFormData.email;
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/resend-otp",
+        { email: email }
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.log(error);
+      setIsOtpMessage("Lỗi gửi mã otp");
+    }
+  };
+
+  const handleOtpChange = (value) => {
+    setOtp(value);
+  };
+
+  const handleVerifyOTP = async () => {
+    const emailData = registerFormData.email;
+    const otpData = otp;
+    try {
+      const response = await axios.post(
+        `http://localhost:5000/api/auth/verify-otp`,
+        {
+          email: emailData,
+          verifyOTP: otpData,
+        }
+      );
+      setIsOtpValid("true");
+      setIsOtpMessage("");
+      setApiMessage("Xác thực email thành công");
+      onClose();
+      console.log(response.data);
+    } catch (error) {
+      setIsOtpValid("false");
+      setIsOtpMessage(error.response.data.message);
+      console.error(error);
+    }
+  };
   return (
     <Flex bg="white" height="100vh" align="center" justify="flex-end" p={10}>
       <Box
@@ -298,16 +404,25 @@ const AuthForm = () => {
               </Alert>
             )}
             <Button
+              textColor={"white"}
               bgGradient="linear(to-r, #07c8f9, #0d41e1)"
               _hover={{ bgGradient: "linear(to-l, #07c8f9, #0d41e1)" }}
               width="100%"
-              mt={4}
+              mt={2}
               onClick={handleLogin}
             >
               Đăng Nhập
             </Button>
+            <Flex
+              fontWeight={"semibold"}
+              textColor={"brand.700"}
+              mt={3}
+              justifyContent="flex-end"
+              width="100%"
+            >
+              <NavLink to={`/forgot-password`}>Quên mật khẩu?</NavLink>
+            </Flex>
           </Box>
-
           {/* Sign Up Form */}
           <Box
             alignContent={"center"}
@@ -320,7 +435,13 @@ const AuthForm = () => {
             opacity={!signinIn ? 1 : 0}
             zIndex={!signinIn ? 2 : 1}
           >
-            <Heading textAlign={"center"} size="lg" mb={6} color="blue.600">
+            <Heading
+              textAlign={"center"}
+              size="lg"
+              mb={6}
+              color="blue.600"
+              onClick={onOpen}
+            >
               Đăng Ký
             </Heading>
 
@@ -454,14 +575,95 @@ const AuthForm = () => {
             )}
             {/* Submit Button */}
             <Button
+              textColor={"white"}
               bgGradient="linear(to-r, #07c8f9, #0d41e1)"
               _hover={{ bgGradient: "linear(to-l, #07c8f9, #0d41e1)" }}
               width="100%"
-              mt={4}
-              onClick={handleRegister}
+              mt={2}
+              onClick={() => {
+                handleRegister();
+              }}
             >
               Đăng Ký
             </Button>
+            {/* OTP */}
+            <Modal
+              finalFocusRef={finalRef}
+              isOpen={isOpen}
+              onClose={onClose}
+              isCentered
+              size="lg"
+            >
+              <ModalOverlay />
+              <ModalContent>
+                <ModalHeader
+                  textColor={"brand.700"}
+                  textAlign="center"
+                  fontWeight="bold"
+                  fontSize="xl"
+                >
+                  Xác thực mã OTP
+                </ModalHeader>
+                <ModalBody textAlign="center">
+                  <Text mb={4}>
+                    Mã OTP đã được gửi tới địa chỉ email của bạn. Vui lòng kiểm
+                    tra hộp thư và nhập mã để xác thực.
+                  </Text>
+
+                  <Flex justifyContent="center" alignItems="center">
+                    <HStack>
+                      <PinInput
+                        otp
+                        size="lg"
+                        placeholder=""
+                        value={otp}
+                        onChange={handleOtpChange}
+                        isInvalid={!isOtpValid}
+                      >
+                        <PinInputField />
+                        <PinInputField />
+                        <PinInputField />
+                        <PinInputField />
+                        <PinInputField />
+                        <PinInputField />
+                      </PinInput>
+                    </HStack>
+                    <Button
+                      ml={4}
+                      size="sm"
+                      variant={"outline"}
+                      colorScheme="blue"
+                      onClick={handleResendOTP}
+                      isDisabled={!canResend}
+                    >
+                      {canResend ? "Gửi lại OTP" : ` ${remainingTime}s`}
+                    </Button>
+                  </Flex>
+
+                  <ModalCloseButton />
+                  {/* Display API Error Message */}
+                  {isOtpMessage && (
+                    <Alert
+                      status={isOtpValid ? "error" : "success"}
+                      borderRadius={6}
+                      mt={6}
+                    >
+                      <AlertIcon />
+                      {isOtpMessage}
+                    </Alert>
+                  )}
+                </ModalBody>
+                <ModalFooter justifyContent="space-between">
+                  <Button colorScheme="red" onClick={onClose}>
+                    Hủy
+                  </Button>
+
+                  <Button colorScheme="green" onClick={handleVerifyOTP}>
+                    Xác nhận
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
           </Box>
         </Flex>
 
@@ -487,7 +689,7 @@ const AuthForm = () => {
             <Heading size="md">
               {signinIn ? "Chưa có tài khoản?" : "Đã có tài khoản?"}
             </Heading>
-            <Text>
+            <Text textColor={"brand.0"}>
               {signinIn
                 ? "Hãy đăng ký để có thể sử dụng dịch vụ của chúng tôi."
                 : "Hãy đăng nhập để sử dụng dịch vụ của chúng tôi."}

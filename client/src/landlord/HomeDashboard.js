@@ -36,7 +36,7 @@ function HomeDashboard() {
   return (
     <Box p={5}>
       <Text fontSize="2xl" fontWeight="bold">
-        Welcome, user!
+        Welcome, username!
       </Text>
 
       <VStack align="start" spacing={4} mb={5}>
@@ -44,14 +44,6 @@ function HomeDashboard() {
           Quick Actions
         </Text>
         <Flex gap={3}>
-          {/* <Button
-            leftIcon={<AddIcon />}
-            colorScheme="blue"
-            variant="solid"
-            onClick={() => navigate("/new-booking")}
-          >
-            Create New Booking
-          </Button> */}
           <Button
             leftIcon={<CalendarIcon />}
             colorScheme="green"
@@ -85,7 +77,6 @@ function HomeDashboard() {
         </VStack>
       </Box>
 
-      {/* Booking Requests Section */}
       <Box mb={5}>
         <Text fontSize="lg" fontWeight="bold" mb={3}>
           Danh sách các yêu cầu thuê phòng

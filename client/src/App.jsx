@@ -58,7 +58,7 @@ function App() {
               }
             />
             <Route
-              path="employee-management"
+              path="employee-management"       
               element={<EmployeeManagement />}
             />
             <Route path="rental-request" element={<RentalRequest />} />

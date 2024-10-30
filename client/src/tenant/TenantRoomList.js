@@ -205,8 +205,8 @@ const TenantRoomList = () => {
                       ? "green"
                       : "orange"
                   }
-                  size="md" // Thay đổi từ "sm" thành "md"
-                  fontSize="md" // Tăng kích thước chữ
+                  size="md" 
+                  fontSize="md" 
                 >
                   {room.status}
                 </Tag>

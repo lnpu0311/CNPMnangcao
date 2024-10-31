@@ -32,43 +32,35 @@ import {
 } from "@chakra-ui/icons";
 import {
   FaBuilding,
-  FaUserTie,
-  FaFileInvoiceDollar,
   FaChartLine,
-  FaMoneyCheckAlt,
   FaChevronRight,
   FaChevronLeft,
-  FaPeopleArrows,
   FaAddressCard,
 } from "react-icons/fa";
-import {
-  NavLink,
-  Routes,
-  Route,
-  Outlet,
-  BrowserRouter,
-  useNavigate,
-} from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import "../../src/index.css";
 import { IoHomeSharp, IoLogOut } from "react-icons/io5";
 import { FaMoneyCheckDollar } from "react-icons/fa6";
 import { MdOutlineMeetingRoom } from "react-icons/md";
 import { RiParentFill } from "react-icons/ri";
-
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 function HomeLayout() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [hasNewNotification, setHasNewNotification] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(true);
   const navigate = useNavigate();
-  const [userData, setUserData] = useState({
-    name: "Pukachu xinh dep tuyt voi",
-  });
+
+  const [userData, setUserData] = useState({});
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       setIsAuthenticated(true);
     }
+    const user = jwtDecode(token);
+    setUserData({ name: user.name });
   }, []);
   const handleMenuClick = (content) => {
     onClose();
@@ -110,7 +102,6 @@ function HomeLayout() {
       icon: <FaChartLine />,
     },
   ];
-  
 
   const handleLogout = () => {
     localStorage.removeItem("token");

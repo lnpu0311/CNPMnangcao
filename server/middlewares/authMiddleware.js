@@ -4,6 +4,7 @@ const authMiddleware = (allowedRoles = []) => {
   return (req, res, next) => {
     // Lấy token từ header
     const authHeader = req.header("Authorization");
+    console.log(req.header("Authorization"));
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         success: false,

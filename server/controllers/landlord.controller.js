@@ -34,7 +34,7 @@ const createHostel = async (req, res) => {
     district: hostel.district,
     city: hostel.city,
     imageUrl: imageUrl,
-    userId: req.user.id,
+    landlordId: req.user.id,
   });
   try {
     await newHostel.save();

@@ -23,6 +23,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ForgotPassword from "./pages/ForgotPassword";
 import Receipt from "./landlord/Receipt";
 import TenantList from "./landlord/TenantList";
+import RevenueStats from "./landlord/RevenueStats";
 
 function App() {
   return (
@@ -58,10 +59,7 @@ function App() {
               element={<EmployeeManagement />}
             />
             <Route path="rental-request" element={<RentalRequest />} />
-            <Route
-              path="revenue-stats"
-              element={<Box>Thống kê doanh thu theo các tháng.</Box>}
-            />
+            <Route path="revenue-stats" element={<RevenueStats />} />
             <Route path="payment-list" element={<Receipt />} />
             <Route path="tenant-list" element={<TenantList />} />
             <Route path="room-list/:facilityId" element={<RoomList />} />

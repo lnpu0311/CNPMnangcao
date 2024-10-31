@@ -15,4 +15,15 @@ const hostelSchema = new mongoose.Schema({
   imageUrl: { type: String, required: false },
 });
 
+// Sử dụng Virtual Populate để tạo trường rooms
+hostelSchema.virtual("rooms", {
+  ref: "Room", // Model liên kết
+  localField: "_id", // Trường trong Hostel (hostelId trong Room)
+  foreignField: "hostelId", // Trường trong Room liên kết tới Hostel
+});
+
+// Bật virtuals khi chuyển thành JSON hoặc Object
+hostelSchema.set("toObject", { virtuals: true });
+hostelSchema.set("toJSON", { virtuals: true });
+
 module.exports = mongoose.model(`Hostel`, hostelSchema);

@@ -195,7 +195,7 @@ const AuthForm = () => {
         const token = response.data.token;
 
         const user = jwtDecode(token);
-
+        console.log(user);
         localStorage.setItem("token", token);
         localStorage.setItem("role", user.role);
 

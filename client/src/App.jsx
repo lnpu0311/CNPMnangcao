@@ -36,9 +36,6 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
 
-          
-          
-
           {/* Landlord and Manager routes */}
           <Route
             path="/"
@@ -58,7 +55,7 @@ function App() {
               }
             />
             <Route
-              path="employee-management"       
+              path="employee-management"
               element={<EmployeeManagement />}
             />
             <Route path="rental-request" element={<RentalRequest />} />
@@ -72,7 +69,6 @@ function App() {
             <Route path="profile-page" element={<ProfilePage />} />
           </Route>
 
-
           {/* Tenant routes */}
           <Route
             path="/tenant"
@@ -83,14 +79,12 @@ function App() {
             }
           >
             <Route index element={<TenantDashboard />} />
-            <Route path="tenant-room-list" element={<TenantRoomList />} />
-            <Route path="tenant-contract" element={<TenantContract />} />
-            <Route path="tenant-payments" element={<TenantPayments />} />
+            <Route path="room-list" element={<TenantRoomList />} />
+            <Route path="contract" element={<TenantContract />} />
+            <Route path="payments" element={<TenantPayments />} />
             <Route path="profile-page" element={<ProfilePage />} />
           </Route>
         </Routes>
-
-       
       </Box>
     </ChakraProvider>
   );

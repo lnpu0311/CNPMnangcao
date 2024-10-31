@@ -55,7 +55,7 @@ function App() {
               }
             />
             <Route
-              path="employee-management"       
+              path="employee-management"
               element={<EmployeeManagement />}
             />
             <Route path="rental-request" element={<RentalRequest />} />
@@ -76,9 +76,9 @@ function App() {
             }
           >
             <Route index element={<TenantDashboard />} />
-            <Route path="tenant-room-list" element={<TenantRoomList />} />
-            <Route path="tenant-contract" element={<TenantContract />} />
-            <Route path="tenant-payments" element={<TenantPayments />} />
+            <Route path="room-list" element={<TenantRoomList />} />
+            <Route path="contract" element={<TenantContract />} />
+            <Route path="payments" element={<TenantPayments />} />
             <Route path="profile-page" element={<ProfilePage />} />
           </Route>
         </Routes>

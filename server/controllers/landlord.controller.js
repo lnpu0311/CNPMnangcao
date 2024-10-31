@@ -1,4 +1,5 @@
 const Hostel = require("../models/hostel.model");
+const Room = require("../models/room.model");
 
 const createHostel = async (req, res) => {
   const hostel = req.body;
@@ -60,7 +61,41 @@ const getHostelByLandLordId = async (req, res) => {
   }
 };
 
+const getHostelById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const hostel = await Hostel.findById(id).populate("rooms");
+    if (!hostel) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Hostel not found" });
+    }
+    res.status(200).json({ success: true, data: hostel });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const getRoomById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const room = await Room.findById(id);
+    if (!room) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Room not found" });
+    }
+    res.status(200).json({ success: true, data: room });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   getHostelByLandLordId,
   createHostel,
+  getHostelById,
+  getRoomById,
 };

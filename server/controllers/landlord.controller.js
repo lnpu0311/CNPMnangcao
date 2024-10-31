@@ -34,7 +34,7 @@ const createHostel = async (req, res) => {
     district: hostel.district,
     city: hostel.city,
     imageUrl: imageUrl,
-    userId: req.user.id,
+    landlordId: req.user.id,
   });
   try {
     await newHostel.save();
@@ -46,7 +46,8 @@ const createHostel = async (req, res) => {
 };
 
 const getHostelByLandLordId = async (req, res) => {
-  const landlordId = req.body;
+  const { landlordId } = req.body;
+  console.log(req.body);
   try {
     const hostel = await Hostel.find({ landlordId: landlordId });
 

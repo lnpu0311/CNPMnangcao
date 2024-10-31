@@ -21,7 +21,7 @@ import {
   Heading,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import { FaPlusCircle } from "react-icons/fa";
+import { PlusSquareIcon } from "@chakra-ui/icons";
 
 const token = localStorage.getItem("token");
 
@@ -167,7 +167,7 @@ const HostelManagement = () => {
         <Button
           onClick={onOpen}
           colorScheme="green"
-          leftIcon={<FaPlusCircle />}
+          leftIcon={<PlusSquareIcon />}
         >
           Thêm cơ sở mới
         </Button>

@@ -23,21 +23,18 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ForgotPassword from "./pages/ForgotPassword";
 import Receipt from "./landlord/Receipt";
 import TenantList from "./landlord/TenantList";
+import RevenueStats from "./landlord/RevenueStats";
 
 function App() {
   return (
     <ChakraProvider theme={theme}>
       <Box minH={"100vh"}>
-        {/* Landlord routes */}
+        {/* Auth routes */}
         <Routes>
-          {/* Auth routes */}
           <Route path="/register" element={<AuthForm isRegister={true} />} />
           <Route path="/login" element={<AuthForm isRegister={false} />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
-
-          
-          
 
           {/* Landlord and Manager routes */}
           <Route
@@ -62,16 +59,12 @@ function App() {
               element={<EmployeeManagement />}
             />
             <Route path="rental-request" element={<RentalRequest />} />
-            <Route
-              path="revenue-stats"
-              element={<Box>Thống kê doanh thu theo các tháng.</Box>}
-            />
+            <Route path="revenue-stats" element={<RevenueStats />} />
             <Route path="payment-list" element={<Receipt />} />
             <Route path="tenant-list" element={<TenantList />} />
             <Route path="room-list/:facilityId" element={<RoomList />} />
             <Route path="profile-page" element={<ProfilePage />} />
           </Route>
-
 
           {/* Tenant routes */}
           <Route
@@ -89,8 +82,6 @@ function App() {
             <Route path="profile-page" element={<ProfilePage />} />
           </Route>
         </Routes>
-
-       
       </Box>
     </ChakraProvider>
   );

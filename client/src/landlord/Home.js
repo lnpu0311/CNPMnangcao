@@ -32,23 +32,12 @@ import {
 } from "@chakra-ui/icons";
 import {
   FaBuilding,
-  FaUserTie,
-  FaFileInvoiceDollar,
   FaChartLine,
-  FaMoneyCheckAlt,
   FaChevronRight,
   FaChevronLeft,
-  FaPeopleArrows,
   FaAddressCard,
 } from "react-icons/fa";
-import {
-  NavLink,
-  Routes,
-  Route,
-  Outlet,
-  BrowserRouter,
-  useNavigate,
-} from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import "../../src/index.css";
 import { IoHomeSharp, IoLogOut } from "react-icons/io5";
 import { FaMoneyCheckDollar } from "react-icons/fa6";
@@ -110,7 +99,6 @@ function HomeLayout() {
       icon: <FaChartLine />,
     },
   ];
-  
 
   const handleLogout = () => {
     localStorage.removeItem("token");

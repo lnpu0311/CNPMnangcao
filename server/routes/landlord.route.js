@@ -22,7 +22,7 @@ router.get("/hostel/:roomId", getRoomById);
 
 //Đăng cơ sở (chỉ landlord)
 router.post(
-  "/",
+  "/hostel/create",
   authMiddleware(["landlord"]),
   upload.single("image"),
   createHostel

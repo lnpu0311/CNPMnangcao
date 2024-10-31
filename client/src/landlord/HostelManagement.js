@@ -22,9 +22,11 @@ import {
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { PlusSquareIcon } from "@chakra-ui/icons";
+import { jwtDecode } from "jwt-decode";
 
 const token = localStorage.getItem("token");
-
+const user = jwtDecode(localStorage.getItem("token"));
+console.log(user.id);
 const FacilityItem = ({ facility, onDelete }) => {
   const navigate = useNavigate();
 
@@ -116,7 +118,7 @@ const HostelManagement = () => {
     data.append("image", formData.image);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/hostel",
+        "http://localhost:5000/api/landlord/hostel/create",
         data,
         {
           headers: {
@@ -139,11 +141,16 @@ const HostelManagement = () => {
   useEffect(() => {
     const fetchFacilities = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/hostel", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await axios.get(
+          "http://localhost:5000/api/landlord/hostel",
+          {
+            landlordId: user.id,
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log(response.data);
         setFacilities(response.data.data);
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu:", error);

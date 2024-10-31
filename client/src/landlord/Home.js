@@ -52,9 +52,7 @@ function HomeLayout() {
   const [isNavOpen, setIsNavOpen] = useState(true);
   const navigate = useNavigate();
 
-  const [userData, setUserData] = useState({
-    name: "Pukachu xinh dep tuyt voi",
-  });
+  const [userData, setUserData] = useState({});
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -62,10 +60,7 @@ function HomeLayout() {
       setIsAuthenticated(true);
     }
     const user = jwtDecode(token);
-    // try{
-    //     const user = await axios("http://localhost:5000/api/")
-    // }
-    // catch{}
+    setUserData({ name: user.name });
   }, []);
   const handleMenuClick = (content) => {
     onClose();

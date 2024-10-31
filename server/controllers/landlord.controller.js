@@ -46,8 +46,10 @@ const createHostel = async (req, res) => {
 };
 
 const getHostelByLandLordId = async (req, res) => {
+
   const { landlordId } = req.query;
   console.log(req.body);
+
   try {
     const hostel = await Hostel.find({ landlordId: landlordId });
 

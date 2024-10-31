@@ -79,7 +79,7 @@ const FacilityItem = ({ facility, onDelete }) => {
         <Button onClick={handleEditClick} colorScheme="blue" mr={2}>
           Chỉnh sửa
         </Button>
-        {facility.roomCount === 0 && (
+        {(facility.roomCount === 0 || !facility.roomCount) && (
           <Button onClick={handleDeleteClick} colorScheme="red">
             Xóa cơ sở
           </Button>
@@ -144,7 +144,9 @@ const HostelManagement = () => {
         const response = await axios.get(
           "http://localhost:5000/api/landlord/hostel",
           {
-            landlordId: user.id,
+            params: {
+              landlordId: user.id,
+            },
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -156,8 +158,10 @@ const HostelManagement = () => {
         console.error("Lỗi khi lấy dữ liệu:", error);
       }
     };
-    fetchFacilities();
-  }, []);
+    if (user && token) {
+      fetchFacilities();
+    }
+  }, [user, token]);
 
   return (
     <Box>

@@ -77,7 +77,7 @@ import "../../src/index.css";
 import { Link as RouterLink } from "react-router-dom";
 import { IoHomeSharp } from "react-icons/io5";
 
-const MotionBox = motion(Box);
+const MotionBox = motion.create(Box);
 
 function TenantHome() {
   const { isOpen, onOpen, onClose } = useDisclosure();

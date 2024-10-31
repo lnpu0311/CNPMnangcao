@@ -32,6 +32,7 @@ import {
   FaTrash,
   FaFileInvoiceDollar,
 } from "react-icons/fa";
+import axios from "axios";
 // Giả sử đây là dữ liệu phòng mẫu
 const rooms = [
   { id: 1, name: "Phòng 101", facilityId: 1, status: "empty" },
@@ -164,12 +165,45 @@ const RoomList = () => {
     onCloseContract();
   };
 
-  const handleCreateRoom = () => {
-    console.log("Creating Room:", newRoom);
-    // Here you can add logic to save the new room to the database
-    setNewRoom({ name: "", area: "", price: "", description: "" });
-    onCloseRoom();
+  const handleCreateRoom = async () => {
+    // Kiểm tra dữ liệu trước khi gửi
+    if (
+      !newRoom.name ||
+      !newRoom.area ||
+      !newRoom.price ||
+      !newRoom.description
+    ) {
+      alert("Vui lòng điền đầy đủ thông tin phòng.");
+      return;
+    }
+
+    try {
+      // Gửi yêu cầu POST tới backend với thông tin phòng
+      const response = await axios.post(
+        "http://localhost:5000/api/rooms",
+        newRoom,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        console.log("Room created:", response.data.data);
+        alert("Tạo phòng thành công!");
+        // Reset form và đóng modal sau khi thành công
+        setNewRoom({ name: "", area: "", price: "", description: "" });
+        onCloseRoom();
+      } else {
+        alert("Có lỗi xảy ra: " + response.data.message);
+      }
+    } catch (error) {
+      console.error("Lỗi khi tạo phòng:", error);
+      alert("Không thể tạo phòng. Vui lòng thử lại sau.");
+    }
   };
+
   // Lọc danh sách phòng theo facilityId
   const filteredRooms = rooms.filter(
     (room) => room.facilityId === parseInt(facilityId)

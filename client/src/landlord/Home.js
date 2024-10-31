@@ -105,7 +105,10 @@ function HomeLayout() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("role");
+
     setIsAuthenticated(false);
+
     navigate(`/register`);
   };
 
@@ -195,13 +198,13 @@ function HomeLayout() {
               <MenuItem
                 fontWeight={"bold"}
                 onClick={handleEditProfile}
-                leftIcon={<EditIcon />}
+                // leftIcon={<EditIcon />}
                 iconSpacing="4px"
               >
                 Chỉnh sửa thông tin cá nhân
               </MenuItem>
               <MenuItem
-                leftIcon={<IoLogOut />}
+                // leftIcon={<IoLogOut />}
                 iconSpacing="8px"
                 fontWeight={"bold"}
                 onClick={handleLogout}

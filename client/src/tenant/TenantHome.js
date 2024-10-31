@@ -149,17 +149,17 @@ function TenantHome() {
     { name: "Trang chủ", path: "/tenant", icon: <IoHomeSharp /> },
     {
       name: "Danh sách phòng",
-      path: "tenant-room-list",
+      path: "room-list",
       icon: <FaBuilding />,
     },
     {
       name: "Thông tin hợp đồng",
-      path: "tenant-contract",
+      path: "contract",
       icon: <FaFileInvoiceDollar />,
     },
     {
       name: "Lịch sử thanh toán",
-      path: "tenant-payments",
+      path: "payments",
       icon: <FaMoneyCheckAlt />,
     },
   ];

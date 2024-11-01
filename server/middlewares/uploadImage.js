@@ -3,11 +3,11 @@ const cloudinary = require("../configs/cloudinary.config");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 const getUploadFolder = (req) => {
-  if (req.originalUrl.includes("/user")) {
-    return "uploads/users";
-  } else if (req.originalUrl.includes("/hostel")) {
+  if (req.originalUrl.includes("/auth")) {
+    return "uploads/auth";
+  } else if (req.originalUrl.includes("/landlord/hostel")) {
     return "uploads/hostels";
-  } else if (req.originalUrl.includes("/room")) {
+  } else if (req.originalUrl.includes("landlord/room")) {
     return "uploads/rooms";
   }
   return "uploads/others";

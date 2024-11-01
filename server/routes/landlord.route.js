@@ -7,27 +7,26 @@ const {
   getHostelByLandLordId,
   getHostelById,
   getRoomById,
+  createRoom,
 } = require("../controllers/landlord.controller");
 const upload = require("../middlewares/uploadImage");
 
-router.get("/hostel", getHostelByLandLordId);
+router.get("/hostel", authMiddleware(["landlord"]), getHostelByLandLordId);
 
 router.get("/hostel/:hostelId", getHostelById);
-//router.get("/hostel/:hostelId/create",)
+//router.get("/hostel/:hostelId/create",createHostel)
 router.get("/hostel/:roomId", getRoomById);
-//router.get("/hostel/:roomId/create", )
 //router.get("/hostel/:roomId/update", )
 //router.get("/hostel/:roomId/updateUnit", )
 //router.get("/hostel/:roomId/createReceipt",  )
 
 //Đăng cơ sở (chỉ landlord)
 router.post(
-  "/hostel/create",
+  "/room/:hostelId/create",
   authMiddleware(["landlord"]),
-  upload.single("image"),
-  createHostel
+  upload.array("images", 5), // Cho phép tải lên tối đa 5 ảnh
+  createRoom
 );
-
 //Tạo tài khoản Manager (chỉ Landlord làm được)
 router.post("/manager/create", authMiddleware(["landlord"]));
 

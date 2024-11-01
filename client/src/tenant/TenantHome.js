@@ -32,8 +32,6 @@ import {
   MenuDivider,
   InputGroup,
   InputRightElement,
-  
-
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { debounce } from "lodash";
@@ -58,10 +56,8 @@ import {
   FaPeopleArrows,
   FaPeopleCarry,
   FaCog,
-
-  
   FaFacebook,
-  FaYoutube, 
+  FaYoutube,
   FaInstagram,
 } from "react-icons/fa";
 import {
@@ -81,7 +77,7 @@ import "../../src/index.css";
 import { Link as RouterLink } from "react-router-dom";
 import { IoHomeSharp } from "react-icons/io5";
 
-const MotionBox = motion(Box);
+const MotionBox = motion.create(Box);
 
 function TenantHome() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -153,24 +149,24 @@ function TenantHome() {
     { name: "Trang chủ", path: "/tenant", icon: <IoHomeSharp /> },
     {
       name: "Danh sách phòng",
-      path: "/tenant-room-list",
+      path: "room-list",
       icon: <FaBuilding />,
     },
     {
       name: "Thông tin hợp đồng",
-      path: "/tenant-contract",
+      path: "contract",
       icon: <FaFileInvoiceDollar />,
     },
     {
       name: "Lịch sử thanh toán",
-      path: "/tenant-payments",
+      path: "payments",
       icon: <FaMoneyCheckAlt />,
     },
   ];
 
   const settingsItem = {
     name: "Cài đặt",
-    path: "/settings",
+    path: "settings",
     icon: <FaCog />,
   };
 
@@ -188,13 +184,12 @@ function TenantHome() {
       templateAreas={{
         base: `"header"
               "main"
-              "footer"`
+              "footer"`,
       }}
       gridTemplateRows={{ base: "70px 1fr auto" }}
       gridTemplateColumns="1fr"
-      minH="100vh" 
+      minH="100vh"
     >
-      
       {/* header */}
       <GridItem
         h="70px"
@@ -250,71 +245,73 @@ function TenantHome() {
         </NavLink>
       </HStack> */}
 
-      {/* Searchbar */}
-      <MotionBox
-        variants={searchVariants}
-        initial="initial"
-        animate={isScrolled ? "scrolled" : "initial"}
-        border={1}
-        padding={2}
-        boxShadow="sm"
-        display={{ base: "none", md: "flex" }}
-        alignItems="center"
-      >
-        <Input
-          placeholder="Tìm kiếm phòng..."
-          size="sm"
-          borderRadius="md"
-          bg="white"
-          mr={2}
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-        />
-        <Button bg="brand.500" size="sm">
-          Tìm
-        </Button>
-      </MotionBox>
-
-      {/* Right Section */}
-      <Flex alignItems="center" gap={4}>
-      <Button
-        onClick={toggleColorMode}
-        variant="ghost"
-        display={{ base: "none", md: "flex" }}
-      >
-        {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-        <Text ml={2}> {/* Thêm khoảng cách giữa icon và text */}
-          {colorMode === "light" ? "Dark Mode" : "Light Mode"}
-        </Text>
-      </Button>
-
-        <Box position="relative">
-          <IconButton
-            color="brand.1"
-            aria-label="Notifications"
-            icon={<BellIcon />}
-            variant="ghost"
-            _hover={{ bg: "gray.300" }}
+        {/* Searchbar */}
+        <MotionBox
+          variants={searchVariants}
+          initial="initial"
+          animate={isScrolled ? "scrolled" : "initial"}
+          border={1}
+          padding={2}
+          boxShadow="sm"
+          display={{ base: "none", md: "flex" }}
+          alignItems="center"
+        >
+          <Input
+            placeholder="Tìm kiếm phòng..."
+            size="sm"
+            borderRadius="md"
+            bg="white"
+            mr={2}
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
           />
-          {hasNewNotification && (
-            <Badge
-              bg="red"
-              color="white"
-              position="absolute"
-              top="-2px"
-              right="-2px"
-              borderRadius="full"
-              boxSize="12px"
-              border="2px solid white"
-            />
-          )}
-        </Box>
+          <Button bg="brand.500" size="sm">
+            Tìm
+          </Button>
+        </MotionBox>
 
-            {/* User Menu */}
-            <Menu>
-              <MenuButton>
-                <Avatar size="sm" name={userData.name} cursor="pointer" />
-              </MenuButton>
+        {/* Right Section */}
+        <Flex alignItems="center" gap={4}>
+          <Button
+            onClick={toggleColorMode}
+            variant="ghost"
+            display={{ base: "none", md: "flex" }}
+          >
+            {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+            <Text ml={2}>
+              {" "}
+              {/* Thêm khoảng cách giữa icon và text */}
+              {colorMode === "light" ? "Dark Mode" : "Light Mode"}
+            </Text>
+          </Button>
+
+          <Box position="relative">
+            <IconButton
+              color="brand.1"
+              aria-label="Notifications"
+              icon={<BellIcon />}
+              variant="ghost"
+              _hover={{ bg: "gray.300" }}
+            />
+            {hasNewNotification && (
+              <Badge
+                bg="red"
+                color="white"
+                position="absolute"
+                top="-2px"
+                right="-2px"
+                borderRadius="full"
+                boxSize="12px"
+                border="2px solid white"
+              />
+            )}
+          </Box>
+
+          {/* User Menu */}
+          <Menu>
+            <MenuButton>
+              <Avatar size="sm" name={userData.name} cursor="pointer" />
+            </MenuButton>
             <MenuList>
               {/* Các chức năng chính */}
               {menuItems.map((item) => (
@@ -327,55 +324,45 @@ function TenantHome() {
                   {item.name}
                 </MenuItem>
               ))}
-              
+
               <MenuDivider />
-              
+
               {/* Cài đặt và thông tin cá nhân */}
-              <MenuItem 
-                icon={<FaCog />}
-                as={RouterLink}
-                to={settingsItem.path}
-              >
+              <MenuItem icon={<FaCog />} as={RouterLink} to={settingsItem.path}>
                 {settingsItem.name}
               </MenuItem>
-              
-              <MenuItem 
-                icon={<EditIcon />}
-                onClick={handleEditProfile}
-              >
+
+              <MenuItem icon={<EditIcon />} onClick={handleEditProfile}>
                 Chỉnh sửa thông tin cá nhân
               </MenuItem>
-              
+
               <MenuItem
                 icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
                 onClick={toggleColorMode}
               >
                 {colorMode === "light" ? "Dark Mode" : "Light Mode"}
               </MenuItem>
-              
+
               <MenuDivider />
-              
+
               {/* Đăng xuất */}
-              <MenuItem 
-                icon={<ArrowForwardIcon />}
-                onClick={handleLogout}
-              >
+              <MenuItem icon={<ArrowForwardIcon />} onClick={handleLogout}>
                 Đăng xuất
               </MenuItem>
             </MenuList>
-        </Menu>
-      </Flex>
+          </Menu>
+        </Flex>
 
-      {/* Mobile Menu Button */}
-      <IconButton
-        aria-label="Open Menu"
-        icon={<HamburgerIcon />}
-        display={{ base: "flex", md: "none" }}
-        onClick={onOpen}
-        ml={2}
-      />
+        {/* Mobile Menu Button */}
+        <IconButton
+          aria-label="Open Menu"
+          icon={<HamburgerIcon />}
+          display={{ base: "flex", md: "none" }}
+          onClick={onOpen}
+          ml={2}
+        />
 
-      {/* Mobile Drawer */}
+        {/* Mobile Drawer */}
         <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
           <DrawerOverlay />
           <DrawerContent>
@@ -398,7 +385,7 @@ function TenantHome() {
                     onClick={onClose}
                     style={({ isActive }) => ({
                       color: isActive ? "#0974f1" : "inherit",
-                      textDecoration: "none"
+                      textDecoration: "none",
                     })}
                   >
                     <Button
@@ -413,7 +400,7 @@ function TenantHome() {
                 ))}
 
                 <Divider />
-                
+
                 {/* Mobile Settings */}
                 <Button
                   leftIcon={<FaCog />}
@@ -426,7 +413,7 @@ function TenantHome() {
                 >
                   {settingsItem.name}
                 </Button>
-                
+
                 {/* Mobile Theme Toggle */}
                 <Button
                   leftIcon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
@@ -441,7 +428,7 @@ function TenantHome() {
             </DrawerBody>
           </DrawerContent>
         </Drawer>
-    </GridItem>
+      </GridItem>
 
       {/* Sidebar */}
       {/* <GridItem
@@ -521,7 +508,7 @@ function TenantHome() {
       <GridItem as="main" area="main" mt="4" p={8}>
         <Outlet />
       </GridItem>
-      
+
       {/* Footer */}
       <GridItem
         as="footer"
@@ -529,87 +516,82 @@ function TenantHome() {
         w="100%"
         bg="gray.500"
         color="white"
-        mt="auto"  // Đẩy footer xuống dưới cùng
-  >
-    <Box maxW="1200px" mx="auto" py={10} px={{ base: 4, md: 6 }}>
-      <Grid 
-        templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }}
-        gap={8}
+        mt="auto" // Đẩy footer xuống dưới cùng
       >
-        {/* Thông tin liên hệ */}
-        <VStack align="start" spacing={3}>
-          <Text fontSize="xl" fontWeight="bold" mb={2}>
-            Liên hệ với chúng tôi
+        <Box maxW="1200px" mx="auto" py={10} px={{ base: 4, md: 6 }}>
+          <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8}>
+            {/* Thông tin liên hệ */}
+            <VStack align="start" spacing={3}>
+              <Text fontSize="xl" fontWeight="bold" mb={2}>
+                Liên hệ với chúng tôi
+              </Text>
+              <Text>Hotline: 0123456789</Text>
+              <Text>Email: info@hostel.com</Text>
+              <Text>
+                Địa chỉ: 69/68 Đặng Thùy Trâm, P.13, Q. Bình Thạnh, TP. HCM
+              </Text>
+              <Text></Text>
+            </VStack>
+
+            {/* Links */}
+            <VStack align="start" spacing={3}>
+              <Text fontSize="xl" fontWeight="bold" mb={2}>
+                Khám phá
+              </Text>
+              <Link href="/ve-chung-toi" _hover={{ color: "blue.300" }}>
+                Về chúng tôi
+              </Link>
+              <Link href="/dich-vu" _hover={{ color: "blue.300" }}>
+                Dịch vụ
+              </Link>
+              <Link href="/lien-he" _hover={{ color: "blue.300" }}>
+                Liên hệ
+              </Link>
+            </VStack>
+
+            {/* Social Media */}
+            <VStack align="start" spacing={3}>
+              <Text fontSize="xl" fontWeight="bold" mb={2}>
+                Kết nối với chúng tôi
+              </Text>
+              <HStack spacing={4}>
+                <Link href="https://facebook.com" isExternal>
+                  <Icon
+                    as={FaFacebook}
+                    boxSize={6}
+                    _hover={{ color: "blue.400", transform: "scale(1.1)" }}
+                    transition="all 0.3s"
+                  />
+                </Link>
+                <Link href="https://youtube.com" isExternal>
+                  <Icon
+                    as={FaYoutube}
+                    boxSize={6}
+                    _hover={{ color: "red.400", transform: "scale(1.1)" }}
+                    transition="all 0.3s"
+                  />
+                </Link>
+                <Link href="https://instagram.com" isExternal>
+                  <Icon
+                    as={FaInstagram}
+                    boxSize={6}
+                    _hover={{ color: "pink.400", transform: "scale(1.1)" }}
+                    transition="all 0.3s"
+                  />
+                </Link>
+              </HStack>
+            </VStack>
+          </Grid>
+
+          {/* Divider */}
+          <Divider my={6} borderColor="gray.600" />
+
+          {/* Copyright */}
+          <Text fontSize="sm" color="gray.400" textAlign="center">
+            © 2024 Hostel Community.
           </Text>
-          <Text>Hotline: 0123456789</Text>
-          <Text>Email: info@hostel.com</Text>
-          <Text>Địa chỉ: 69/68 Đặng Thùy Trâm, P.13, Q. Bình Thạnh, TP. HCM</Text>
-          <Text></Text>
-        </VStack>
-
-        {/* Links */}
-        <VStack align="start" spacing={3}>
-          <Text fontSize="xl" fontWeight="bold" mb={2}>
-            Khám phá
-          </Text>
-          <Link href="/ve-chung-toi" _hover={{ color: "blue.300" }}>
-            Về chúng tôi
-          </Link>
-          <Link href="/dich-vu" _hover={{ color: "blue.300" }}>
-            Dịch vụ
-          </Link>
-          <Link href="/lien-he" _hover={{ color: "blue.300" }}>
-            Liên hệ
-          </Link>
-        </VStack>
-
-        {/* Social Media */}
-        <VStack align="start" spacing={3}>
-          <Text fontSize="xl" fontWeight="bold" mb={2}>
-            Kết nối với chúng tôi
-          </Text>
-          <HStack spacing={4}>
-            <Link href="https://facebook.com" isExternal>
-              <Icon 
-                as={FaFacebook} 
-                boxSize={6} 
-                _hover={{ color: "blue.400", transform: "scale(1.1)" }}
-                transition="all 0.3s"
-              />
-            </Link>
-            <Link href="https://youtube.com" isExternal>
-              <Icon 
-                as={FaYoutube} 
-                boxSize={6} 
-                _hover={{ color: "red.400", transform: "scale(1.1)" }}
-                transition="all 0.3s"
-              />
-            </Link>
-            <Link href="https://instagram.com" isExternal>
-              <Icon 
-                as={FaInstagram} 
-                boxSize={6} 
-                _hover={{ color: "pink.400", transform: "scale(1.1)" }}
-                transition="all 0.3s"
-              />
-            </Link>
-          </HStack>
-        </VStack>
-      </Grid>
-
-      {/* Divider */}
-      <Divider my={6} borderColor="gray.600" />
-
-      {/* Copyright */}
-      <Text 
-        fontSize="sm" 
-        color="gray.400" 
-        textAlign="center"
-      >
-        © 2024 Hostel Community.
-      </Text>
-    </Box>
-  </GridItem>
+        </Box>
+      </GridItem>
     </Grid>
   );
 }

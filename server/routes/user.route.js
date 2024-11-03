@@ -5,7 +5,8 @@ const {
   getUserByRole,
   updateActive,
   updateUser,
-  changePassword
+  changePassword,
+  searchAccommodation
 } = require("../controllers/user.controller");
 const upload = require("../middlewares/uploadImage");
 const router = express.Router();
@@ -22,6 +23,9 @@ router.post(
   upload.single("image"),
   updateUser
 );
+//Search ( cho cả tenant và landlord)
+router.get('/search',authMiddleware(["tenant","landlord"]),
+searchAccommodation);
 
 //Đổi mật khẩu
 router.put(

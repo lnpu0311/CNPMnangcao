@@ -300,14 +300,18 @@ const EmployeeManagement = () => {
               </Flex>
 
               <Flex flex="2" align="center">
-                <Text mr={2}>Số điện thoại:</Text>
+                <Text color="gray.600" mr={2}>
+                  Số điện thoại:
+                </Text>
                 <Text fontWeight="bold" mr={4}>
                   {employee.phone}
                 </Text>
               </Flex>
 
               <Flex flex="3" align="center">
-                <Text mr={2}>Cơ sở:</Text>
+                <Text color="gray.600" mr={2}>
+                  Cơ sở:
+                </Text>
                 {employee.isEditing ? (
                   <Input
                     value={employee.hostel}

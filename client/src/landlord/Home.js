@@ -70,35 +70,35 @@ function HomeLayout() {
     onClose();
   };
   const menuItems = [
-    { name: "Trang chủ", path: "/", icon: <IoHomeSharp /> },
+    { name: "Trang chủ", path: "/landlord", icon: <IoHomeSharp /> },
     {
       name: "Quản lý cơ sở",
-      path: "/hostel-management",
+      path: "/landlord/hostel-management",
       icon: <FaBuilding />,
     },
     {
       name: "Quản lý nhân viên",
-      path: "/employee-management",
+      path: "/landlord/employee-management",
       icon: <RiParentFill />,
     },
     {
       name: "Quản lý yêu cầu thuê phòng",
-      path: "/rental-request",
+      path: "/landlord/rental-request",
       icon: <MdOutlineMeetingRoom />,
     },
     {
       name: "Danh sách khách thuê",
-      path: "/tenant-list",
+      path: "/landlord/tenant-list",
       icon: <FaAddressCard />,
     },
     {
       name: "Danh sách thanh toán",
-      path: "/payment-list",
+      path: "/landlord/payment-list",
       icon: <FaMoneyCheckDollar />,
     },
     {
       name: "Thống kê doanh thu",
-      path: "/revenue-stats",
+      path: "/landlord/revenue-stats",
       icon: <FaChartLine />,
     },
   ];
@@ -194,12 +194,13 @@ function HomeLayout() {
             <MenuButton>
               <Text fontWeight={600}>{userData.name}</Text>
             </MenuButton>
-            <MenuList width={"250px"} textColor={"brand.500"}>
+            <MenuList bgColor={"brand.2"} textColor={"brand.500"}>
               <MenuItem
                 fontWeight={"bold"}
                 onClick={handleEditProfile}
                 // leftIcon={<EditIcon />}
                 iconSpacing="4px"
+                icon={<EditIcon />}
               >
                 Chỉnh sửa thông tin cá nhân
               </MenuItem>
@@ -208,6 +209,7 @@ function HomeLayout() {
                 iconSpacing="8px"
                 fontWeight={"bold"}
                 onClick={handleLogout}
+                icon={<IoLogOut />}
               >
                 Đăng xuất
               </MenuItem>
@@ -227,7 +229,7 @@ function HomeLayout() {
         <DrawerOverlay />
         <DrawerContent textColor={"white"}>
           <DrawerCloseButton />
-          <DrawerBody bg={"brand.800"}>
+          <DrawerBody py={4} bg={"brand.800"}>
             <VStack align="start">
               <Flex alignItems="center" gap={2}>
                 <Avatar

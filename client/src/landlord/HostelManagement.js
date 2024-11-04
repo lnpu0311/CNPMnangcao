@@ -114,6 +114,8 @@ const FacilityItem = ({ facility, onDelete }) => {
 };
 
 const HostelManagement = () => {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [facilities, setFacilities] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [formData, setFormData] = useState({
@@ -124,43 +126,14 @@ const HostelManagement = () => {
     image: null,
   });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleImageChange = (e) => {
-    setFormData({ ...formData, image: e.target.files[0] });
-  };
-
-  const handleSubmit = async () => {
-    const data = new FormData();
-    data.append("name", formData.name);
-    data.append("address", formData.address);
-    data.append("city", formData.city);
-    data.append("district", formData.district);
-    data.append("image", formData.image);
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/landlord/hostel/create",
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      setFacilities((prev) => [...prev, response.data.data]);
-    } catch (error) {
-      console.error("Lỗi khi gửi yêu cầu:", error);
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      setToken(storedToken);
+      const decodedUser = jwtDecode(storedToken);
+      setUser(decodedUser);
     }
-    onClose();
-  };
-
-  const handleDeleteFacility = (id) => {
-    setFacilities((prev) => prev.filter((facility) => facility.id !== id));
-  };
+  }, []);
 
   useEffect(() => {
     const fetchFacilities = async () => {
@@ -182,10 +155,113 @@ const HostelManagement = () => {
         console.error("Lỗi khi lấy dữ liệu:", error);
       }
     };
+
     if (user && token) {
       fetchFacilities();
     }
   }, [user, token]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleImageChange = (e) => {
+    setFormData({ ...formData, image: e.target.files[0] });
+  };
+
+  const handleSubmit = async () => {
+    const data = new FormData();
+    data.append("name", formData.name);
+    data.append("address", formData.address);
+    data.append("city", formData.city);
+    data.append("district", formData.district);
+    data.append("image", formData.image);
+    data.append("landlordId", user.id);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/landlord/hostel/create",
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setFacilities((prev) => [...prev, response.data.data]);
+    } catch (error) {
+      console.error("Lỗi khi gửi yêu cầu:", error);
+    }
+    onClose();
+  };
+
+  const handleDeleteFacility = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/hostel/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setFacilities((prev) => prev.filter((facility) => facility.id !== id));
+    } catch (error) {
+      console.error("Lỗi khi xóa cơ sở:", error);
+    }
+  };
+
+  // Component FacilityItem nested bên trong HostelManagement
+  const FacilityItem = ({ facility }) => {
+    const navigate = useNavigate();
+
+    const handleEditClick = () => {
+      navigate(`/room-list/${facility.id}`);
+    };
+
+    return (
+      <Flex
+        bg="brand.2"
+        p={4}
+        mb={4}
+        alignItems="center"
+        justifyContent="space-between"
+        borderRadius="md"
+        shadow={"lg"}
+      >
+        <Flex>
+          <Image
+            borderRadius={8}
+            src={facility.imageUrl}
+            alt={facility.name}
+            boxSize="200px"
+            mr={4}
+            objectFit={"cover"}
+          />
+          <Box textAlign="left" display="flex" flexDirection="column">
+            <Text fontSize="x-large" fontWeight="bold" color="blue.500">
+              {facility.name}
+            </Text>
+            <Text fontSize="md" color="gray.600">
+              Địa chỉ: {facility.address}
+            </Text>
+          </Box>
+        </Flex>
+        <Flex>
+          <Button onClick={handleEditClick} colorScheme="blue" mr={2}>
+            Chỉnh sửa
+          </Button>
+          {(facility.roomCount === 0 || !facility.roomCount) && (
+            <Button
+              onClick={() => handleDeleteFacility(facility.id)}
+              colorScheme="red"
+            >
+              Xóa cơ sở
+            </Button>
+          )}
+        </Flex>
+      </Flex>
+    );
+  };
 
   return (
     <Box>
@@ -278,11 +354,7 @@ const HostelManagement = () => {
         </Modal>
       </Flex>
       {facilities.map((facility) => (
-        <FacilityItem
-          key={facility.id}
-          facility={facility}
-          onDelete={handleDeleteFacility}
-        />
+        <FacilityItem key={facility.id} facility={facility} />
       ))}
     </Box>
   );

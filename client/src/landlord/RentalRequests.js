@@ -65,18 +65,24 @@ const RentalRequest = () => {
             </Flex>
 
             <Flex align="center" flex="2">
-              <Text mr={2}>Số điện thoại: </Text>
+              <Text color="gray.600" mr={2}>
+                Số điện thoại:{" "}
+              </Text>
               <Text fontWeight="bold" mr={2}>
                 {request.phone}
               </Text>
             </Flex>
 
             <Flex align="center" flex="2">
-              <Text mr={2}>Cơ sở: </Text>
+              <Text color="gray.600" mr={2}>
+                Cơ sở:{" "}
+              </Text>
               <Text fontWeight="bold">{request.hostel}</Text>
             </Flex>
             <Flex align="center" flex="2">
-              <Text mr={2}>Tên phòng:</Text>
+              <Text color="gray.600" mr={2}>
+                Tên phòng:
+              </Text>
               <Text fontWeight="bold">{request.room}</Text>
             </Flex>
             <Flex flex="1" justify="flex-end" gap={2}>

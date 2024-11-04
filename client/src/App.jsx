@@ -7,11 +7,11 @@ import {
 } from "react-router-dom";
 import theme from "./theme";
 import AuthForm from "./pages/AuthForm";
-import LandlordHome from "./landlord/Home"; // Import HomeLayout if it's a separate component
-import HomeDashboard from "./landlord/HomeDashboard"; // Import HomeDashboard if needed
-import HostelManagement from "./landlord/HostelManagement"; // Import necessary components
-import RoomList from "./landlord/RoomList"; // Import necessary components
-import ProfilePage from "./landlord/Profile"; // Import ProfilePage
+import LandlordHome from "./landlord/Home";
+import HomeDashboard from "./landlord/HomeDashboard";
+import HostelManagement from "./landlord/HostelManagement";
+import RoomList from "./landlord/RoomList";
+import ProfilePage from "./landlord/Profile";
 import EmployeeManagement from "./landlord/EmployeeManagement";
 import RentalRequest from "./landlord/RentalRequests";
 import TenantRoomList from "./tenant/TenantRoomList";
@@ -24,6 +24,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Receipt from "./landlord/Receipt";
 import TenantList from "./landlord/TenantList";
 import RevenueStats from "./landlord/RevenueStats";
+import AdminDashboard from "./admin/AdminDashboard";
 
 function App() {
   return (
@@ -36,9 +37,18 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
 
+          {/* Admin routes */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute rolesRequired={["admin"]}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          ></Route>
           {/* Landlord and Manager routes */}
           <Route
-            path="/"
+            path="/landlord"
             element={
               <ProtectedRoute rolesRequired={["landlord", "manager"]}>
                 <LandlordHome />

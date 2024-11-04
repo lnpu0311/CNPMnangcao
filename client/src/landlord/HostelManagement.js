@@ -31,7 +31,7 @@ const FacilityItem = ({ facility, onDelete }) => {
   const navigate = useNavigate();
 
   const handleEditClick = () => {
-    navigate(`/room-list/${facility.id}`);
+    navigate(`/landlord/room-list/${facility.id}`);
   };
 
   const handleDeleteClick = async () => {
@@ -66,13 +66,37 @@ const FacilityItem = ({ facility, onDelete }) => {
           mr={4}
           objectFit={"cover"}
         />
-        <Box textAlign="left" display="flex" flexDirection="column">
+        <Box textAlign="left" display="flex" flexDirection="column" gap={2}>
           <Text fontSize="x-large" fontWeight="bold" color="blue.500">
             {facility.name}
           </Text>
-          <Text fontSize="md" color="gray.600">
-            Địa chỉ: {facility.address}
-          </Text>
+
+          <Box display="flex" alignItems="center">
+            <Text fontSize="md" color="gray.600" mr={2}>
+              Thành phố:
+            </Text>
+            <Text fontSize="md" fontWeight={"bold"}>
+              {facility.city}
+            </Text>
+          </Box>
+
+          <Box display="flex" alignItems="center">
+            <Text fontSize="md" color="gray.600" mr={2}>
+              Quận:
+            </Text>
+            <Text fontSize="md" fontWeight={"bold"}>
+              {facility.district}
+            </Text>
+          </Box>
+
+          <Box display="flex" alignItems="center">
+            <Text fontSize="md" color="gray.600" mr={2}>
+              Địa chỉ:
+            </Text>
+            <Text fontSize="md" fontWeight={"bold"}>
+              {facility.address}
+            </Text>
+          </Box>
         </Box>
       </Flex>
       <Flex>
@@ -182,7 +206,7 @@ const HostelManagement = () => {
         >
           Thêm cơ sở mới
         </Button>
-        <Modal isOpen={isOpen} onClose={onClose} size="lg">
+        <Modal isCentered isOpen={isOpen} onClose={onClose} size="lg">
           <ModalOverlay />
           <ModalContent>
             <ModalHeader fontSize="x-large" textAlign="center">

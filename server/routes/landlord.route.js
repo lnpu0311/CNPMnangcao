@@ -14,7 +14,12 @@ const upload = require("../middlewares/uploadImage");
 router.get("/hostel", authMiddleware(["landlord"]), getHostelByLandLordId);
 
 router.get("/hostel/:hostelId", getHostelById);
-router.get("/hostel/create", createHostel);
+router.post(
+  "/hostel/create",
+  authMiddleware(["landlord"]),
+  upload.single("image"),
+  createHostel
+);
 router.get("/hostel/:roomId", getRoomById);
 //router.get("/hostel/:roomId/update", )
 //router.get("/hostel/:roomId/updateUnit", )

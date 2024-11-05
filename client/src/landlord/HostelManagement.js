@@ -215,7 +215,7 @@ const HostelManagement = () => {
     const navigate = useNavigate();
 
     const handleEditClick = () => {
-      navigate(`/room-list/${facility.id}`);
+      navigate(`/landlord/room-list/${facility.id}`);
     };
 
     return (

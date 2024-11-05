@@ -19,16 +19,20 @@ import {
   Text,
   Image,
   Heading,
+  Select,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { PlusSquareIcon } from "@chakra-ui/icons";
 import { jwtDecode } from "jwt-decode";
+import vietnamData from "../data/dvhcvn.json"
 
 
 const FacilityItem = ({ facility, onDelete }) => {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
-
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards,setWards] = useState([]);
   const handleEditClick = () => {
     navigate(`/landlord/room-list/${facility.id}`);
   };
@@ -122,8 +126,12 @@ const HostelManagement = () => {
     address: "",
     city: "",
     district: "",
+    ward: "",
     image: null,
   });
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -160,6 +168,10 @@ const HostelManagement = () => {
     }
   }, [user, token]);
 
+  useEffect(() => {
+    setProvinces(vietnamData.data);
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -169,12 +181,45 @@ const HostelManagement = () => {
     setFormData({ ...formData, image: e.target.files[0] });
   };
 
+  const handleProvinceChange = (e) => {
+    const provinceName = e.target.value;
+    const province = provinces.find(p => p.name === provinceName);
+    setDistricts(province ? province.level2s : []);
+    setWards([]);
+    setFormData({
+      ...formData,
+      city: provinceName,
+      district: '',
+      ward: ''
+    });
+  };
+
+  const handleDistrictChange = (e) => {
+    const districtName = e.target.value;
+    const district = districts.find(d => d.name === districtName);
+    setWards(district ? district.level3s : []);
+    setFormData({
+      ...formData,
+      district: districtName,
+      ward: ''
+    });
+  };
+
+  const handleWardChange = (e) => {
+    const wardName = e.target.value;
+    setFormData({
+      ...formData,
+      ward: wardName
+    });
+  };
+
   const handleSubmit = async () => {
     const data = new FormData();
     data.append("name", formData.name);
     data.append("address", formData.address);
     data.append("city", formData.city);
     data.append("district", formData.district);
+    data.append("ward", formData.ward);
     data.append("image", formData.image);
     data.append("landlordId", user.id);
 
@@ -190,10 +235,18 @@ const HostelManagement = () => {
         }
       );
       setFacilities((prev) => [...prev, response.data.data]);
+      setFormData({
+        name: "",
+        address: "",
+        city: "",
+        district: "",
+        ward: "",
+        image: null,
+      });
+      onClose();
     } catch (error) {
       console.error("Lỗi khi gửi yêu cầu:", error);
     }
-    onClose();
   };
 
   const handleDeleteFacility = async (id) => {
@@ -300,36 +353,68 @@ const HostelManagement = () => {
                     onChange={handleInputChange}
                   />
                 </FormControl>
+
+                <FormControl isRequired>
+                  <FormLabel>Thành phố/Tỉnh</FormLabel>
+                  <Select
+                    name="city"
+                    value={formData.city}
+                    onChange={handleProvinceChange}
+                    placeholder="Chọn thành phố/tỉnh"
+                  >
+                    {provinces.map((province) => (
+                      <option key={province.level1_id} value={province.name}>
+                        {province.name}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <FormControl isRequired>
+                  <FormLabel>Quận/Huyện</FormLabel>
+                  <Select
+                    name="district"
+                    value={formData.district}
+                    onChange={handleDistrictChange}
+                    placeholder="Chọn quận/huyện"
+                    isDisabled={!formData.city}
+                  >
+                    {districts.map((district) => (
+                      <option key={district.level2_id} value={district.name}>
+                        {district.name}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <FormControl isRequired>
+                  <FormLabel>Xã/Phường</FormLabel>
+                  <Select
+                    name="ward"
+                    value={formData.ward}
+                    onChange={handleWardChange}
+                    placeholder="Chọn xã/phường"
+                    isDisabled={!formData.district}
+                  >
+                    {wards.map((ward) => (
+                      <option key={ward.level3_id} value={ward.name}>
+                        {ward.name}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+
                 <FormControl isRequired>
                   <FormLabel>Địa chỉ chi tiết</FormLabel>
                   <Input
                     type="text"
                     name="address"
-                    placeholder="Nhập địa chỉ chi tiết"
+                    placeholder="Nhập số nhà, tên đường..."
                     value={formData.address}
                     onChange={handleInputChange}
                   />
                 </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Thành phố/Tỉnh</FormLabel>
-                  <Input
-                    type="text"
-                    name="city"
-                    placeholder="Nhập thành phố hoặc tỉnh"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                  />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Quận/Huyện</FormLabel>
-                  <Input
-                    type="text"
-                    name="district"
-                    placeholder="Nhập quận hoặc huyện"
-                    value={formData.district}
-                    onChange={handleInputChange}
-                  />
-                </FormControl>
+
                 <FormControl isRequired>
                   <FormLabel>Hình ảnh</FormLabel>
                   <Input

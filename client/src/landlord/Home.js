@@ -66,7 +66,7 @@ function HomeLayout() {
     onClose();
   };
   const handleEditProfile = () => {
-    navigate(`/profile-page`);
+    navigate(`/landlord/profile-page`);
     onClose();
   };
   const menuItems = [

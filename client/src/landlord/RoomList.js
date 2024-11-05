@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -26,7 +26,6 @@ import {
 
 import {
   FaArrowLeft,
-  FaPlusCircle,
   FaEdit,
   FaPlus,
   FaTrash,
@@ -34,39 +33,39 @@ import {
 } from "react-icons/fa";
 import axios from "axios";
 // Giả sử đây là dữ liệu phòng mẫu
-const rooms = [
-  { id: 1, name: "Phòng 101", facilityId: 1, status: "empty" },
-  { id: 1, name: "Phòng 101", facilityId: 1, status: "empty" },
-  { id: 1, name: "Phòng 101", facilityId: 1, status: "empty" },
-  {
-    id: 1,
-    name: "Phòng 101",
-    facilityId: 1,
-    status: "occupied",
-    paymentStatus: "paid",
-  },
-  {
-    id: 2,
-    name: "Phòng 102",
-    facilityId: 1,
-    status: "occupied",
-    paymentStatus: "unpaid",
-  },
-  { id: 5, name: "Phòng 101", facilityId: 1, status: "empty" },
-  {
-    id: 8,
-    name: "Phòng 102",
-    facilityId: 1,
-    status: "occupied",
-    paymentStatus: "paid",
-  },
-  { id: 3, name: "Phòng 201", facilityId: 2, status: "empty" },
-  { id: 4, name: "Phòng 202", facilityId: 2, status: "empty" },
-  { id: 5, name: "Phòng 301", facilityId: 3, status: "empty" },
-];
-
 const RoomList = () => {
+  const [hostel, setHostel] = useState();
+  const [rooms, setRooms] = useState([]);
   const { facilityId } = useParams();
+  useEffect(() => {
+    console.log(facilityId);
+    const fetchRooms = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/api/landlord/hostel/${facilityId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        console.log("Dữ liệu hostel:", response.data.data);
+        setHostel(response.data.data); // Gán dữ liệu hostel vào state
+        setRooms(response.data.data.rooms); // Gán dữ liệu phòng vào state
+      } catch (error) {
+        console.log("Lỗi khi lấy dữ liệu:", error);
+      }
+    };
+    fetchRooms();
+  }, [facilityId]);
+
+  // Kiểm tra dữ liệu của hostel khi nó thay đổi
+  useEffect(() => {
+    if (hostel) {
+      console.log("Thông tin hostel sau khi cập nhật:", hostel);
+    }
+  }, [hostel]);
+
   const navigate = useNavigate();
   const {
     isOpen: isOpenRoom,
@@ -79,15 +78,14 @@ const RoomList = () => {
     onClose: onCloseContract,
   } = useDisclosure();
   const [newRoom, setNewRoom] = useState({
-    title: "",
-    name: "",
+    roomTitle: "",
+    roomName: "",
     area: "",
     price: "",
     description: "",
-    hostel: "",
-    coc: "",
-    phone: "",
-    image: [],
+    hostelId: "",
+    deposit: "",
+    images: [],
   });
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [contractDetails, setContractDetails] = useState({
@@ -100,6 +98,7 @@ const RoomList = () => {
     tenantName: "",
     landlordName: "",
   });
+
   const handleEditRoom = (room) => {
     console.log("Editing room:", room);
     // Add your edit room logic here
@@ -142,6 +141,7 @@ const RoomList = () => {
       images: files,
     }));
   };
+
   const handleAddTenant = (e) => {
     const { name, value } = e.target;
     setContractDetails((prevDetails) => ({
@@ -166,9 +166,8 @@ const RoomList = () => {
   };
 
   const handleCreateRoom = async () => {
-    // Kiểm tra dữ liệu trước khi gửi
     if (
-      !newRoom.name ||
+      !newRoom.roomName ||
       !newRoom.area ||
       !newRoom.price ||
       !newRoom.description
@@ -177,23 +176,42 @@ const RoomList = () => {
       return;
     }
 
+    const data = new FormData();
+    data.append("roomTitle", newRoom.roomTitle);
+    data.append("roomName", newRoom.roomName);
+    data.append("area", newRoom.area);
+    data.append("price", newRoom.price);
+    data.append("description", newRoom.description);
+    data.append("deposit", newRoom.deposit);
+
+    // Gửi từng tệp ảnh vào FormData
+    newRoom.images.forEach((image) => {
+      data.append("images", image);
+    });
+    console.log(Array.from(data.entries()));
     try {
-      // Gửi yêu cầu POST tới backend với thông tin phòng
       const response = await axios.post(
-        "http://localhost:5000/api/rooms",
-        newRoom,
+        `http://localhost:5000/api/landlord/room/${facilityId}/create`,
+        data,
         {
           headers: {
-            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "multipart/form-data",
           },
         }
       );
 
       if (response.data.success) {
-        console.log("Room created:", response.data.data);
         alert("Tạo phòng thành công!");
-        // Reset form và đóng modal sau khi thành công
-        setNewRoom({ name: "", area: "", price: "", description: "" });
+        setNewRoom({
+          roomTitle: "",
+          roomName: "",
+          area: "",
+          price: "",
+          description: "",
+          deposit: "",
+          images: [],
+        });
         onCloseRoom();
       } else {
         alert("Có lỗi xảy ra: " + response.data.message);
@@ -203,11 +221,6 @@ const RoomList = () => {
       alert("Không thể tạo phòng. Vui lòng thử lại sau.");
     }
   };
-
-  // Lọc danh sách phòng theo facilityId
-  const filteredRooms = rooms.filter(
-    (room) => room.facilityId === parseInt(facilityId)
-  );
 
   const handleGoBack = () => {
     navigate(-1);
@@ -229,11 +242,11 @@ const RoomList = () => {
       </Flex>
 
       <Text fontSize="2xl" fontWeight="bold" mb={4}>
-        Danh sách phòng của cơ sở: {facilityId}
+        Danh sách phòng của cơ sở: {hostel?.name || "Đang tải..."}
       </Text>
 
       <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={6}>
-        {filteredRooms.map((room) => (
+        {rooms.map((room) => (
           <Box
             border="2px solid"
             key={room.id}
@@ -253,14 +266,14 @@ const RoomList = () => {
           >
             <Image
               boxSize="200px"
-              src="https://images.unsplash.com/photo-1530053969600-caed2596d242?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fHNlYXxlbnwwfHwwfHx8MA%3D%3D" // Replace with actual image URL
-              alt={room.name}
+              src={room.images[0]}
+              alt={room.roomName}
               mb={3}
               borderRadius="md"
               objectFit="cover"
             />
             <Text fontWeight="bold" mb={1} textAlign="center">
-              {room.name}
+              {room.roomName}
             </Text>
             {room.status === "occupied" && (
               <Badge
@@ -284,7 +297,7 @@ const RoomList = () => {
                 Chỉnh sửa
               </Button>
               {/* Only show the Add button if the room is not occupied */}
-              {room.status !== "occupied" && (
+              {room.is_available !== true && (
                 <Button
                   leftIcon={<FaPlus />}
                   size="sm"
@@ -338,8 +351,8 @@ const RoomList = () => {
               <FormControl mb={2} isRequired>
                 <FormLabel>Tiêu đề bài đăng</FormLabel>
                 <Input
-                  name="title"
-                  value={newRoom.title}
+                  name="roomTitle"
+                  value={newRoom.roomTitle}
                   onChange={handleInputChange}
                   placeholder="Nhập tiêu đề bài đăng"
                 />
@@ -348,8 +361,8 @@ const RoomList = () => {
               <FormControl mb={2} isRequired>
                 <FormLabel>Tên phòng</FormLabel>
                 <Input
-                  name="name"
-                  value={newRoom.name}
+                  name="roomName"
+                  value={newRoom.roomName}
                   onChange={handleInputChange}
                   placeholder="Nhập tên phòng"
                 />
@@ -370,8 +383,8 @@ const RoomList = () => {
                 <FormLabel>Số tiền cọc (VND)</FormLabel>
                 <Input
                   type="number"
-                  name="coc"
-                  value={newRoom.coc}
+                  name="deposit"
+                  value={newRoom.deposit}
                   onChange={handleInputChange}
                   placeholder="Nhập giá tiền cọc"
                 />

@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const sendverificationCode = require("../middlewares/sendEmail");
 const { use } = require("../configs/email.config");
+const Hostel = require("../models/hostel.model");
+const Room = require("../models/room.model");
 //Lấy toàn bộ User
 const getUser = async (req, res) => {
   try {
@@ -139,11 +141,96 @@ const changePassword = async (req,res) => {
     });
   }
 }
+//Tìm kiếm 
+const searchAccommodation = async(req,res) =>{
+  try {
+    const {keyword}= req.query;
+    //Kiểm tra keyword 
+    if(!keyword){
+      return res.status(400).json({
+        success:false,
+        message:"Không có từ khóa tìm kiếm"
+      });
+    }
+    //Tìm kiếm trong hostel 
+    const hostels = await Hostel.find({
+      $or:[
+        {name:{$regex:keyword, $options:'i'}},
+        {address:{$regex:keyword,$options:'i'}},
+        {district:{$regex:keyword,$options:'i'}},
+        {city:{$regex:keyword,$options:'i'}},
+      ]
+    }).populate({
+      path:'rooms',
+      select:'roomName roomTitle price area images status'// Khi tìm Hostel, populate rooms để xem các phòng trong nhà trọ đó
+    });
+    //Tìm kiếm trong room
+    const rooms = await Room.find({
+      $or:[
+        {roomName:{$regex:keyword,$options:'i'}},
+        {roomTitle:{$regex:keyword,$options:'i'}}
+      ]
+    }).populate({
+      path:'hostelId',
+      select:'name address district city imageUrl' // Khi tìm Room, populate hostelId để biết phòng thuộc nhà trọ nào
+    });
+    //Kết hợp và lọc kết quả 
+    const result = {
+      //Lọc hostel có phòng trống
+      hostel:hostels
+      .filter(hostel => hostel.rooms.some(room => room.status === 'available' ))
+      .map(hostel=>({
+        id: hostel._id,
+        name:hostel.name,
+        address:hostel.address,
+        district:hostel.district,
+        city:hostel.city,
+        imageUrl:hostel.imageUrl,
+        availableRooms:hostel.rooms.filter(room => room.status === 'available'),
+        type:'hostel'
+      })),
+      //Chỉ lấy phòng còn trống
+      rooms:rooms
+      .filter(room => room.status === 'available')
+      .map(room => ({
+        id: room._id,
+        roomName: room.roomName,
+        roomTitle:room.roomTitle,
+        price:room.price,
+        area:room.area,
+        images:room.images,
+        hostel:{
+          id:room.hostelId._id,
+          name:room.hostelId.name,
+          address:room.hostelId.address,
+          district:room.hostelId.district,
+          city:room.hostelId.city,
+        },
+        type:'room'
+      }))
+    };
+    res.status(200).json({
+      success:true,
+      data:result,
+      total:{
+        hostels:result.hostel.length,
+        rooms:result.rooms.length,
+        all:result.hostel.length+result.rooms.length
+      }
+    });
+  }catch(error){
+    res.status(500).json({
+      success:false,
+      message:"Lỗi tìm kiếm" + error.message
+    });
+  }
+}
 module.exports = {
   getUser,
   getUserByRole,
   updateActive,
   updateUser,
   changePassword,
-  verifyOTP
+  verifyOTP,
+  searchAccommodation
 };

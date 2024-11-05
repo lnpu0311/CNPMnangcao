@@ -1,10 +1,12 @@
 {
   "dependencies": {
+    "@chakra-ui/react": "^3.0.2",
     "@paypal/checkout-server-sdk": "^1.0.3",
     "axios": "^1.7.7",
     "chart.js": "^4.4.6",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
+    "nodemon": "^3.1.7",
     "react-chartjs-2": "^5.2.0"
   }
 }

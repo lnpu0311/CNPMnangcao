@@ -69,10 +69,7 @@ import {
   useNavigate,
   Link,
 } from "react-router-dom";
-import TenantRoomList from "./TenantRoomList";
-import TenantContract from "./TenantContract.js";
-import TenantPayments from "./TenantPayments";
-import TenantDashboard from "./TenantDashboard";
+
 import "../../src/index.css";
 import { Link as RouterLink } from "react-router-dom";
 import { IoHomeSharp } from "react-icons/io5";
@@ -86,9 +83,9 @@ function TenantHome() {
   const [isNavOpen, setIsNavOpen] = useState(true);
   const navigate = useNavigate();
   const [userData, setUserData] = useState({
-    name: "", // Thông tin người dùng
+    name: "Tenant", // Thông tin người dùng
   });
-  const { colorMode, toggleColorMode } = useColorMode();
+
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -97,12 +94,10 @@ function TenantHome() {
     }
   }, []);
 
-  const handleMenuClick = (content) => {
-    onClose();
-  };
+
 
   const handleEditProfile = () => {
-    navigate(`/profile-page`);
+    navigate(`/tenant/profile-page`);
     onClose();
   };
 
@@ -272,18 +267,7 @@ function TenantHome() {
 
         {/* Right Section */}
         <Flex alignItems="center" gap={4}>
-          <Button
-            onClick={toggleColorMode}
-            variant="ghost"
-            display={{ base: "none", md: "flex" }}
-          >
-            {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-            <Text ml={2}>
-              {" "}
-              {/* Thêm khoảng cách giữa icon và text */}
-              {colorMode === "light" ? "Dark Mode" : "Light Mode"}
-            </Text>
-          </Button>
+      
 
           <Box position="relative">
             <IconButton
@@ -336,12 +320,7 @@ function TenantHome() {
                 Chỉnh sửa thông tin cá nhân
               </MenuItem>
 
-              <MenuItem
-                icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-                onClick={toggleColorMode}
-              >
-                {colorMode === "light" ? "Dark Mode" : "Light Mode"}
-              </MenuItem>
+             
 
               <MenuDivider />
 
@@ -415,15 +394,7 @@ function TenantHome() {
                 </Button>
 
                 {/* Mobile Theme Toggle */}
-                <Button
-                  leftIcon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-                  onClick={toggleColorMode}
-                  variant="ghost"
-                  w="100%"
-                  justifyContent="flex-start"
-                >
-                  {colorMode === "light" ? "Dark Mode" : "Light Mode"}
-                </Button>
+                
               </VStack>
             </DrawerBody>
           </DrawerContent>

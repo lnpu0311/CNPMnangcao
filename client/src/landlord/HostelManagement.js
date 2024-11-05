@@ -24,10 +24,9 @@ import { useNavigate } from "react-router-dom";
 import { PlusSquareIcon } from "@chakra-ui/icons";
 import { jwtDecode } from "jwt-decode";
 
-const token = localStorage.getItem("token");
-const user = jwtDecode(localStorage.getItem("token"));
-console.log(user.id);
+
 const FacilityItem = ({ facility, onDelete }) => {
+  const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
   const handleEditClick = () => {

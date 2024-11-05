@@ -141,6 +141,37 @@ const changePassword = async (req,res) => {
     });
   }
 }
+const getAllRooms = async (req, res) => {
+  try {
+    console.log("Fetching all rooms...");
+    const rooms = await Room.find()
+      .populate({
+        path: 'hostelId',
+        select: 'name address district city ward'
+      });
+    
+    console.log("Found rooms:", rooms);
+
+    if (!rooms || rooms.length === 0) {
+      console.log("No rooms found");
+      return res.status(200).json({
+        success: true,
+        data: []
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: rooms
+    });
+  } catch (error) {
+    console.error("Error in getAllRooms:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
 //Tìm kiếm 
 const searchAccommodation = async(req,res) =>{
   try {
@@ -232,5 +263,6 @@ module.exports = {
   updateUser,
   changePassword,
   verifyOTP,
-  searchAccommodation
+  searchAccommodation,
+  getAllRooms
 };

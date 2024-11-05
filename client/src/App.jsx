@@ -25,6 +25,7 @@ import Receipt from "./landlord/Receipt";
 import TenantList from "./landlord/TenantList";
 import RevenueStats from "./landlord/RevenueStats";
 import AdminDashboard from "./admin/AdminDashboard";
+import SearchResults from './pages/SearchResults';
 
 function App() {
   return (
@@ -91,6 +92,8 @@ function App() {
             <Route path="payments" element={<TenantPayments />} />
             <Route path="profile-page" element={<ProfilePage />} />
           </Route>
+
+          <Route path="/search-results" element={<SearchResults />} />
         </Routes>
       </Box>
     </ChakraProvider>

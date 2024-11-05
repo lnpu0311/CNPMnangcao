@@ -171,9 +171,9 @@ const AuthForm = () => {
     if (role === "tenant") {
       navigate(`/tenant`);
     } else if (role === "landlord" || role === "manager") {
-      navigate(`/`);
+      navigate(`/landlord`);
     } else if (role === "admin") {
-      navigate("/home");
+      navigate("/admin");
     }
     onClose();
   };

@@ -24,6 +24,95 @@ import { useNavigate } from "react-router-dom";
 import { PlusSquareIcon } from "@chakra-ui/icons";
 import { jwtDecode } from "jwt-decode";
 
+const token = localStorage.getItem("token");
+const user = jwtDecode(localStorage.getItem("token"));
+console.log(user.id);
+const FacilityItem = ({ facility, onDelete }) => {
+  const navigate = useNavigate();
+
+  const handleEditClick = () => {
+    navigate(`/landlord/room-list/${facility.id}`);
+  };
+
+  const handleDeleteClick = async () => {
+    try {
+      await axios.delete(`http://localhost:5000/api/hostel/${facility.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      onDelete(facility.id); // Gọi hàm onDelete để cập nhật danh sách sau khi xóa
+    } catch (error) {
+      console.error("Lỗi khi xóa cơ sở:", error);
+    }
+  };
+
+  return (
+    <Flex
+      bg="brand.2"
+      p={4}
+      mb={4}
+      alignItems="center"
+      justifyContent="space-between"
+      borderRadius="md"
+      shadow={"lg"}
+    >
+      <Flex>
+        <Image
+          borderRadius={8}
+          src={facility.imageUrl}
+          alt={facility.name}
+          boxSize="200px"
+          mr={4}
+          objectFit={"cover"}
+        />
+        <Box textAlign="left" display="flex" flexDirection="column" gap={2}>
+          <Text fontSize="x-large" fontWeight="bold" color="blue.500">
+            {facility.name}
+          </Text>
+
+          <Box display="flex" alignItems="center">
+            <Text fontSize="md" color="gray.600" mr={2}>
+              Thành phố:
+            </Text>
+            <Text fontSize="md" fontWeight={"bold"}>
+              {facility.city}
+            </Text>
+          </Box>
+
+          <Box display="flex" alignItems="center">
+            <Text fontSize="md" color="gray.600" mr={2}>
+              Quận:
+            </Text>
+            <Text fontSize="md" fontWeight={"bold"}>
+              {facility.district}
+            </Text>
+          </Box>
+
+          <Box display="flex" alignItems="center">
+            <Text fontSize="md" color="gray.600" mr={2}>
+              Địa chỉ:
+            </Text>
+            <Text fontSize="md" fontWeight={"bold"}>
+              {facility.address}
+            </Text>
+          </Box>
+        </Box>
+      </Flex>
+      <Flex>
+        <Button onClick={handleEditClick} colorScheme="blue" mr={2}>
+          Chỉnh sửa
+        </Button>
+        {(facility.roomCount === 0 || !facility.roomCount) && (
+          <Button onClick={handleDeleteClick} colorScheme="red">
+            Xóa cơ sở
+          </Button>
+        )}
+      </Flex>
+    </Flex>
+  );
+};
+
 const HostelManagement = () => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
@@ -193,7 +282,7 @@ const HostelManagement = () => {
         >
           Thêm cơ sở mới
         </Button>
-        <Modal isOpen={isOpen} onClose={onClose} size="lg">
+        <Modal isCentered isOpen={isOpen} onClose={onClose} size="lg">
           <ModalOverlay />
           <ModalContent>
             <ModalHeader fontSize="x-large" textAlign="center">

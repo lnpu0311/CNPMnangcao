@@ -6,12 +6,18 @@ require("dotenv").config();
 const morgan = require("morgan");
 const cors = require("cors");
 
-const allowedOrigins = ["http://localhost:3000"];
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://cnpm-nangcao.vercel.app", // replace with your actual Vercel app URL
+];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (
+        !origin ||
+        allowedOrigins.some((allowedOrigin) => origin.startsWith(allowedOrigin))
+      ) {
         return callback(null, true);
       }
       const msg =

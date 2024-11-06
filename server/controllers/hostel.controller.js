@@ -44,7 +44,7 @@ const getHostelByUserId = async (req, res) => {
 const createHostel = async (req, res) => {
   const hostel = req.body;
   console.log(req.file);
-  if (!hostel.name || !hostel.address || !hostel.district || !hostel.city) {
+  if (!hostel.name || !hostel.address || !hostel.district || !hostel.city || !hostel.ward) {
     return res
       .status(400)
       .json({ success: false, message: "Please provide all fields" });
@@ -68,14 +68,17 @@ const createHostel = async (req, res) => {
   if (req.file) {
     imageUrl = req.file.path; // Lấy URL của ảnh sau khi upload lên Cloudinary
   }
+
   const newHostel = new Hostel({
     name: hostel.name,
     address: hostel.address,
     district: hostel.district,
     city: hostel.city,
+    ward: hostel.ward,
     imageUrl: imageUrl,
     userId: req.user.id,
   });
+
   try {
     await newHostel.save();
     res.status(200).json({ success: true, data: newHostel });

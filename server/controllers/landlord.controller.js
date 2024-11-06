@@ -4,7 +4,7 @@ const Room = require("../models/room.model");
 const createHostel = async (req, res) => {
   const hostel = req.body;
   console.log(req.file);
-  if (!hostel.name || !hostel.address || !hostel.district || !hostel.city) {
+  if (!hostel.name || !hostel.address || !hostel.district || !hostel.city || !hostel.ward) {
     return res
       .status(400)
       .json({ success: false, message: "Please provide all fields" });
@@ -26,8 +26,9 @@ const createHostel = async (req, res) => {
     address: hostel.address,
     district: hostel.district,
     city: hostel.city,
+    ward: hostel.ward,
     imageUrl: imageUrl,
-    landlordId: req.user.id,
+    landlordId: hostel.landlordId,
   });
   try {
     await newHostel.save();

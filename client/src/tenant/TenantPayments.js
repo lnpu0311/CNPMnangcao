@@ -67,12 +67,6 @@ const mockPayments = [
   },
 ];
 
-const paymentMethodIcons = {
-  Paypal: "./paypal-icon.png",
-  Visa: "./visa-icon.png",
-  MasterCard: "./mastercard-icon.png",
-  // Thêm các phương thức thanh toán khác nếu cần
-};
 
 function TenantPayments() {
   const [selectedPayment, setSelectedPayment] = useState(null);
@@ -206,8 +200,8 @@ function TenantPayments() {
             }}
           >
             <option value="all">Tất cả</option>
-            <option value="month">Tháng này</option>
-            <option value="year">Năm nay</option>
+            <option value="month">Tháng</option>
+            <option value="year">Năm</option>
           </Select>
         </Box>
         <Box flex={1}>
@@ -236,7 +230,7 @@ function TenantPayments() {
             <Th borderRightWidth={1}>Ngày thanh toán</Th>
             <Th borderRightWidth={1}>Loại</Th>
             <Th borderRightWidth={1}>Số tiền</Th>
-            <Th borderRightWidth={1}>Phương thức</Th>
+            
             <Th borderRightWidth={1}>Số điện thoại</Th>
             <Th>Trạng thái</Th>
           </Tr>
@@ -260,19 +254,7 @@ function TenantPayments() {
                 <Td borderRightWidth={1}>{formatDate(payment.date)}</Td>
                 <Td borderRightWidth={1}>{payment.type}</Td>
                 <Td borderRightWidth={1}>{formatCurrency(payment.amount)}</Td>
-                <Td borderRightWidth={1}>
-                  <Flex alignItems="center">
-                    {paymentMethodIcons[payment.method] && (
-                      <Image
-                        src={paymentMethodIcons[payment.method]}
-                        alt={payment.method}
-                        boxSize="20px"
-                        mr={2}
-                      />
-                    )}
-                    {payment.method}
-                  </Flex>
-                </Td>
+                
                 <Td borderRightWidth={1}>{payment.phone}</Td>
                 <Td>Đã thanh toán</Td>
               </Tr>
@@ -295,7 +277,7 @@ function TenantPayments() {
                 <Text>Ngày thanh toán: {formatDate(selectedPayment.date)}</Text>
                 <Text>Loại: {selectedPayment.type}</Text>
                 <Text>Số tiền: {formatCurrency(selectedPayment.amount)}</Text>
-                <Text>Phương thức: {selectedPayment.method}</Text>
+                
                 <Text>Số điện thoại: {selectedPayment.phone}</Text>
               </VStack>
             )}

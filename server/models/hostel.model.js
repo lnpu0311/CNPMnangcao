@@ -4,6 +4,7 @@ const hostelSchema = new mongoose.Schema({
   address: { type: String, required: true },
   district: { type: String, required: true },
   city: { type: String, required: true },
+  ward: { type: String,required: true,},
   elecUnit: { type: Number, required: true, default: 1 },
   aquaUnit: { type: Number, required: true, default: 1 },
   servicesFee: { type: Number, required: true, default: 0 },

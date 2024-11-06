@@ -20,11 +20,15 @@ import {
   Image,
   Heading,
   Select,
+  Avatar,
+  HStack,
+  Badge,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { PlusSquareIcon } from "@chakra-ui/icons";
 import { jwtDecode } from "jwt-decode";
 import vietnamData from "../data/dvhcvn.json"
+import Chat from '../components/Chat';
 
 
 const FacilityItem = ({ facility, onDelete }) => {
@@ -132,6 +136,10 @@ const HostelManagement = () => {
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showChat, setShowChat] = useState(false);
+  const [selectedTenant, setSelectedTenant] = useState(null);
+  const [unreadMessages, setUnreadMessages] = useState([]);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -171,6 +179,48 @@ const HostelManagement = () => {
   useEffect(() => {
     setProvinces(vietnamData.data);
   }, []);
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const response = await axios.get('http://localhost:5000/api/user/current', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.data.success) {
+          console.log('Current user data:', response.data.data);
+          const userData = response.data.data;
+          setCurrentUser(userData);
+          setToken(token);
+        }
+      } catch (error) {
+        console.error('Error fetching current user:', error);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
+  useEffect(() => {
+    const fetchUnreadMessages = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('http://localhost:5000/api/messages/unread', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUnreadMessages(response.data.data);
+      } catch (error) {
+        console.error('Error fetching unread messages:', error);
+      }
+    };
+
+    if (currentUser) {
+      fetchUnreadMessages();
+    }
+  }, [currentUser]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -315,6 +365,24 @@ const HostelManagement = () => {
     );
   };
 
+  const handleChatWithTenant = (tenant) => {
+    if (!currentUser || !tenant) {
+      console.error('Missing data:', { currentUser, tenant });
+      return;
+    }
+
+    console.log('Chat data:', {
+      currentUser: currentUser,
+      tenant: tenant
+    });
+
+    setSelectedTenant({
+      id: tenant.id || tenant._id,
+      name: tenant.name
+    });
+    setShowChat(true);
+  };
+
   return (
     <Box>
       <Heading
@@ -440,6 +508,51 @@ const HostelManagement = () => {
       {facilities.map((facility) => (
         <FacilityItem key={facility.id} facility={facility} />
       ))}
+
+      <Box mt={4}>
+        <Heading size="md" mb={4}>Tin nhắn từ người thuê</Heading>
+        <VStack spacing={3} align="stretch">
+          {unreadMessages && unreadMessages.map((message) => (
+            <Box
+              key={message._id}
+              p={3}
+              bg="gray.50"
+              borderRadius="md"
+              cursor="pointer"
+              onClick={() => handleChatWithTenant({
+                id: message.senderId._id,
+                name: message.senderId.name
+              })}
+            >
+              <HStack spacing={3}>
+                <Avatar size="sm" name={message.senderId.name} />
+                <Box flex={1}>
+                  <Text fontWeight="bold">{message.senderId.name}</Text>
+                  <Text noOfLines={1}>{message.content}</Text>
+                  <Text fontSize="xs" color="gray.500">
+                    {new Date(message.timestamp).toLocaleString()}
+                  </Text>
+                </Box>
+                {message.count > 1 && (
+                  <Badge colorScheme="red" borderRadius="full">
+                    {message.count}
+                  </Badge>
+                )}
+              </HStack>
+            </Box>
+          ))}
+        </VStack>
+      </Box>
+
+      {showChat && currentUser && selectedTenant && (
+        <Box position="fixed" bottom="20px" right="20px" zIndex={1000}>
+          <Chat
+            currentUserId={currentUser.id || currentUser._id}
+            recipientId={selectedTenant.id}
+            recipientName={selectedTenant.name || "Người thuê"}
+          />
+        </Box>
+      )}
     </Box>
   );
 };

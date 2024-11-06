@@ -147,7 +147,11 @@ const getAllRooms = async (req, res) => {
     const rooms = await Room.find()
       .populate({
         path: 'hostelId',
-        select: 'name address district city ward'
+        select: 'name address district city ward landlordId',
+        populate: {
+          path: 'landlordId',
+          select: 'name'
+        }
       });
     
     console.log("Found rooms:", rooms);

@@ -26,6 +26,7 @@ import TenantList from "./landlord/TenantList";
 import RevenueStats from "./landlord/RevenueStats";
 import AdminDashboard from "./admin/AdminDashboard";
 import SearchResults from './pages/SearchResults';
+import MessageManagement from "./landlord/MessageManagement";
 
 function App() {
   return (
@@ -75,6 +76,7 @@ function App() {
             <Route path="tenant-list" element={<TenantList />} />
             <Route path="room-list/:facilityId" element={<RoomList />} />
             <Route path="profile-page" element={<ProfilePage />} />
+            <Route path="messages" element={<MessageManagement />} />
           </Route>
 
           {/* Tenant routes */}

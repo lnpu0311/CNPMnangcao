@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../middlewares/authMiddleware");
+const User = require("../models/user.model");
 
 const {
   getUser,
@@ -48,5 +49,19 @@ router.get("/rooms", authMiddleware(["tenant"]), getAllRooms);
 
 // Tìm kiếm phòng trọ
 router.get("/search", authMiddleware(["tenant"]), searchAccommodation);
+
+// Thêm route mới để lấy thông tin user hiện tại
+router.get("/current", authMiddleware(["tenant", "landlord", "manager"]), async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    res.json({ success: true, data: user });
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
 
 module.exports = router;

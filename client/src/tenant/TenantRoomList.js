@@ -21,16 +21,22 @@ import {
   ListItem,
   ListIcon,
   Center,
-  Spinner
+  Spinner,
+  useToast
 } from "@chakra-ui/react";
 import { MdCheckCircle } from "react-icons/md";
+import Chat from '../components/Chat';
+import { jwtDecode } from 'jwt-decode';
 
 const TenantRoomList = () => {
   const [rooms, setRooms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
-  
+  const [showChat, setShowChat] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const toast = useToast();
+
   useEffect(() => {
     const fetchRooms = async () => {
       try {
@@ -51,6 +57,7 @@ const TenantRoomList = () => {
             id: room._id,
             roomTitle: room.roomTitle || 'Không có tiêu đề',
             roomName: room.roomName || 'Không có tên',
+            landlordId: room.hostelId?.landlordId?._id || room.hostelId?.landlordId,
             image: room.images && room.images.length > 0 
               ? room.images[0]
               : 'https://via.placeholder.com/200',
@@ -82,6 +89,18 @@ const TenantRoomList = () => {
     };
 
     fetchRooms();
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setCurrentUser(decoded);
+      } catch (error) {
+        console.error('Error decoding token:', error);
+      }
+    }
   }, []);
 
   const handleRoomClick = (room) => {
@@ -222,10 +241,36 @@ const TenantRoomList = () => {
             <Button colorScheme="red" mr={3} onClick={() => setIsOpenDetail(false)}>
               Đóng
             </Button>
-            <Button colorScheme="teal">Liên hệ chủ trọ</Button>
+            <Button 
+              colorScheme="teal" 
+              onClick={() => {
+                if (currentUser) {
+                  setShowChat(true);
+                  setIsOpenDetail(false);
+                } else {
+                  toast({
+                    title: "Vui lòng đăng nhập",
+                    description: "Bạn cần đăng nhập để chat với chủ trọ",
+                    status: "warning",
+                    duration: 3000,
+                    isClosable: true,
+                  });
+                }
+              }}
+            >
+              Liên hệ chủ trọ
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      {showChat && currentUser && selectedRoom && selectedRoom.landlordId && (
+        <Chat
+          currentUserId={currentUser.id}
+          recipientId={selectedRoom.landlordId.toString()}
+          recipientName={selectedRoom.landlordName || "Chủ trọ"}
+        />
+      )}
     </Box>
   );
 };

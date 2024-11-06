@@ -29,6 +29,7 @@ import {
   BellIcon,
   ArrowForwardIcon,
   EditIcon,
+  ChatIcon,
 } from "@chakra-ui/icons";
 import {
   FaBuilding,
@@ -100,6 +101,11 @@ function HomeLayout() {
       name: "Thống kê doanh thu",
       path: "/landlord/revenue-stats",
       icon: <FaChartLine />,
+    },
+    {
+      name: "Quản lý tin nhắn",
+      path: "/landlord/messages",
+      icon: <ChatIcon />,
     },
   ];
 

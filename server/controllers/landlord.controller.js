@@ -42,20 +42,22 @@ const createHostel = async (req, res) => {
 const createRoom = async (req, res) => {
   const { roomTitle, roomName, deposit, area, description, price } = req.body;
   const { hostelId } = req.params;
+  
   if (!roomTitle || !roomName || !deposit || !area || !description || !price) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Vui lòng điền đầy đủ thông tin" });
+    return res.status(400).json({ 
+      success: false, 
+      message: "Vui lòng điền đầy đủ thông tin" 
+    });
   }
 
   const hostel = await Hostel.findById(hostelId);
   if (!hostel) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Nhà trọ không tồn tại" });
+    return res.status(400).json({ 
+      success: false, 
+      message: "Nhà trọ không tồn tại" 
+    });
   }
 
-  // Lưu đường dẫn hình ảnh
   const imagePaths = req.files.map((file) => file.path);
 
   try {
@@ -68,9 +70,11 @@ const createRoom = async (req, res) => {
       price,
       images: imagePaths,
       hostelId: hostel._id,
+      status: 'available',
+      paymentStatus: 'unpaid'
     });
+    
     await newRoom.save();
-
     res.status(200).json({ success: true, data: newRoom });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

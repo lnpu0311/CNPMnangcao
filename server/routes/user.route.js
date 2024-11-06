@@ -1,40 +1,67 @@
 const express = require("express");
+const router = express.Router();
 const authMiddleware = require("../middlewares/authMiddleware");
+const User = require("../models/user.model");
+
 const {
   getUser,
   getUserByRole,
   updateActive,
   updateUser,
   changePassword,
-  searchAccommodation
+  searchAccommodation,
+  getAllRooms
 } = require("../controllers/user.controller");
-const upload = require("../middlewares/uploadImage");
-const router = express.Router();
 
-//Quản trị Admin
-router.get("/", authMiddleware(["admin"]), getUser);
-router.get("/:role", authMiddleware(["admin"]), getUserByRole);
-router.post("/activeAccount", authMiddleware(["admin"]), updateActive);
+// Lấy thông tin người dùng
+router.get("/", authMiddleware(["tenant", "landlord", "manager"]), getUser);
 
-//Chỉnh sửa thông tin (Tenant và Landlord)
-router.post(
-  "/updateUser",
-  authMiddleware(["tenant", "landlord"]),
-  upload.single("image"),
+// Lấy người dùng theo role
+router.get(
+  "/role/:role",
+  authMiddleware(["manager"]),
+  getUserByRole
+);
+
+// Cập nhật trạng thái active của user
+router.put(
+  "/active/:id",
+  authMiddleware(["manager"]),
+  updateActive
+);
+
+// Cập nhật thông tin user
+router.put(
+  "/update",
+  authMiddleware(["tenant", "landlord", "manager"]),
   updateUser
 );
-//Search ( cho cả tenant và landlord)
-router.get('/search',authMiddleware(["tenant","landlord"]),
-searchAccommodation);
 
-//Đổi mật khẩu
+// Đổi mật khẩu
 router.put(
   "/change-password",
   authMiddleware(["tenant", "landlord", "manager"]),
   changePassword
 );
 
-//Tạo tài khoản Manager (chỉ Landlord làm được)
-router.post("/manager/create", authMiddleware(["landlord"]));
+// Lấy danh sách phòng cho tenant
+router.get("/rooms", authMiddleware(["tenant"]), getAllRooms);
+
+// Tìm kiếm phòng trọ
+router.get("/search", authMiddleware(["tenant"]), searchAccommodation);
+
+// Thêm route mới để lấy thông tin user hiện tại
+router.get("/current", authMiddleware(["tenant", "landlord", "manager"]), async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    res.json({ success: true, data: user });
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
 
 module.exports = router;

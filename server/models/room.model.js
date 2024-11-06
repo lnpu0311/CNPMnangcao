@@ -9,20 +9,33 @@ const roomSchema = new mongoose.Schema({
   description: { type: String, required: true },
   price: { type: Number, required: true },
   images: [{ type: String }],
-  is_active: { type: Boolean, required: true, default: false },
-  is_available: { type: Boolean, required: true, default: false },
-  is_paid: { type: Boolean, required: true, default: false },
+  status: {
+    type: String,
+    enum: ['available', 'occupied'],
+    default: 'available'
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['paid', 'unpaid'],
+    default: 'unpaid'
+  },
   hostelId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Hostel",
     required: true,
   },
-  TenantId: {
+  tenantId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    require: false,
     default: null,
   },
+  amenities: [{ type: String }],
+  lastUpdated: { type: Date, default: Date.now }
+});
+
+roomSchema.pre('save', function(next) {
+  this.lastUpdated = new Date();
+  next();
 });
 
 module.exports = mongoose.model("Room", roomSchema);

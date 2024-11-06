@@ -22,6 +22,7 @@ import {
   useDisclosure,
   Flex,
   Grid,
+  Tag,
 } from "@chakra-ui/react";
 
 import {
@@ -275,15 +276,6 @@ const RoomList = () => {
             <Text fontWeight="bold" mb={1} textAlign="center">
               {room.roomName}
             </Text>
-            {room.status === "occupied" && (
-              <Badge
-                colorScheme={room.paymentStatus === "paid" ? "green" : "red"}
-              >
-                {room.paymentStatus === "paid"
-                  ? "Đã thanh toán"
-                  : "Chưa thanh toán"}
-              </Badge>
-            )}
             <Flex mt={3} gap={2} justifyContent="center" wrap="wrap">
               <Button
                 leftIcon={<FaEdit />}

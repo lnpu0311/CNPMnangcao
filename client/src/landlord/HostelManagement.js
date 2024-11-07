@@ -19,16 +19,24 @@ import {
   Text,
   Image,
   Heading,
+  Select,
+  Avatar,
+  HStack,
+  Badge,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { PlusSquareIcon } from "@chakra-ui/icons";
 import { jwtDecode } from "jwt-decode";
+import vietnamData from "../data/dvhcvn.json"
+import Chat from '../components/Chat';
 
 
 const FacilityItem = ({ facility, onDelete }) => {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
-
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards,setWards] = useState([]);
   const handleEditClick = () => {
     navigate(`/landlord/room-list/${facility.id}`);
   };
@@ -122,8 +130,16 @@ const HostelManagement = () => {
     address: "",
     city: "",
     district: "",
+    ward: "",
     image: null,
   });
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showChat, setShowChat] = useState(false);
+  const [selectedTenant, setSelectedTenant] = useState(null);
+  const [unreadMessages, setUnreadMessages] = useState([]);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -160,6 +176,52 @@ const HostelManagement = () => {
     }
   }, [user, token]);
 
+  useEffect(() => {
+    setProvinces(vietnamData.data);
+  }, []);
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const response = await axios.get('http://localhost:5000/api/user/current', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.data.success) {
+          console.log('Current user data:', response.data.data);
+          const userData = response.data.data;
+          setCurrentUser(userData);
+          setToken(token);
+        }
+      } catch (error) {
+        console.error('Error fetching current user:', error);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
+  useEffect(() => {
+    const fetchUnreadMessages = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('http://localhost:5000/api/messages/unread', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUnreadMessages(response.data.data);
+      } catch (error) {
+        console.error('Error fetching unread messages:', error);
+      }
+    };
+
+    if (currentUser) {
+      fetchUnreadMessages();
+    }
+  }, [currentUser]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -169,12 +231,45 @@ const HostelManagement = () => {
     setFormData({ ...formData, image: e.target.files[0] });
   };
 
+  const handleProvinceChange = (e) => {
+    const provinceName = e.target.value;
+    const province = provinces.find(p => p.name === provinceName);
+    setDistricts(province ? province.level2s : []);
+    setWards([]);
+    setFormData({
+      ...formData,
+      city: provinceName,
+      district: '',
+      ward: ''
+    });
+  };
+
+  const handleDistrictChange = (e) => {
+    const districtName = e.target.value;
+    const district = districts.find(d => d.name === districtName);
+    setWards(district ? district.level3s : []);
+    setFormData({
+      ...formData,
+      district: districtName,
+      ward: ''
+    });
+  };
+
+  const handleWardChange = (e) => {
+    const wardName = e.target.value;
+    setFormData({
+      ...formData,
+      ward: wardName
+    });
+  };
+
   const handleSubmit = async () => {
     const data = new FormData();
     data.append("name", formData.name);
     data.append("address", formData.address);
     data.append("city", formData.city);
     data.append("district", formData.district);
+    data.append("ward", formData.ward);
     data.append("image", formData.image);
     data.append("landlordId", user.id);
 
@@ -190,10 +285,18 @@ const HostelManagement = () => {
         }
       );
       setFacilities((prev) => [...prev, response.data.data]);
+      setFormData({
+        name: "",
+        address: "",
+        city: "",
+        district: "",
+        ward: "",
+        image: null,
+      });
+      onClose();
     } catch (error) {
       console.error("Lỗi khi gửi yêu cầu:", error);
     }
-    onClose();
   };
 
   const handleDeleteFacility = async (id) => {
@@ -262,6 +365,24 @@ const HostelManagement = () => {
     );
   };
 
+  const handleChatWithTenant = (tenant) => {
+    if (!currentUser || !tenant) {
+      console.error('Missing data:', { currentUser, tenant });
+      return;
+    }
+
+    console.log('Chat data:', {
+      currentUser: currentUser,
+      tenant: tenant
+    });
+
+    setSelectedTenant({
+      id: tenant.id || tenant._id,
+      name: tenant.name
+    });
+    setShowChat(true);
+  };
+
   return (
     <Box>
       <Heading
@@ -300,36 +421,68 @@ const HostelManagement = () => {
                     onChange={handleInputChange}
                   />
                 </FormControl>
+
+                <FormControl isRequired>
+                  <FormLabel>Thành phố/Tỉnh</FormLabel>
+                  <Select
+                    name="city"
+                    value={formData.city}
+                    onChange={handleProvinceChange}
+                    placeholder="Chọn thành phố/tỉnh"
+                  >
+                    {provinces.map((province) => (
+                      <option key={province.level1_id} value={province.name}>
+                        {province.name}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <FormControl isRequired>
+                  <FormLabel>Quận/Huyện</FormLabel>
+                  <Select
+                    name="district"
+                    value={formData.district}
+                    onChange={handleDistrictChange}
+                    placeholder="Chọn quận/huyện"
+                    isDisabled={!formData.city}
+                  >
+                    {districts.map((district) => (
+                      <option key={district.level2_id} value={district.name}>
+                        {district.name}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <FormControl isRequired>
+                  <FormLabel>Xã/Phường</FormLabel>
+                  <Select
+                    name="ward"
+                    value={formData.ward}
+                    onChange={handleWardChange}
+                    placeholder="Chọn xã/phường"
+                    isDisabled={!formData.district}
+                  >
+                    {wards.map((ward) => (
+                      <option key={ward.level3_id} value={ward.name}>
+                        {ward.name}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+
                 <FormControl isRequired>
                   <FormLabel>Địa chỉ chi tiết</FormLabel>
                   <Input
                     type="text"
                     name="address"
-                    placeholder="Nhập địa chỉ chi tiết"
+                    placeholder="Nhập số nhà, tên đường..."
                     value={formData.address}
                     onChange={handleInputChange}
                   />
                 </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Thành phố/Tỉnh</FormLabel>
-                  <Input
-                    type="text"
-                    name="city"
-                    placeholder="Nhập thành phố hoặc tỉnh"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                  />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Quận/Huyện</FormLabel>
-                  <Input
-                    type="text"
-                    name="district"
-                    placeholder="Nhập quận hoặc huyện"
-                    value={formData.district}
-                    onChange={handleInputChange}
-                  />
-                </FormControl>
+
                 <FormControl isRequired>
                   <FormLabel>Hình ảnh</FormLabel>
                   <Input
@@ -355,6 +508,51 @@ const HostelManagement = () => {
       {facilities.map((facility) => (
         <FacilityItem key={facility.id} facility={facility} />
       ))}
+
+      <Box mt={4}>
+        <Heading size="md" mb={4}>Tin nhắn từ người thuê</Heading>
+        <VStack spacing={3} align="stretch">
+          {unreadMessages && unreadMessages.map((message) => (
+            <Box
+              key={message._id}
+              p={3}
+              bg="gray.50"
+              borderRadius="md"
+              cursor="pointer"
+              onClick={() => handleChatWithTenant({
+                id: message.senderId._id,
+                name: message.senderId.name
+              })}
+            >
+              <HStack spacing={3}>
+                <Avatar size="sm" name={message.senderId.name} />
+                <Box flex={1}>
+                  <Text fontWeight="bold">{message.senderId.name}</Text>
+                  <Text noOfLines={1}>{message.content}</Text>
+                  <Text fontSize="xs" color="gray.500">
+                    {new Date(message.timestamp).toLocaleString()}
+                  </Text>
+                </Box>
+                {message.count > 1 && (
+                  <Badge colorScheme="red" borderRadius="full">
+                    {message.count}
+                  </Badge>
+                )}
+              </HStack>
+            </Box>
+          ))}
+        </VStack>
+      </Box>
+
+      {showChat && currentUser && selectedTenant && (
+        <Box position="fixed" bottom="20px" right="20px" zIndex={1000}>
+          <Chat
+            currentUserId={currentUser.id || currentUser._id}
+            recipientId={selectedTenant.id}
+            recipientName={selectedTenant.name || "Người thuê"}
+          />
+        </Box>
+      )}
     </Box>
   );
 };

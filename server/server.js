@@ -100,6 +100,7 @@ const authRoutes = require("./routes/auth.route");
 const landlordRoute = require("./routes/landlord.route");
 const messageRoute = require("./routes/message.route");
 
+
 // Api
 app.use("/api/room", roomRoute);
 app.use("/api/user", userRoute);

@@ -8,6 +8,7 @@ const {
   getHostelById,
   getRoomById,
   createRoom,
+  createContract
 } = require("../controllers/landlord.controller");
 const upload = require("../middlewares/uploadImage");
 
@@ -20,6 +21,7 @@ router.post(
   upload.single("image"),
   createHostel
 );
+router.post("/contract/create",authMiddleware(["landlord"]),createContract);
 router.get("/hostel/:roomId", getRoomById);
 //router.get("/hostel/:roomId/update", )
 //router.get("/hostel/:roomId/updateUnit", )

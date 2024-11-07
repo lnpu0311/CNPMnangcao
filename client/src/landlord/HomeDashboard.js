@@ -26,7 +26,7 @@ function HomeDashboard() {
     "Facility 2 - Address",
     "Facility 3 - Address",
   ];
-
+  
   const bookingRequests = [
     "John Doe requested - Room 101",
     "Jane Smith requested - Room 202",
@@ -48,7 +48,7 @@ function HomeDashboard() {
             leftIcon={<CalendarIcon />}
             colorScheme="green"
             variant="outline"
-            onClick={() => navigate("/hostel-management")}
+            onClick={() => navigate("/landlord/hostel-management")}
           >
             Quản lý cơ sở
           </Button>
@@ -56,7 +56,7 @@ function HomeDashboard() {
             leftIcon={<CheckCircleIcon />}
             colorScheme="teal"
             variant="outline"
-            onClick={() => navigate("/rental-request")}
+            onClick={() => navigate("/landlord/rental-request")}
           >
             Danh sách yêu cầu
           </Button>

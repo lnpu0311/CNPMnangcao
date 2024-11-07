@@ -185,7 +185,7 @@ const AuthForm = () => {
 
       try {
         const response = await axios.post(
-          `${process.env.REACT_APP_API}/auth/login`,
+          `https://cnpm-nc-eight.vercel.app/api/auth/login`,
           {
             email: email,
             password: password,

@@ -6,7 +6,7 @@ const transporter = nodemailer.createTransport({
   secure: false, // true for port 465, false for other ports
   auth: {
     user: "tranquocbao1410@gmail.com",
-    pass: "xgly edoz coyj mpqk",
+    pass: `${process.env.GMAIL_PASS}`,
   },
 });
 const sendEmail = async () => {

@@ -43,6 +43,10 @@ const io = new Server(server, {
   },
 });
 
+app.get("/", (req, res) => {
+  res.send("<h1> Deploy successfully </h1>");
+});
+
 // Socket connection handling
 const userSockets = new Map();
 
@@ -111,7 +115,3 @@ app.use("/api/messages", messageRoute);
 server.listen(PORT, () =>
   console.log(`Server is running on http://localhost:${PORT}`)
 );
-
-app.get("/", (req, res) => {
-  res.send("<h1> Deploy successfully </h1>");
-});

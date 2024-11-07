@@ -43,7 +43,7 @@ const FacilityItem = ({ facility, onDelete }) => {
 
   const handleDeleteClick = async () => {
     try {
-      await axios.delete(`http://localhost:5000/api/hostel/${facility.id}`, {
+      await axios.delete(`${process.env.REACT_APP_API}/hostel/${facility.id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -154,7 +154,7 @@ const HostelManagement = () => {
     const fetchFacilities = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/landlord/hostel",
+          `${process.env.REACT_APP_API}/landlord/hostel`,
           {
             params: {
               landlordId: user.id,
@@ -187,7 +187,7 @@ const HostelManagement = () => {
         if (!token) return;
 
         const response = await axios.get(
-          "http://localhost:5000/api/user/current",
+          `${process.env.REACT_APP_API}/user/current`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -212,7 +212,7 @@ const HostelManagement = () => {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          "http://localhost:5000/api/messages/unread",
+          `${process.env.REACT_APP_API}/messages/unread`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -281,7 +281,7 @@ const HostelManagement = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/landlord/hostel/create",
+        `${process.env.REACT_APP_API}/landlord/hostel/create`,
         data,
         {
           headers: {
@@ -307,7 +307,7 @@ const HostelManagement = () => {
 
   const handleDeleteFacility = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/hostel/${id}`, {
+      await axios.delete(`${process.env.REACT_APP_API}/hostel/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -13,7 +13,7 @@ const cors = require("cors");
 
 const allowedOrigins = [
   "http://localhost:3000",
-  `https://hostel-community-git-bao-paomultiverses-projects.vercel.app/`,
+  `https://hostel-community-git-bao-paomultiverses-projects.vercel.app`,
 ];
 
 app.use(

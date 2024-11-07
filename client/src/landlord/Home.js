@@ -52,7 +52,6 @@ function HomeLayout() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(true);
   const navigate = useNavigate();
-
   const [userData, setUserData] = useState({});
 
   useEffect(() => {
@@ -108,16 +107,11 @@ function HomeLayout() {
       icon: <ChatIcon />,
     },
   ];
-
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("role");
-
     setIsAuthenticated(false);
-
     navigate(`/register`);
   };
-
   const toggleNav = () => {
     setIsNavOpen(!isNavOpen);
   };

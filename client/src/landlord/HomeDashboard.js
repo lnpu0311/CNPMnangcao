@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Text,
@@ -16,11 +16,20 @@ import {
   CheckCircleIcon,
 } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
-
+import { jwtDecode } from "jwt-decode";
 function HomeDashboard() {
+  const [userData, setUserData] = useState({});
   const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsAuthenticated(true);
+    }
+    const user = jwtDecode(token);
+    setUserData({ name: user.name });
+  }, []);
 
-  // Dummy data for illustration
   const hostel = [
     "Facility 1 - Address",
     "Facility 2 - Address",
@@ -36,7 +45,7 @@ function HomeDashboard() {
   return (
     <Box p={5}>
       <Text fontSize="2xl" fontWeight="bold">
-        Welcome, username!
+        Welcome, {userData.name}!
       </Text>
 
       <VStack align="start" spacing={4} mb={5}>
@@ -48,7 +57,7 @@ function HomeDashboard() {
             leftIcon={<CalendarIcon />}
             colorScheme="green"
             variant="outline"
-            onClick={() => navigate("/hostel-management")}
+            onClick={() => navigate("/landlord/hostel-management")}
           >
             Quản lý cơ sở
           </Button>
@@ -56,7 +65,7 @@ function HomeDashboard() {
             leftIcon={<CheckCircleIcon />}
             colorScheme="teal"
             variant="outline"
-            onClick={() => navigate("/rental-request")}
+            onClick={() => navigate("/landlord/rental-request")}
           >
             Danh sách yêu cầu
           </Button>

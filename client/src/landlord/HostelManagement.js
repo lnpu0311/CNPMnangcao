@@ -23,6 +23,7 @@ import {
   Avatar,
   HStack,
   Badge,
+  Stack,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { PlusSquareIcon } from "@chakra-ui/icons";
@@ -326,47 +327,95 @@ const HostelManagement = () => {
     };
 
     return (
-      <Flex
-        bg="brand.2"
-        p={4}
-        mb={4}
-        alignItems="center"
-        justifyContent="space-between"
-        borderRadius="md"
-        shadow={"lg"}
+      <Stack
+        mx="auto"
+        justifyContent={"center"}
+        w={{ base: "100%", md: "6xl" }}
+        spacing={4}
       >
-        <Flex>
-          <Image
-            borderRadius={8}
-            src={facility.imageUrl}
-            alt={facility.name}
-            boxSize="200px"
-            mr={4}
-            objectFit={"cover"}
-          />
-          <Box textAlign="left" display="flex" flexDirection="column">
-            <Text fontSize="x-large" fontWeight="bold" color="blue.500">
-              {facility.name}
-            </Text>
-            <Text fontSize="md" color="gray.600">
-              Địa chỉ: {facility.address}
-            </Text>
+        {facilities.map((facility) => (
+          <Box
+            key={facility.id}
+            p={{ base: 2, md: 4 }}
+            borderWidth="1px"
+            borderRadius="md"
+            shadow="sm"
+            bg="brand.2"
+          >
+            <Flex flexDirection={{ base: "column", md: "row" }}>
+              {/* Image Column */}
+              <Box width={{ base: "100%", md: "30%" }} pr={{ base: 0, md: 4 }}>
+                <Image
+                  borderRadius={8}
+                  src={facility.imageUrl}
+                  alt={facility.name}
+                  width="100%"
+                  height="200px"
+                  objectFit="cover"
+                />
+              </Box>
+
+              {/* Content Column */}
+              <Box
+                width={{ base: "100%", md: "50%" }}
+                display="flex"
+                flexDirection="column"
+                gap={{ base: 1, md: 2 }}
+              >
+                <Heading
+                  textAlign={{ base: "center", md: "left" }}
+                  as="h4"
+                  fontSize={{ base: "xl", md: "2xl" }}
+                  color="blue.500"
+                >
+                  {facility.name}
+                </Heading>
+                <Box display="flex" alignItems="center">
+                  <Text fontSize="md" color="gray.600" mr={2}>
+                    Địa chỉ:
+                  </Text>
+                  <Text fontSize="md" fontWeight={"bold"}>
+                    {facility.address}
+                  </Text>
+                </Box>
+                <Box display="flex" alignItems="center">
+                  <Text fontSize="md" color="gray.600" mr={2}>
+                    Thành phố:
+                  </Text>
+                  <Text fontSize="md" fontWeight={"bold"}>
+                    {facility.city}
+                  </Text>
+                </Box>
+                <Box display="flex" alignItems="center">
+                  <Text fontSize="md" color="gray.600" mr={2}>
+                    Quận:
+                  </Text>
+                  <Text fontSize="md" fontWeight={"bold"}>
+                    {facility.district}
+                  </Text>
+                </Box>
+              </Box>
+
+              {/* Buttons Column */}
+              <Box width={{ base: "100%", md: "20%" }}>
+                <Flex>
+                  <Button onClick={handleEditClick} colorScheme="blue" mr={2}>
+                    Chỉnh sửa
+                  </Button>
+                  {(facility.roomCount === 0 || !facility.roomCount) && (
+                    <Button
+                      onClick={() => handleDeleteFacility(facility.id)}
+                      colorScheme="red"
+                    >
+                      Xóa cơ sở
+                    </Button>
+                  )}
+                </Flex>
+              </Box>
+            </Flex>
           </Box>
-        </Flex>
-        <Flex>
-          <Button onClick={handleEditClick} colorScheme="blue" mr={2}>
-            Chỉnh sửa
-          </Button>
-          {(facility.roomCount === 0 || !facility.roomCount) && (
-            <Button
-              onClick={() => handleDeleteFacility(facility.id)}
-              colorScheme="red"
-            >
-              Xóa cơ sở
-            </Button>
-          )}
-        </Flex>
-      </Flex>
+        ))}
+      </Stack>
     );
   };
 

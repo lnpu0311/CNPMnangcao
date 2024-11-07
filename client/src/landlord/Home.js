@@ -45,7 +45,7 @@ import { FaMoneyCheckDollar } from "react-icons/fa6";
 import { MdOutlineMeetingRoom } from "react-icons/md";
 import { RiParentFill } from "react-icons/ri";
 import { jwtDecode } from "jwt-decode";
-import axios from "axios";
+
 function HomeLayout() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [hasNewNotification, setHasNewNotification] = useState(true);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   VStack,
@@ -7,10 +7,10 @@ import {
   Avatar,
   Divider,
   useToast,
-  Flex
-} from '@chakra-ui/react';
-import axios from 'axios';
-import Chat from '../components/Chat';
+  Flex,
+} from "@chakra-ui/react";
+import axios from "axios";
+import Chat from "../components/Chat";
 
 const MessageManagement = () => {
   const [unreadMessages, setUnreadMessages] = useState([]);
@@ -23,23 +23,26 @@ const MessageManagement = () => {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token) return;
 
-        const response = await axios.get('http://localhost:5000/api/user/current', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await axios.get(
+          `${process.env.REACT_APP_API}/user/current`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         if (response.data.success) {
-          console.log('Current user data:', response.data.data);
+          console.log("Current user data:", response.data.data);
           const userData = response.data.data;
           setCurrentUser({
             id: userData._id || userData.id,
-            name: userData.name
+            name: userData.name,
           });
         }
       } catch (error) {
-        console.error('Error fetching current user:', error);
+        console.error("Error fetching current user:", error);
       }
     };
 
@@ -50,13 +53,16 @@ const MessageManagement = () => {
   useEffect(() => {
     const fetchUnreadMessages = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5000/api/messages/unread', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          `${process.env.REACT_APP_API}/messages/unread`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setUnreadMessages(response.data.data);
       } catch (error) {
-        console.error('Error fetching unread messages:', error);
+        console.error("Error fetching unread messages:", error);
         toast({
           title: "Lỗi",
           description: "Không thể tải tin nhắn. Vui lòng thử lại sau.",
@@ -89,11 +95,13 @@ const MessageManagement = () => {
               bg="gray.50"
               borderRadius="md"
               cursor="pointer"
-              _hover={{ bg: 'gray.100' }}
-              onClick={() => handleSelectTenant({
-                id: message.senderId._id,
-                name: message.senderId.name
-              })}
+              _hover={{ bg: "gray.100" }}
+              onClick={() =>
+                handleSelectTenant({
+                  id: message.senderId._id,
+                  name: message.senderId.name,
+                })
+              }
             >
               <HStack spacing={3}>
                 <Avatar size="sm" name={message.senderId.name} />
@@ -127,4 +135,4 @@ const MessageManagement = () => {
   );
 };
 
-export default MessageManagement; 
+export default MessageManagement;

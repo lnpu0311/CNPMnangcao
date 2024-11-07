@@ -43,7 +43,7 @@ const RoomList = () => {
     const fetchRooms = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/landlord/hostel/${facilityId}`,
+          `${process.env.REACT_APP_API}/landlord/hostel/${facilityId}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -192,7 +192,7 @@ const RoomList = () => {
     console.log(Array.from(data.entries()));
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/landlord/room/${facilityId}/create`,
+        `${process.env.REACT_APP_API}/landlord/room/${facilityId}/create`,
         data,
         {
           headers: {

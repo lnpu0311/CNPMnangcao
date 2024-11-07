@@ -1,12 +1,12 @@
 const express = require("express");
 const app = express();
-const http = require('http');
+const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const PORT = process.env.PORT || 5000;
 require("dotenv").config();
 
-const Message = require('./models/message.model');
+const Message = require("./models/message.model");
 
 const morgan = require("morgan");
 const cors = require("cors");
@@ -16,7 +16,10 @@ const allowedOrigins = ["http://localhost:3000"];
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (
+        !origin ||
+        allowedOrigins.some((allowedOrigin) => origin.startsWith(allowedOrigin))
+      ) {
         return callback(null, true);
       }
       const msg =
@@ -36,25 +39,29 @@ const io = new Server(server, {
   cors: {
     origin: "http://localhost:3000",
     methods: ["GET", "POST"],
-    credentials: true
-  }
+    credentials: true,
+  },
+});
+
+app.get("/", (req, res) => {
+  res.send("<h1> Deploy successfully </h1>");
 });
 
 // Socket connection handling
 const userSockets = new Map();
 
-io.on('connection', (socket) => {
-  socket.on('login', (userId) => {
+io.on("connection", (socket) => {
+  socket.on("login", (userId) => {
     userSockets.set(userId, socket.id);
-    console.log('User logged in:', userId);
+    console.log("User logged in:", userId);
   });
 
-  socket.on('send_message', async (data) => {
+  socket.on("send_message", async (data) => {
     try {
       const { senderId, recipientId, content } = data;
-      
+
       if (!senderId || !recipientId || !content) {
-        throw new Error('Missing required fields');
+        throw new Error("Missing required fields");
       }
 
       const message = new Message({
@@ -62,24 +69,23 @@ io.on('connection', (socket) => {
         recipientId: recipientId.toString(),
         content,
         timestamp: new Date(),
-        read: false
+        read: false,
       });
       await message.save();
 
       const recipientSocketId = userSockets.get(recipientId);
       if (recipientSocketId) {
-        io.to(recipientSocketId).emit('receive_message', message);
+        io.to(recipientSocketId).emit("receive_message", message);
       }
 
-      socket.emit('message_sent', { success: true, data: message });
-
+      socket.emit("message_sent", { success: true, data: message });
     } catch (error) {
-      console.error('Error sending message:', error);
-      socket.emit('message_sent', { success: false, error: error.message });
+      console.error("Error sending message:", error);
+      socket.emit("message_sent", { success: false, error: error.message });
     }
   });
 
-  socket.on('disconnect', () => {
+  socket.on("disconnect", () => {
     for (const [userId, socketId] of userSockets.entries()) {
       if (socketId === socket.id) {
         userSockets.delete(userId);
@@ -110,4 +116,3 @@ app.use("/api/messages", messageRoute);
 server.listen(PORT, () =>
   console.log(`Server is running on http://localhost:${PORT}`)
 );
-

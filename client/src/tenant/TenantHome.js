@@ -86,15 +86,12 @@ function TenantHome() {
     name: "Tenant", // Thông tin người dùng
   });
 
-
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       setIsAuthenticated(true);
     }
   }, []);
-
-
 
   const handleEditProfile = () => {
     navigate(`/tenant/profile-page`);
@@ -205,7 +202,7 @@ function TenantHome() {
       >
         {/* Logo */}
         <Box ml={{ base: "0", md: "4" }}>
-          <RouterLink to="/">
+          <RouterLink to="/tenant">
             <Text
               bgGradient="linear(to-l, #9fccfa, #0974f1)"
               bgClip="text"
@@ -267,8 +264,6 @@ function TenantHome() {
 
         {/* Right Section */}
         <Flex alignItems="center" gap={4}>
-      
-
           <Box position="relative">
             <IconButton
               color="brand.1"
@@ -319,8 +314,6 @@ function TenantHome() {
               <MenuItem icon={<EditIcon />} onClick={handleEditProfile}>
                 Chỉnh sửa thông tin cá nhân
               </MenuItem>
-
-             
 
               <MenuDivider />
 
@@ -394,7 +387,6 @@ function TenantHome() {
                 </Button>
 
                 {/* Mobile Theme Toggle */}
-                
               </VStack>
             </DrawerBody>
           </DrawerContent>

@@ -7,8 +7,7 @@ const morgan = require("morgan");
 const cors = require("cors");
 
 const allowedOrigins = [
-  "http://localhost:3000",
-  "https://cnpm-nangcao.vercel.app", // replace with your actual Vercel app URL
+  "http://localhost:3000", // replace with your actual Vercel app URL
 ];
 
 app.use(

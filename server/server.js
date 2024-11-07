@@ -11,7 +11,7 @@ const Message = require("./models/message.model");
 const morgan = require("morgan");
 const cors = require("cors");
 
-const allowedOrigins = ["http://localhost:3000"];
+const allowedOrigins = ["http://localhost:3000", `${process.env.DOMAIN_APP}`];
 
 app.use(
   cors({

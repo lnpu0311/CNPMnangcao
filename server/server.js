@@ -11,10 +11,7 @@ const Message = require("./models/message.model");
 const morgan = require("morgan");
 const cors = require("cors");
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://cnpm-nangcao.vercel.app", // replace with your actual Vercel app URL
-];
+const allowedOrigins = ["http://localhost:3000"];
 
 app.use(
   cors({

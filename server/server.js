@@ -11,7 +11,10 @@ const Message = require("./models/message.model");
 const morgan = require("morgan");
 const cors = require("cors");
 
-const allowedOrigins = ["http://localhost:3000", `${process.env.DOMAIN_APP}`];
+const allowedOrigins = [
+  "http://localhost:3000",
+  `https://hostel-community-git-bao-paomultiverses-projects.vercel.app`,
+];
 
 app.use(
   cors({

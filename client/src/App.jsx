@@ -25,7 +25,7 @@ import Receipt from "./landlord/Receipt";
 import TenantList from "./landlord/TenantList";
 import RevenueStats from "./landlord/RevenueStats";
 import AdminDashboard from "./admin/AdminDashboard";
-import SearchResults from './pages/SearchResults';
+import SearchResults from "./pages/SearchResults";
 import MessageManagement from "./landlord/MessageManagement";
 
 function App() {

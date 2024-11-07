@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Avatar,
@@ -12,7 +12,7 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { EditIcon } from "@chakra-ui/icons";
-
+import { jwtDecode } from "jwt-decode";
 function ProfilePage() {
   const toast = useToast();
 
@@ -25,11 +25,19 @@ function ProfilePage() {
     password: "******",
     avatar: "https://bit.ly/broken-link",
   });
-
+  const [userData, setUserData] = useState({});
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(originalUser);
   const [isEditing, setIsEditing] = useState(false);
   const [newAvatar, setNewAvatar] = useState(null);
-
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsAuthenticated(true);
+    }
+    const user = jwtDecode(token);
+    setUserData({ name: user.name });
+  }, []);
   const toggleEdit = () => {
     if (isEditing) {
       // If canceling, revert to original user data
@@ -81,7 +89,7 @@ function ProfilePage() {
     <Box maxW="md" mx="auto" p={4} textAlign="center">
       <Box position="relative" display="inline-block">
         <Avatar
-          name={user.name}
+          name={userData.name}
           size="2xl"
           src={newAvatar || user.avatar}
           mb={4}
@@ -115,7 +123,7 @@ function ProfilePage() {
         <Input
           width="70%"
           name="name"
-          value={user.name}
+          value={userData.name}
           onChange={handleChange}
           fontSize="2xl"
           fontWeight="bold"
@@ -125,7 +133,7 @@ function ProfilePage() {
         />
       ) : (
         <Text fontSize="2xl" fontWeight="bold">
-          {user.name}
+          {userData.name}
         </Text>
       )}
 
@@ -137,7 +145,7 @@ function ProfilePage() {
             <Input
               width="70%"
               name="email"
-              value={user.email}
+              value={userData.email}
               onChange={handleChange}
               size="sm"
             />

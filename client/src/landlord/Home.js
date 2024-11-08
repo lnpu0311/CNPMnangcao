@@ -45,14 +45,13 @@ import { FaMoneyCheckDollar } from "react-icons/fa6";
 import { MdOutlineMeetingRoom } from "react-icons/md";
 import { RiParentFill } from "react-icons/ri";
 import { jwtDecode } from "jwt-decode";
-import axios from "axios";
+
 function HomeLayout() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [hasNewNotification, setHasNewNotification] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(true);
   const navigate = useNavigate();
-
   const [userData, setUserData] = useState({});
 
   useEffect(() => {
@@ -108,16 +107,11 @@ function HomeLayout() {
       icon: <ChatIcon />,
     },
   ];
-
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("role");
-
     setIsAuthenticated(false);
-
     navigate(`/register`);
   };
-
   const toggleNav = () => {
     setIsNavOpen(!isNavOpen);
   };
@@ -330,7 +324,7 @@ function HomeLayout() {
         <VStack align="start" spacing={4}>
           <Flex justify="space-between" width="100%">
             <Image
-              src="../eco-house.png"
+              src="../../../eco-house.png"
               alt="Logo"
               boxSize="150px"
               mx="auto"

@@ -11,15 +11,16 @@ const Message = require("./models/message.model");
 const morgan = require("morgan");
 const cors = require("cors");
 
-const allowedOrigins = ["http://localhost:3000"];
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://hostel-community.vercel.app",
+];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (
-        !origin ||
-        allowedOrigins.some((allowedOrigin) => origin.startsWith(allowedOrigin))
-      ) {
+      // Kiểm tra nếu origin không có (khi gọi từ chính server) hoặc thuộc allowedOrigins
+      if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
       const msg =
@@ -37,7 +38,7 @@ app.use(morgan("combined"));
 // Khởi tạo Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "https://hostel-community.vercel.app"],
     methods: ["GET", "POST"],
     credentials: true,
   },

@@ -1,10 +1,5 @@
-import { Box, ChakraProvider, useColorModeValue } from "@chakra-ui/react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate,
-} from "react-router-dom";
+import { Box, ChakraProvider } from "@chakra-ui/react";
+import { Route, Routes, Navigate } from "react-router-dom";
 import theme from "./theme";
 import AuthForm from "./pages/AuthForm";
 import LandlordHome from "./landlord/Home";
@@ -25,7 +20,7 @@ import Receipt from "./landlord/Receipt";
 import TenantList from "./landlord/TenantList";
 import RevenueStats from "./landlord/RevenueStats";
 import AdminDashboard from "./admin/AdminDashboard";
-import SearchResults from './pages/SearchResults';
+import SearchResults from "./pages/SearchResults";
 import MessageManagement from "./landlord/MessageManagement";
 
 function App() {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from 'axios';
+import axios from "axios";
 import {
   Box,
   SimpleGrid,
@@ -22,11 +22,11 @@ import {
   ListIcon,
   Center,
   Spinner,
-  useToast
+  useToast,
 } from "@chakra-ui/react";
 import { MdCheckCircle } from "react-icons/md";
-import Chat from '../components/Chat';
-import { jwtDecode } from 'jwt-decode';
+import Chat from "../components/Chat";
+import { jwtDecode } from "jwt-decode";
 
 const TenantRoomList = () => {
   const [rooms, setRooms] = useState([]);
@@ -46,35 +46,42 @@ const TenantRoomList = () => {
           return;
         }
 
-        const response = await axios.get(`http://localhost:5000/api/user/rooms`, {
-          headers: {
-            Authorization: `Bearer ${token}`
+        const response = await axios.get(
+          `${process.env.REACT_APP_API}/user/rooms`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
+        );
 
         if (response.data.success && Array.isArray(response.data.data)) {
-          const formattedRooms = response.data.data.map(room => ({
+          const formattedRooms = response.data.data.map((room) => ({
             id: room._id,
-            roomTitle: room.roomTitle || 'Không có tiêu đề',
-            roomName: room.roomName || 'Không có tên',
-            landlordId: room.hostelId?.landlordId?._id || room.hostelId?.landlordId,
-            image: room.images && room.images.length > 0 
-              ? room.images[0]
-              : 'https://via.placeholder.com/200',
-            address: room.hostelId 
-              ? `${room.hostelId.address || ''}, ${room.hostelId.ward || ''}, ${room.hostelId.district || ''}, ${room.hostelId.city || ''}` 
-              : 'Địa chỉ không có sẵn',
-            status: room.status === 'available' ? 'Còn trống' : 'Đã thuê',
+            roomTitle: room.roomTitle || "Không có tiêu đề",
+            roomName: room.roomName || "Không có tên",
+            landlordId:
+              room.hostelId?.landlordId?._id || room.hostelId?.landlordId,
+            image:
+              room.images && room.images.length > 0
+                ? room.images[0]
+                : "https://via.placeholder.com/200",
+            address: room.hostelId
+              ? `${room.hostelId.address || ""}, ${room.hostelId.ward || ""}, ${
+                  room.hostelId.district || ""
+                }, ${room.hostelId.city || ""}`
+              : "Địa chỉ không có sẵn",
+            status: room.status === "available" ? "Còn trống" : "Đã thuê",
             price: room.price || 0,
             area: room.area || 0,
-            description: room.description || 'Không có mô tả',
+            description: room.description || "Không có mô tả",
             deposit: room.deposit || 0,
             amenities: [
               "Wifi miễn phí",
               "Bảo vệ 24/7",
               "Chỗ để xe",
-              "Tự do giờ giấc"
-            ]
+              "Tự do giờ giấc",
+            ],
           }));
           setRooms(formattedRooms);
         } else {
@@ -92,13 +99,13 @@ const TenantRoomList = () => {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       try {
         const decoded = jwtDecode(token);
         setCurrentUser(decoded);
       } catch (error) {
-        console.error('Error decoding token:', error);
+        console.error("Error decoding token:", error);
       }
     }
   }, []);
@@ -136,7 +143,7 @@ const TenantRoomList = () => {
               bg="white"
               onClick={() => handleRoomClick(room)}
               cursor="pointer"
-              _hover={{ transform: 'scale(1.02)', transition: 'all 0.2s' }}
+              _hover={{ transform: "scale(1.02)", transition: "all 0.2s" }}
             >
               <Image
                 src={room.image}
@@ -160,16 +167,18 @@ const TenantRoomList = () => {
                 </Flex>
                 <Flex justifyContent="space-between" alignItems="center">
                   <Text fontWeight="bold">Tình trạng:</Text>
-                  <Tag colorScheme={room.status === "Còn trống" ? "green" : "red"}>
+                  <Tag
+                    colorScheme={room.status === "Còn trống" ? "green" : "red"}
+                  >
                     {room.status}
                   </Tag>
                 </Flex>
                 <Flex justifyContent="space-between">
                   <Text fontWeight="bold">Giá:</Text>
                   <Text>
-                    {new Intl.NumberFormat('vi-VN', { 
-                      style: 'currency', 
-                      currency: 'VND' 
+                    {new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
                     }).format(room.price)}
                   </Text>
                 </Flex>
@@ -179,7 +188,11 @@ const TenantRoomList = () => {
         </SimpleGrid>
       )}
 
-      <Modal isOpen={isOpenDetail} onClose={() => setIsOpenDetail(false)} size="xl">
+      <Modal
+        isOpen={isOpenDetail}
+        onClose={() => setIsOpenDetail(false)}
+        size="xl"
+      >
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Chi tiết phòng</ModalHeader>
@@ -195,7 +208,11 @@ const TenantRoomList = () => {
                   objectFit="cover"
                   borderRadius="md"
                 />
-                <VStack align="stretch" spacing={4} w={{ base: "100%", md: "50%" }}>
+                <VStack
+                  align="stretch"
+                  spacing={4}
+                  w={{ base: "100%", md: "50%" }}
+                >
                   <Box>
                     <Text fontWeight="bold">Địa chỉ:</Text>
                     <Text color="gray.600">{selectedRoom.address}</Text>
@@ -207,18 +224,18 @@ const TenantRoomList = () => {
                   <Box>
                     <Text fontWeight="bold">Giá thuê:</Text>
                     <Text color="gray.600">
-                      {new Intl.NumberFormat('vi-VN', {
-                        style: 'currency',
-                        currency: 'VND'
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
                       }).format(selectedRoom.price)}
                     </Text>
                   </Box>
                   <Box>
                     <Text fontWeight="bold">Đặt cọc:</Text>
                     <Text color="gray.600">
-                      {new Intl.NumberFormat('vi-VN', {
-                        style: 'currency',
-                        currency: 'VND'
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
                       }).format(selectedRoom.deposit)}
                     </Text>
                   </Box>
@@ -238,11 +255,15 @@ const TenantRoomList = () => {
             )}
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="red" mr={3} onClick={() => setIsOpenDetail(false)}>
+            <Button
+              colorScheme="red"
+              mr={3}
+              onClick={() => setIsOpenDetail(false)}
+            >
               Đóng
             </Button>
-            <Button 
-              colorScheme="teal" 
+            <Button
+              colorScheme="teal"
               onClick={() => {
                 if (currentUser) {
                   setShowChat(true);

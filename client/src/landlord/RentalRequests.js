@@ -49,6 +49,7 @@ const RentalRequest = () => {
       <Stack spacing={4}>
         {rentalRequests.map((request) => (
           <Flex
+            flexDirection={{ base: "column", md: "row" }}
             key={request.id}
             bg={backgroundColor}
             borderRadius="md"
@@ -66,7 +67,7 @@ const RentalRequest = () => {
 
             <Flex align="center" flex="2">
               <Text color="gray.600" mr={2}>
-                Số điện thoại:{" "}
+                Số điện thoại:
               </Text>
               <Text fontWeight="bold" mr={2}>
                 {request.phone}

@@ -14,6 +14,18 @@ const getUser = async (req, res) => {
     res.status(200).json({ success: false, message: error.message });
   }
 };
+//Lấy user theo Id
+const getUserById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await User.findById(id);
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    res.status(200).json({ success: false, message: error.message });
+  }
+};
+
 //Lấy user theo role
 const getUserByRole = async (req, res) => {
   console.log("hello");
@@ -73,193 +85,196 @@ const updateActive = async (req, res) => {
 const verifyOTP = async (req, res) => {
   const { email, verifyOTP } = req.body;
   try {
-    const user = await User.findOne({ 
+    const user = await User.findOne({
       email: email,
       otpVerification: verifyOTP,
-      otpExpires: { $gt: Date.now() }
+      otpExpires: { $gt: Date.now() },
     });
 
     if (!user) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Mã OTP không chính xác hoặc đã hết hạn" 
+      return res.status(400).json({
+        success: false,
+        message: "Mã OTP không chính xác hoặc đã hết hạn",
       });
     }
 
     // Cập nhật trạng thái xác thực
     await User.findByIdAndUpdate(user._id, {
       is_verified: true,
-      $unset: { otpVerification: "", otpExpires: "" }
+      $unset: { otpVerification: "", otpExpires: "" },
     });
 
-    return res.status(200).json({ 
-      success: true, 
-      message: "Xác thực OTP thành công"
+    return res.status(200).json({
+      success: true,
+      message: "Xác thực OTP thành công",
     });
   } catch (error) {
-    return res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    return res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };
 //Thay đổi mật khẩu (sau khi đăng nhập)
-const changePassword = async (req,res) => {
-  const {currentPassword,newPassword} = req.body;
-  try{
-    //Tìm user dựa trên id từ token 
+const changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  try {
+    //Tìm user dựa trên id từ token
     const user = await User.findById(req.user.id);
-    if(!user){
+    if (!user) {
       return res.status(400).json({
-        success:false,
-        message:"Không tìm thấy người dùng "
+        success: false,
+        message: "Không tìm thấy người dùng ",
       });
     }
-    //Kiểm tra mật khẩu hiện tại 
-    const isMatch = await bcrypt.compare(currentPassword,user.password);
-    if(!isMatch){
+    //Kiểm tra mật khẩu hiện tại
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
       return res.status(400).json({
-        success:false,
-        message: "Mật khẩu hiện tại không đúng "
+        success: false,
+        message: "Mật khẩu hiện tại không đúng ",
       });
     }
-    //Hash mật khẩu mới 
-    const hashPassword = await bcrypt.hash(newPassword,10);
+    //Hash mật khẩu mới
+    const hashPassword = await bcrypt.hash(newPassword, 10);
 
-    //Cập nhật mật khẩu mới 
-    await User.findByIdAndUpdate(user._id,{
-      password :hashPassword
+    //Cập nhật mật khẩu mới
+    await User.findByIdAndUpdate(user._id, {
+      password: hashPassword,
     });
     res.status(200).json({
-      success:true,
-      message: "Đổi mật khẩu thành công"
+      success: true,
+      message: "Đổi mật khẩu thành công",
     });
-  }catch(error){
+  } catch (error) {
     res.status(500).json({
-      success:false,
-      message: error.message
+      success: false,
+      message: error.message,
     });
   }
-}
+};
 const getAllRooms = async (req, res) => {
   try {
     console.log("Fetching all rooms...");
-    const rooms = await Room.find()
-      .populate({
-        path: 'hostelId',
-        select: 'name address district city ward landlordId',
-        populate: {
-          path: 'landlordId',
-          select: 'name'
-        }
-      });
-    
+    const rooms = await Room.find().populate({
+      path: "hostelId",
+      select: "name address district city ward landlordId",
+      populate: {
+        path: "landlordId",
+        select: "name",
+      },
+    });
+
     console.log("Found rooms:", rooms);
 
     if (!rooms || rooms.length === 0) {
       console.log("No rooms found");
       return res.status(200).json({
         success: true,
-        data: []
+        data: [],
       });
     }
 
     res.status(200).json({
       success: true,
-      data: rooms
+      data: rooms,
     });
   } catch (error) {
     console.error("Error in getAllRooms:", error);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
-//Tìm kiếm 
-const searchAccommodation = async(req,res) =>{
+//Tìm kiếm
+const searchAccommodation = async (req, res) => {
   try {
-    const {keyword}= req.query;
-    //Kiểm tra keyword 
-    if(!keyword){
+    const { keyword } = req.query;
+    //Kiểm tra keyword
+    if (!keyword) {
       return res.status(400).json({
-        success:false,
-        message:"Không có từ khóa tìm kiếm"
+        success: false,
+        message: "Không có từ khóa tìm kiếm",
       });
     }
-    //Tìm kiếm trong hostel 
+    //Tìm kiếm trong hostel
     const hostels = await Hostel.find({
-      $or:[
-        {name:{$regex:keyword, $options:'i'}},
-        {address:{$regex:keyword,$options:'i'}},
-        {district:{$regex:keyword,$options:'i'}},
-        {city:{$regex:keyword,$options:'i'}},
-      ]
+      $or: [
+        { name: { $regex: keyword, $options: "i" } },
+        { address: { $regex: keyword, $options: "i" } },
+        { district: { $regex: keyword, $options: "i" } },
+        { city: { $regex: keyword, $options: "i" } },
+      ],
     }).populate({
-      path:'rooms',
-      select:'roomName roomTitle price area images status'// Khi tìm Hostel, populate rooms để xem các phòng trong nhà trọ đó
+      path: "rooms",
+      select: "roomName roomTitle price area images status", // Khi tìm Hostel, populate rooms để xem các phòng trong nhà trọ đó
     });
     //Tìm kiếm trong room
     const rooms = await Room.find({
-      $or:[
-        {roomName:{$regex:keyword,$options:'i'}},
-        {roomTitle:{$regex:keyword,$options:'i'}}
-      ]
+      $or: [
+        { roomName: { $regex: keyword, $options: "i" } },
+        { roomTitle: { $regex: keyword, $options: "i" } },
+      ],
     }).populate({
-      path:'hostelId',
-      select:'name address district city imageUrl' // Khi tìm Room, populate hostelId để biết phòng thuộc nhà trọ nào
+      path: "hostelId",
+      select: "name address district city imageUrl", // Khi tìm Room, populate hostelId để biết phòng thuộc nhà trọ nào
     });
-    //Kết hợp và lọc kết quả 
+    //Kết hợp và lọc kết quả
     const result = {
       //Lọc hostel có phòng trống
-      hostel:hostels
-      .filter(hostel => hostel.rooms.some(room => room.status === 'available' ))
-      .map(hostel=>({
-        id: hostel._id,
-        name:hostel.name,
-        address:hostel.address,
-        district:hostel.district,
-        city:hostel.city,
-        imageUrl:hostel.imageUrl,
-        availableRooms:hostel.rooms.filter(room => room.status === 'available'),
-        type:'hostel'
-      })),
+      hostel: hostels
+        .filter((hostel) =>
+          hostel.rooms.some((room) => room.status === "available")
+        )
+        .map((hostel) => ({
+          id: hostel._id,
+          name: hostel.name,
+          address: hostel.address,
+          district: hostel.district,
+          city: hostel.city,
+          imageUrl: hostel.imageUrl,
+          availableRooms: hostel.rooms.filter(
+            (room) => room.status === "available"
+          ),
+          type: "hostel",
+        })),
       //Chỉ lấy phòng còn trống
-      rooms:rooms
-      .filter(room => room.status === 'available')
-      .map(room => ({
-        id: room._id,
-        roomName: room.roomName,
-        roomTitle:room.roomTitle,
-        price:room.price,
-        area:room.area,
-        images:room.images,
-        hostel:{
-          id:room.hostelId._id,
-          name:room.hostelId.name,
-          address:room.hostelId.address,
-          district:room.hostelId.district,
-          city:room.hostelId.city,
-        },
-        type:'room'
-      }))
+      rooms: rooms
+        .filter((room) => room.status === "available")
+        .map((room) => ({
+          id: room._id,
+          roomName: room.roomName,
+          roomTitle: room.roomTitle,
+          price: room.price,
+          area: room.area,
+          images: room.images,
+          hostel: {
+            id: room.hostelId._id,
+            name: room.hostelId.name,
+            address: room.hostelId.address,
+            district: room.hostelId.district,
+            city: room.hostelId.city,
+          },
+          type: "room",
+        })),
     };
     res.status(200).json({
-      success:true,
-      data:result,
-      total:{
-        hostels:result.hostel.length,
-        rooms:result.rooms.length,
-        all:result.hostel.length+result.rooms.length
-      }
+      success: true,
+      data: result,
+      total: {
+        hostels: result.hostel.length,
+        rooms: result.rooms.length,
+        all: result.hostel.length + result.rooms.length,
+      },
     });
-  }catch(error){
+  } catch (error) {
     res.status(500).json({
-      success:false,
-      message:"Lỗi tìm kiếm" + error.message
+      success: false,
+      message: "Lỗi tìm kiếm" + error.message,
     });
   }
-}
+};
 module.exports = {
   getUser,
   getUserByRole,
@@ -268,5 +283,6 @@ module.exports = {
   changePassword,
   verifyOTP,
   searchAccommodation,
-  getAllRooms
+  getAllRooms,
+  getUserById,
 };

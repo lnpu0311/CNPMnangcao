@@ -95,7 +95,10 @@ const RoomList = () => {
     deposit: "",
     images: [],
   });
+
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(selectedRoom?.images[0]);
+
   const [contractDetails, setContractDetails] = useState({
     startDate: "",
     endDate: "",
@@ -106,6 +109,13 @@ const RoomList = () => {
     tenantName: "",
     landlordName: "",
   });
+  // Cập nhật hình ảnh mặc định khi chọn phòng thay đổi
+  useEffect(() => {
+    if (selectedRoom) {
+      setSelectedImage(selectedRoom.images[0]);
+    }
+  }, [selectedRoom]);
+  // Tạo trạng thái để lưu trữ hình ảnh được chọn
 
   const handleEditRoom = (room) => {
     console.log("Editing room:", room);
@@ -561,7 +571,7 @@ const RoomList = () => {
             {/* Main Image and Details */}
             <HStack align="start" spacing={4}>
               <Image
-                src={selectedRoom?.images || "Đang tải..."}
+                src={selectedImage || "Đang tải..."}
                 alt={selectedRoom?.roomName || "Đang tải..."}
                 borderRadius="md"
                 boxSize="250px"
@@ -586,19 +596,18 @@ const RoomList = () => {
 
             {/* Thumbnail Images */}
             <HStack mt={4} spacing={2}>
-              {/* {selectedRoom.images
-                ? selectedRoom.images.map((image, index) => (
-                    <Image
-                      key={index}
-                      src={image}
-                      alt={`Thumbnail ${index + 1}`}
-                      boxSize="50px"
-                      objectFit="cover"
-                      borderRadius="md"
-                      cursor="pointer"
-                    />
-                  ))
-                : ""} */}
+              {selectedRoom?.images.map((image, index) => (
+                <Image
+                  key={index}
+                  src={image}
+                  alt={`Thumbnail ${index + 1}`}
+                  boxSize="50px"
+                  objectFit="cover"
+                  borderRadius="md"
+                  cursor="pointer"
+                  onClick={() => setSelectedImage(image)} // Cập nhật hình ảnh khi nhấp vào
+                />
+              )) || "Đang tải"}
             </HStack>
 
             {/* Tenant Information */}

@@ -10,25 +10,25 @@ const {
   updateUser,
   changePassword,
   searchAccommodation,
-  getAllRooms
+  getAllRooms,
+  getUserById,
 } = require("../controllers/user.controller");
 
 // Lấy thông tin người dùng
 router.get("/", authMiddleware(["tenant", "landlord", "manager"]), getUser);
 
-// Lấy người dùng theo role
+// Lấy thông tin người dùng theo Id
 router.get(
-  "/role/:role",
-  authMiddleware(["manager"]),
-  getUserByRole
+  "/:id",
+  authMiddleware(["tenant", "landlord", "manager"]),
+  getUserById
 );
 
+// Lấy người dùng theo role
+router.get("/role/:role", authMiddleware(["manager"]), getUserByRole);
+
 // Cập nhật trạng thái active của user
-router.put(
-  "/active/:id",
-  authMiddleware(["manager"]),
-  updateActive
-);
+router.put("/active/:id", authMiddleware(["manager"]), updateActive);
 
 // Cập nhật thông tin user
 router.put(
@@ -51,17 +51,23 @@ router.get("/rooms", authMiddleware(["tenant"]), getAllRooms);
 router.get("/search", authMiddleware(["tenant"]), searchAccommodation);
 
 // Thêm route mới để lấy thông tin user hiện tại
-router.get("/current", authMiddleware(["tenant", "landlord", "manager"]), async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('-password');
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+router.get(
+  "/current",
+  authMiddleware(["tenant", "landlord", "manager"]),
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.user.id).select("-password");
+      if (!user) {
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
+      }
+      res.json({ success: true, data: user });
+    } catch (error) {
+      console.error("Error getting current user:", error);
+      res.status(500).json({ success: false, message: error.message });
     }
-    res.json({ success: true, data: user });
-  } catch (error) {
-    console.error('Error getting current user:', error);
-    res.status(500).json({ success: false, message: error.message });
   }
-});
+);
 
 module.exports = router;

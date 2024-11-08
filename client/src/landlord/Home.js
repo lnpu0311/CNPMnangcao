@@ -324,7 +324,7 @@ function HomeLayout() {
         <VStack align="start" spacing={4}>
           <Flex justify="space-between" width="100%">
             <Image
-              src="../eco-house.png"
+              src="../../../eco-house.png"
               alt="Logo"
               boxSize="150px"
               mx="auto"

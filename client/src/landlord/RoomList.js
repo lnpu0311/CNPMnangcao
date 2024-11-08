@@ -22,7 +22,9 @@ import {
   useDisclosure,
   Flex,
   Grid,
-  Tag,
+  VStack,
+  HStack,
+  Avatar,
 } from "@chakra-ui/react";
 
 import {
@@ -69,14 +71,19 @@ const RoomList = () => {
 
   const navigate = useNavigate();
   const {
-    isOpen: isOpenRoom,
-    onOpen: onOpenRoom,
-    onClose: onCloseRoom,
+    isOpen: isOpenNewRoom,
+    onOpen: onOpenNewRoom,
+    onClose: onCloseNewRoom,
   } = useDisclosure();
   const {
     isOpen: isOpenContract,
     onOpen: onOpenContract,
     onClose: onCloseContract,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenRoom,
+    onOpen: onOpenRoom,
+    onClose: onCloseRoom,
   } = useDisclosure();
   const [newRoom, setNewRoom] = useState({
     roomTitle: "",
@@ -213,7 +220,7 @@ const RoomList = () => {
           deposit: "",
           images: [],
         });
-        onCloseRoom();
+        onCloseNewRoom();
       } else {
         alert("Có lỗi xảy ra: " + response.data.message);
       }
@@ -237,7 +244,11 @@ const RoomList = () => {
         >
           Quay lại
         </Button>
-        <Button onClick={onOpenRoom} colorScheme="green" rightIcon={<FaPlus />}>
+        <Button
+          onClick={onOpenNewRoom}
+          colorScheme="green"
+          rightIcon={<FaPlus />}
+        >
           Thêm phòng mới
         </Button>
       </Flex>
@@ -333,7 +344,7 @@ const RoomList = () => {
         ))}
       </SimpleGrid>
       {/* Modal for Adding New Room */}
-      <Modal isCentered isOpen={isOpenRoom} onClose={onCloseRoom}>
+      <Modal isCentered isOpen={isOpenNewRoom} onClose={onCloseNewRoom}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader textAlign={"center"}>Thêm phòng mới</ModalHeader>
@@ -432,7 +443,7 @@ const RoomList = () => {
             <Button colorScheme="green" mr={3} onClick={handleCreateRoom}>
               Tạo phòng
             </Button>
-            <Button colorScheme="red" onClick={onCloseRoom}>
+            <Button colorScheme="red" onClick={onCloseNewRoom}>
               Hủy
             </Button>
           </ModalFooter>
@@ -532,6 +543,84 @@ const RoomList = () => {
             <Button variant="ghost" onClick={onCloseContract}>
               Hủy
             </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      {/* Modal for information of room */}
+      <Modal isOpen={isOpenRoom} onClose={onCloseRoom} size={"2xl"}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            <Text fontSize="2xl" fontWeight="bold" align={"center"}>
+              {selectedRoom?.roomName || "Đang tải..."}
+            </Text>
+          </ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody>
+            {/* Main Image and Details */}
+            <HStack align="start" spacing={4}>
+              <Image
+                src={selectedRoom?.images || "Đang tải..."}
+                alt={selectedRoom?.roomName || "Đang tải..."}
+                borderRadius="md"
+                boxSize="250px"
+                objectFit="cover"
+              />
+
+              {/* Room Details */}
+
+              <VStack align={"start"} spacing={2} flex="1">
+                <Text fontWeight="bold">Số điện:</Text>{" "}
+                <Text> {selectedRoom?.electricity || "Đang tải..."}</Text>
+                <Text fontWeight="bold">Số nước:</Text>{" "}
+                <Text>{selectedRoom?.water || "Đang tải..."}</Text>
+                <Text fontWeight="bold">Giá phòng:</Text>{" "}
+                <Text>{selectedRoom?.price || "Đang tải..."} VND</Text>
+                <Text fontWeight="bold">Diện tích:</Text>{" "}
+                <Text>{selectedRoom?.area || "Đang tải..."} m²</Text>
+                <Text fontWeight="bold">Mô tả:</Text>{" "}
+                <Text>{selectedRoom?.description || "Đang tải..."}</Text>
+              </VStack>
+            </HStack>
+
+            {/* Thumbnail Images */}
+            <HStack mt={4} spacing={2}>
+              {/* {selectedRoom.images
+                ? selectedRoom.images.map((image, index) => (
+                    <Image
+                      key={index}
+                      src={image}
+                      alt={`Thumbnail ${index + 1}`}
+                      boxSize="50px"
+                      objectFit="cover"
+                      borderRadius="md"
+                      cursor="pointer"
+                    />
+                  ))
+                : ""} */}
+            </HStack>
+
+            {/* Tenant Information */}
+            <Box mt={6} borderWidth="1px" borderRadius="md" p={4}>
+              <Text fontWeight="bold" mb={2}>
+                Khách thuê:
+              </Text>
+              <HStack spacing={3}>
+                <Avatar src={newRoom.tenantAvatar} />
+                <VStack align="start" spacing={0}>
+                  <Text>Tên khách thuê: {newRoom.tenantName}</Text>
+                  <Text>Số điện thoại: {newRoom.tenantPhone}</Text>
+                </VStack>
+              </HStack>
+            </Box>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="gray" mr={3} onClick={onCloseRoom}>
+              Đóng
+            </Button>
+            <Button colorScheme="blue">Chi tiết hợp đồng</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

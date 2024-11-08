@@ -1,10 +1,5 @@
-import { Box, ChakraProvider, useColorModeValue } from "@chakra-ui/react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate,
-} from "react-router-dom";
+import { Box, ChakraProvider } from "@chakra-ui/react";
+import { Route, Routes, Navigate } from "react-router-dom";
 import theme from "./theme";
 import AuthForm from "./pages/AuthForm";
 import LandlordHome from "./landlord/Home";

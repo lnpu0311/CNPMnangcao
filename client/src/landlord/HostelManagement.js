@@ -398,7 +398,7 @@ const HostelManagement = () => {
 
               {/* Buttons Column */}
               <Box width={{ base: "100%", md: "20%" }}>
-                <Flex>
+                <Flex justifyContent="flex-end">
                   <Button onClick={handleEditClick} colorScheme="blue" mr={2}>
                     Chỉnh sửa
                   </Button>

@@ -20,9 +20,7 @@ import {
   ModalFooter,
   FormErrorMessage,
   Text,
-  Image,
   Avatar,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import { FaEdit, FaTrash, FaSave } from "react-icons/fa";
 import { EditIcon, PlusSquareIcon } from "@chakra-ui/icons";

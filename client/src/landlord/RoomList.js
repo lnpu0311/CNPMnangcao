@@ -81,6 +81,11 @@ const RoomList = () => {
     onClose: onCloseContract,
   } = useDisclosure();
   const {
+    isOpen: isOpenInfoRoom,
+    onOpen: onOpenInfoRoom,
+    onClose: onCloseInfoRoom,
+  } = useDisclosure();
+  const {
     isOpen: isOpenRoom,
     onOpen: onOpenRoom,
     onClose: onCloseRoom,
@@ -139,15 +144,22 @@ const RoomList = () => {
 
   const handleRoomClick = (room) => {
     setSelectedRoom(room);
-    onOpenRoom();
+    onOpenInfoRoom();
   };
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewRoom((prevRoom) => ({
+  // Update field in selectedRoom object
+  const handleInputChange = (field, value) => {
+    setSelectedRoom((prevRoom) => ({
       ...prevRoom,
-      [name]: value,
+      [field]: value,
     }));
   };
+
+  // Save changes to database or state
+  const handleSaveChanges = () => {
+    // Call backend or update state with new room details
+    console.log("Saved room details:", selectedRoom);
+  };
+
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 5) {
@@ -304,7 +316,7 @@ const RoomList = () => {
                 colorScheme="teal"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleEditRoom(room);
+                  onOpenRoom(room);
                 }}
               >
                 Chỉnh sửa
@@ -459,7 +471,6 @@ const RoomList = () => {
           </ModalFooter>
         </ModalContent>
       </Modal>
-
       {/* Modal for Creating Contract */}
       <Modal isOpen={isOpenContract} onClose={onCloseContract}>
         <ModalOverlay />
@@ -557,7 +568,7 @@ const RoomList = () => {
         </ModalContent>
       </Modal>
       {/* Modal for information of room */}
-      <Modal isOpen={isOpenRoom} onClose={onCloseRoom} size={"2xl"}>
+      <Modal isOpen={isOpenInfoRoom} onClose={onCloseInfoRoom} size={"2xl"}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>
@@ -626,10 +637,89 @@ const RoomList = () => {
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="gray" mr={3} onClick={onCloseRoom}>
+            <Button colorScheme="gray" mr={3} onClick={onCloseInfoRoom}>
               Đóng
             </Button>
             <Button colorScheme="blue">Chi tiết hợp đồng</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      {/* Modal for edit information of room*/}
+      <Modal isOpen={isOpenRoom} onClose={onCloseRoom} size={"2xl"}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            <Input
+              w={"80%"}
+              value={selectedRoom?.roomName || ""}
+              onChange={(e) => handleInputChange("roomName", e.target.value)}
+              fontSize="2xl"
+              fontWeight="bold"
+              align={"center"}
+              placeholder="Tên phòng"
+            />
+          </ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody>
+            {/* Main Image and Details */}
+            <HStack align="start" spacing={4}>
+              <Image
+                src={selectedRoom?.images || ""}
+                alt={selectedRoom?.roomName || "Đang tải..."}
+                borderRadius="md"
+                boxSize="250px"
+                objectFit="cover"
+              />
+              <VStack align={"start"} spacing={2} flex="1">
+                <Text fontWeight="bold">Giá phòng:</Text>
+                <Input
+                  type="number"
+                  value={selectedRoom?.price || ""}
+                  onChange={(e) => handleInputChange("price", e.target.value)}
+                  placeholder="Giá phòng (VND)"
+                />
+                <Text fontWeight="bold">Diện tích:</Text>
+                <Input
+                  type="number"
+                  value={selectedRoom?.area || ""}
+                  onChange={(e) => handleInputChange("area", e.target.value)}
+                  placeholder="Diện tích (m²)"
+                />
+                <Text fontWeight="bold">Mô tả:</Text>
+                <Textarea
+                  value={selectedRoom?.description || ""}
+                  onChange={(e) =>
+                    handleInputChange("description", e.target.value)
+                  }
+                  placeholder="Mô tả phòng"
+                />
+              </VStack>
+            </HStack>
+
+            {/* Thumbnail Images */}
+            <HStack mt={4} spacing={2}>
+              {selectedRoom?.images?.map((image, index) => (
+                <Image
+                  key={index}
+                  src={image}
+                  alt={`Thumbnail ${index + 1}`}
+                  boxSize="50px"
+                  objectFit="cover"
+                  borderRadius="md"
+                  cursor="pointer"
+                />
+              ))}
+            </HStack>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="gray" mr={3} onClick={onCloseRoom}>
+              Đóng
+            </Button>
+            <Button colorScheme="blue" onClick={handleSaveChanges}>
+              Lưu thay đổi
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

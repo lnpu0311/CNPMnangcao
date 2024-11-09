@@ -31,95 +31,6 @@ import { jwtDecode } from "jwt-decode";
 import vietnamData from "../data/dvhcvn.json";
 import Chat from "../components/Chat";
 
-const FacilityItem = ({ facility, onDelete }) => {
-  const token = localStorage.getItem("token");
-  const navigate = useNavigate();
-  const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [wards, setWards] = useState([]);
-  const handleEditClick = () => {
-    navigate(`/landlord/room-list/${facility.id}`);
-  };
-
-  const handleDeleteClick = async () => {
-    try {
-      await axios.delete(`${process.env.REACT_APP_API}/hostel/${facility.id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      onDelete(facility.id); // Gọi hàm onDelete để cập nhật danh sách sau khi xóa
-    } catch (error) {
-      console.error("Lỗi khi xóa cơ sở:", error);
-    }
-  };
-
-  return (
-    <Flex
-      bg="brand.2"
-      p={4}
-      mb={4}
-      alignItems="center"
-      justifyContent="space-between"
-      borderRadius="md"
-      shadow={"lg"}
-    >
-      <Flex>
-        <Image
-          borderRadius={8}
-          src={facility.imageUrl}
-          alt={facility.name}
-          boxSize="200px"
-          mr={4}
-          objectFit={"cover"}
-        />
-        <Box textAlign="left" display="flex" flexDirection="column" gap={2}>
-          <Text fontSize="x-large" fontWeight="bold" color="blue.500">
-            {facility.name}
-          </Text>
-
-          <Box display="flex" alignItems="center">
-            <Text fontSize="md" color="gray.600" mr={2}>
-              Thành phố:
-            </Text>
-            <Text fontSize="md" fontWeight={"bold"}>
-              {facility.city}
-            </Text>
-          </Box>
-
-          <Box display="flex" alignItems="center">
-            <Text fontSize="md" color="gray.600" mr={2}>
-              Quận:
-            </Text>
-            <Text fontSize="md" fontWeight={"bold"}>
-              {facility.district}
-            </Text>
-          </Box>
-
-          <Box display="flex" alignItems="center">
-            <Text fontSize="md" color="gray.600" mr={2}>
-              Địa chỉ:
-            </Text>
-            <Text fontSize="md" fontWeight={"bold"}>
-              {facility.address}
-            </Text>
-          </Box>
-        </Box>
-      </Flex>
-      <Flex>
-        <Button onClick={handleEditClick} colorScheme="blue" mr={2}>
-          Chỉnh sửa
-        </Button>
-        {(facility.roomCount === 0 || !facility.roomCount) && (
-          <Button onClick={handleDeleteClick} colorScheme="red">
-            Xóa cơ sở
-          </Button>
-        )}
-      </Flex>
-    </Flex>
-  );
-};
-
 const HostelManagement = () => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
@@ -333,88 +244,86 @@ const HostelManagement = () => {
         w={{ base: "100%", md: "6xl" }}
         spacing={4}
       >
-        {facilities.map((facility) => (
-          <Box
-            key={facility.id}
-            p={{ base: 2, md: 4 }}
-            borderWidth="1px"
-            borderRadius="md"
-            shadow="sm"
-            bg="brand.2"
-          >
-            <Flex flexDirection={{ base: "column", md: "row" }}>
-              {/* Image Column */}
-              <Box width={{ base: "100%", md: "30%" }} pr={{ base: 0, md: 4 }}>
-                <Image
-                  borderRadius={8}
-                  src={facility.imageUrl}
-                  alt={facility.name}
-                  width="100%"
-                  height="200px"
-                  objectFit="cover"
-                />
-              </Box>
+        <Box
+          key={facility.id}
+          p={{ base: 2, md: 4 }}
+          borderWidth="1px"
+          borderRadius="md"
+          shadow="sm"
+          bg="brand.2"
+        >
+          <Flex flexDirection={{ base: "column", md: "row" }}>
+            {/* Image Column */}
+            <Box width={{ base: "100%", md: "30%" }} pr={{ base: 0, md: 4 }}>
+              <Image
+                borderRadius={8}
+                src={facility.imageUrl}
+                alt={facility.name}
+                width="100%"
+                height="200px"
+                objectFit="cover"
+              />
+            </Box>
 
-              {/* Content Column */}
-              <Box
-                width={{ base: "100%", md: "50%" }}
-                display="flex"
-                flexDirection="column"
-                gap={{ base: 1, md: 2 }}
+            {/* Content Column */}
+            <Box
+              width={{ base: "100%", md: "50%" }}
+              display="flex"
+              flexDirection="column"
+              gap={{ base: 1, md: 2 }}
+            >
+              <Heading
+                textAlign={{ base: "center", md: "left" }}
+                as="h4"
+                fontSize={{ base: "xl", md: "2xl" }}
+                color="blue.500"
               >
-                <Heading
-                  textAlign={{ base: "center", md: "left" }}
-                  as="h4"
-                  fontSize={{ base: "xl", md: "2xl" }}
-                  color="blue.500"
-                >
-                  {facility.name}
-                </Heading>
-                <Box display="flex" alignItems="center">
-                  <Text fontSize="md" color="gray.600" mr={2}>
-                    Địa chỉ:
-                  </Text>
-                  <Text fontSize="md" fontWeight={"bold"}>
-                    {facility.address}
-                  </Text>
-                </Box>
-                <Box display="flex" alignItems="center">
-                  <Text fontSize="md" color="gray.600" mr={2}>
-                    Thành phố:
-                  </Text>
-                  <Text fontSize="md" fontWeight={"bold"}>
-                    {facility.city}
-                  </Text>
-                </Box>
-                <Box display="flex" alignItems="center">
-                  <Text fontSize="md" color="gray.600" mr={2}>
-                    Quận:
-                  </Text>
-                  <Text fontSize="md" fontWeight={"bold"}>
-                    {facility.district}
-                  </Text>
-                </Box>
+                {facility.name}
+              </Heading>
+              <Box display="flex" alignItems="center">
+                <Text fontSize="md" color="gray.600" mr={2}>
+                  Địa chỉ:
+                </Text>
+                <Text fontSize="md" fontWeight={"bold"}>
+                  {facility.address}
+                </Text>
               </Box>
+              <Box display="flex" alignItems="center">
+                <Text fontSize="md" color="gray.600" mr={2}>
+                  Thành phố:
+                </Text>
+                <Text fontSize="md" fontWeight={"bold"}>
+                  {facility.city}
+                </Text>
+              </Box>
+              <Box display="flex" alignItems="center">
+                <Text fontSize="md" color="gray.600" mr={2}>
+                  Quận:
+                </Text>
+                <Text fontSize="md" fontWeight={"bold"}>
+                  {facility.district}
+                </Text>
+              </Box>
+            </Box>
 
-              {/* Buttons Column */}
-              <Box width={{ base: "100%", md: "20%" }}>
-                <Flex justifyContent="flex-end">
-                  <Button onClick={handleEditClick} colorScheme="blue" mr={2}>
-                    Chỉnh sửa
+            {/* Buttons Column */}
+            <Box width={{ base: "100%", md: "20%" }}>
+              <Flex justifyContent="flex-end">
+                <Button onClick={handleEditClick} colorScheme="blue" mr={2}>
+                  Chỉnh sửa
+                </Button>
+                {(facility.roomCount === 0 || !facility.roomCount) && (
+                  <Button
+                    onClick={() => handleDeleteFacility(facility.id)}
+                    colorScheme="red"
+                  >
+                    Xóa cơ sở
                   </Button>
-                  {(facility.roomCount === 0 || !facility.roomCount) && (
-                    <Button
-                      onClick={() => handleDeleteFacility(facility.id)}
-                      colorScheme="red"
-                    >
-                      Xóa cơ sở
-                    </Button>
-                  )}
-                </Flex>
-              </Box>
-            </Flex>
-          </Box>
-        ))}
+                )}
+              </Flex>
+            </Box>
+          </Flex>
+        </Box>
       </Stack>
     );
   };

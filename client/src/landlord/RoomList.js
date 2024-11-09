@@ -35,7 +35,6 @@ import {
   FaFileInvoiceDollar,
 } from "react-icons/fa";
 import axios from "axios";
-// Giả sử đây là dữ liệu phòng mẫu
 const RoomList = () => {
   const [hostel, setHostel] = useState();
   const [rooms, setRooms] = useState([]);
@@ -61,7 +60,6 @@ const RoomList = () => {
     };
     fetchRooms();
   }, [facilityId]);
-
   // Kiểm tra dữ liệu của hostel khi nó thay đổi
   useEffect(() => {
     if (hostel) {

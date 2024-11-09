@@ -497,7 +497,7 @@ function TenantHome() {
             </VStack>
 
             {/* Links */}
-            <VStack align="start" spacing={3}>
+            <VStack align="start" spacing={3} textColor={"black"} >
               <Text fontSize="xl" fontWeight="bold" mb={2}>
                 Khám phá
               </Text>

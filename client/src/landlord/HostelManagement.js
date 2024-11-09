@@ -233,7 +233,7 @@ const HostelManagement = () => {
   const FacilityItem = ({ facility }) => {
     const navigate = useNavigate();
 
-    const handleEditClick = () => {
+    const handleClick = () => {
       navigate(`/landlord/room-list/${facility.id}`);
     };
 
@@ -256,7 +256,7 @@ const HostelManagement = () => {
             {/* Image Column */}
             <Box
               cursor="pointer"
-              onClick={handleEditClick}
+              onClick={handleClick}
               width={{ base: "100%", md: "30%" }}
               pr={{ base: 0, md: 4 }}
             >
@@ -273,7 +273,7 @@ const HostelManagement = () => {
             {/* Content Column */}
             <Box
               cursor="pointer"
-              onClick={handleEditClick}
+              onClick={handleClick}
               width={{ base: "100%", md: "50%" }}
               display="flex"
               flexDirection="column"

@@ -22,55 +22,45 @@ import {
   Text,
   Collapse,
   Button,
-  Container,
-  useColorMode,
-  useColorModeValue,
   Divider,
 } from "@chakra-ui/react";
 import {
   HamburgerIcon,
   BellIcon,
-  StarIcon,
   ArrowForwardIcon,
   EditIcon,
-  MoonIcon,
-  SunIcon,
 } from "@chakra-ui/icons";
 import {
   FaBuilding,
-  FaUserTie,
-  FaFileInvoiceDollar,
   FaChartLine,
-  FaMoneyCheckAlt,
   FaChevronRight,
   FaChevronLeft,
-  FaPeopleArrows,
-  FaPeopleCarry,
+  FaAddressCard,
 } from "react-icons/fa";
-import {
-  NavLink,
-  Routes,
-  Route,
-  Outlet,
-  BrowserRouter,
-  useNavigate,
-} from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import "../../src/index.css";
 import { IoHomeSharp, IoLogOut } from "react-icons/io5";
+import { FaMoneyCheckDollar } from "react-icons/fa6";
+import { MdOutlineMeetingRoom } from "react-icons/md";
+import { RiParentFill } from "react-icons/ri";
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 function HomeLayout() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [hasNewNotification, setHasNewNotification] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(true);
   const navigate = useNavigate();
-  const [userData, setUserData] = useState({
-    name: "Pukachu xinh dep tuyt voi",
-  });
+
+  const [userData, setUserData] = useState({});
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       setIsAuthenticated(true);
     }
+    const user = jwtDecode(token);
+    setUserData({ name: user.name });
   }, []);
   const handleMenuClick = (content) => {
     onClose();
@@ -89,33 +79,36 @@ function HomeLayout() {
     {
       name: "Quản lý nhân viên",
       path: "/employee-management",
-      icon: <FaUserTie />,
+      icon: <RiParentFill />,
     },
     {
       name: "Quản lý yêu cầu thuê phòng",
       path: "/rental-request",
-      icon: <FaFileInvoiceDollar />,
+      icon: <MdOutlineMeetingRoom />,
+    },
+    {
+      name: "Danh sách khách thuê",
+      path: "/tenant-list",
+      icon: <FaAddressCard />,
+    },
+    {
+      name: "Danh sách thanh toán",
+      path: "/payment-list",
+      icon: <FaMoneyCheckDollar />,
     },
     {
       name: "Thống kê doanh thu",
       path: "/revenue-stats",
       icon: <FaChartLine />,
     },
-    {
-      name: "Danh sách thanh toán",
-      path: "/payment-list",
-      icon: <FaMoneyCheckAlt />,
-    },
-    {
-      name: "Danh sách khách thuê",
-      path: "/customer-list",
-      icon: <FaPeopleCarry />,
-    },
   ];
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("role");
+
     setIsAuthenticated(false);
+
     navigate(`/register`);
   };
 
@@ -201,17 +194,17 @@ function HomeLayout() {
             <MenuButton>
               <Text fontWeight={600}>{userData.name}</Text>
             </MenuButton>
-            <MenuList width={"300px"} textColor={"brand.500"}>
+            <MenuList width={"250px"} textColor={"brand.500"}>
               <MenuItem
                 fontWeight={"bold"}
                 onClick={handleEditProfile}
-                leftIcon={<EditIcon />}
-                iconSpacing="8px"
+                // leftIcon={<EditIcon />}
+                iconSpacing="4px"
               >
                 Chỉnh sửa thông tin cá nhân
               </MenuItem>
               <MenuItem
-                leftIcon={<IoLogOut />}
+                // leftIcon={<IoLogOut />}
                 iconSpacing="8px"
                 fontWeight={"bold"}
                 onClick={handleLogout}
@@ -324,6 +317,7 @@ function HomeLayout() {
         transition="width 0.5s ease-in-out"
         position="fixed"
         h={"100%"}
+        zIndex={10}
       >
         <VStack align="start" spacing={4}>
           <Flex justify="space-between" width="100%">

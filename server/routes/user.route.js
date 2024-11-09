@@ -5,6 +5,7 @@ const {
   getUserByRole,
   updateActive,
   updateUser,
+  changePassword
 } = require("../controllers/user.controller");
 const upload = require("../middlewares/uploadImage");
 const router = express.Router();
@@ -14,7 +15,6 @@ router.get("/", authMiddleware(["admin"]), getUser);
 router.get("/:role", authMiddleware(["admin"]), getUserByRole);
 router.post("/activeAccount", authMiddleware(["admin"]), updateActive);
 
-
 //Chỉnh sửa thông tin (Tenant và Landlord)
 router.post(
   "/updateUser",
@@ -22,6 +22,14 @@ router.post(
   upload.single("image"),
   updateUser
 );
+
+//Đổi mật khẩu
+router.put(
+  "/change-password",
+  authMiddleware(["tenant", "landlord", "manager"]),
+  changePassword
+);
+
 //Tạo tài khoản Manager (chỉ Landlord làm được)
 router.post("/manager/create", authMiddleware(["landlord"]));
 

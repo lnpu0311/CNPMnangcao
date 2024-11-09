@@ -165,14 +165,14 @@ const EmployeeManagement = () => {
   };
   return (
     <Box>
-      <Text
-        textColor={"brand.700"}
-        fontSize="xx-large"
-        fontWeight="bold"
-        as={"h2"}
+      <Heading
+        textColor={"blue.500"}
+        as="h3"
+        size="lg"
+        mb={{ base: 4, md: 12 }}
       >
-        Quản lý nhân viên
-      </Text>
+        Quản Lý Nhân Viên
+      </Heading>
 
       {/* Add New Employee */}
       <Flex justifyContent={"flex-end"} mb={8}>
@@ -232,7 +232,7 @@ const EmployeeManagement = () => {
                     name="hostel"
                     value={formData.hostel}
                     onChange={handleInputChange}
-                    placeholder="Nhập chi nhánh"
+                    placeholder="Chọn cơ sở trực thuộc"
                   />
                   <FormErrorMessage>{errors.hostel}</FormErrorMessage>
                 </FormControl>
@@ -294,24 +294,20 @@ const EmployeeManagement = () => {
                   name={employee.name}
                   src="https://bit.ly/broken-link"
                 />
-                <Text textColor={"brand.4"} mr={4}>
+                <Text fontWeight="bold" mr={4}>
                   {employee.name}
                 </Text>
               </Flex>
 
               <Flex flex="2" align="center">
-                <Text fontWeight="bold" mr={2}>
-                  Số điện thoại:
-                </Text>
-                <Text textColor="brand.4" mr={4}>
+                <Text mr={2}>Số điện thoại:</Text>
+                <Text fontWeight="bold" mr={4}>
                   {employee.phone}
                 </Text>
               </Flex>
 
               <Flex flex="3" align="center">
-                <Text fontWeight="bold" mr={2}>
-                  Cơ sở:
-                </Text>
+                <Text mr={2}>Cơ sở:</Text>
                 {employee.isEditing ? (
                   <Input
                     value={employee.hostel}
@@ -322,7 +318,7 @@ const EmployeeManagement = () => {
                     textColor={"black"}
                   />
                 ) : (
-                  <Text textColor={"brand.4"}>{employee.hostel}</Text>
+                  <Text fontWeight="bold">{employee.hostel}</Text>
                 )}
               </Flex>
 

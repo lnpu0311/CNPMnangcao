@@ -195,7 +195,7 @@ const AuthForm = () => {
         const token = response.data.token;
 
         const user = jwtDecode(token);
-
+        console.log(user);
         localStorage.setItem("token", token);
         localStorage.setItem("role", user.role);
 
@@ -227,7 +227,7 @@ const AuthForm = () => {
         numPhone: registerFormData.numPhone,
         gender: registerFormData.gender,
         role: registerFormData.role,
-        password: registerFormData.password
+        password: registerFormData.password,
       });
 
       try {
@@ -245,7 +245,10 @@ const AuthForm = () => {
         setApiMessage("Tạo tài khoản thành công!");
         setIsError(false);
       } catch (error) {
-        console.error("Registration error:", error.response?.data || error.message);
+        console.error(
+          "Registration error:",
+          error.response?.data || error.message
+        );
         setApiMessage(error.response?.data?.message || "Đã xảy ra lỗi");
         setIsError(true);
       }
@@ -255,11 +258,10 @@ const AuthForm = () => {
   const handleResendOTP = async () => {
     setCanResend(false);
     setIsOtpValid("true");
-    // Logic to resend the OTP here
     try {
       const email = registerFormData.email;
       const response = await axios.post(
-        "http://localhost:5000/api/user/resendOtp",
+        "http://localhost:5000/api/auth/resend-otp",
         { email: email }
       );
       console.log(response.data);
@@ -278,7 +280,7 @@ const AuthForm = () => {
     const otpData = otp;
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/user/verifyOTP`,
+        `http://localhost:5000/api/auth/verify-otp`,
         {
           email: emailData,
           verifyOTP: otpData,

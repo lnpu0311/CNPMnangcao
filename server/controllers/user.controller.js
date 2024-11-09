@@ -67,10 +67,83 @@ const updateActive = async (req, res) => {
   }
 };
 
+//Xác thực Email OTP
+const verifyOTP = async (req, res) => {
+  const { email, verifyOTP } = req.body;
+  try {
+    const user = await User.findOne({ 
+      email: email,
+      otpVerification: verifyOTP,
+      otpExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Mã OTP không chính xác hoặc đã hết hạn" 
+      });
+    }
+
+    // Cập nhật trạng thái xác thực
+    await User.findByIdAndUpdate(user._id, {
+      is_verified: true,
+      $unset: { otpVerification: "", otpExpires: "" }
+    });
+
+    return res.status(200).json({ 
+      success: true, 
+      message: "Xác thực OTP thành công"
+    });
+  } catch (error) {
+    return res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+};
+//Thay đổi mật khẩu (sau khi đăng nhập)
+const changePassword = async (req,res) => {
+  const {currentPassword,newPassword} = req.body;
+  try{
+    //Tìm user dựa trên id từ token 
+    const user = await User.findById(req.user.id);
+    if(!user){
+      return res.status(400).json({
+        success:false,
+        message:"Không tìm thấy người dùng "
+      });
+    }
+    //Kiểm tra mật khẩu hiện tại 
+    const isMatch = await bcrypt.compare(currentPassword,user.password);
+    if(!isMatch){
+      return res.status(400).json({
+        success:false,
+        message: "Mật khẩu hiện tại không đúng "
+      });
+    }
+    //Hash mật khẩu mới 
+    const hashPassword = await bcrypt.hash(newPassword,10);
+
+    //Cập nhật mật khẩu mới 
+    await User.findByIdAndUpdate(user._id,{
+      password :hashPassword
+    });
+    res.status(200).json({
+      success:true,
+      message: "Đổi mật khẩu thành công"
+    });
+  }catch(error){
+    res.status(500).json({
+      success:false,
+      message: error.message
+    });
+  }
+}
 module.exports = {
   getUser,
   getUserByRole,
   updateActive,
   updateUser,
-  
+  changePassword,
+  verifyOTP
 };

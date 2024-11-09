@@ -311,16 +311,29 @@ const AuthForm = () => {
         position="relative"
         overflow="hidden"
         flex="4"
-        height={"fit-content"}
+        height="fit-content"
         textAlign="center"
         display="flex"
         flexDirection="column"
         alignItems="center"
-        justifyContent="center"
         mr={{ base: 0, lg: 6 }}
         mb={{ base: 6, lg: 0 }}
+        p={4}
       >
-        <Box display={{ base: "none", md: "block" }}>
+        {/* right content */}
+        <Box
+          as={"section"}
+          display={{ base: "none", md: "block" }}
+          sx={{
+            transition: "transform 0.4s ease-in-out",
+            _hover: {
+              transform: "scale(1.1)",
+              backgroundImage: `url("../eco-house-color.png")`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            },
+          }}
+        >
           <img src="../eco-house-black.png" alt="Eco Green" width="100%" />
         </Box>
         <Text
@@ -333,6 +346,7 @@ const AuthForm = () => {
           Hostel Community
         </Text>
       </Box>
+
       <Box
         borderRadius="10px"
         boxShadow="dark-lg"

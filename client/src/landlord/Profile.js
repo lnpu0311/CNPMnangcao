@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Avatar,
@@ -12,23 +12,64 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { EditIcon } from "@chakra-ui/icons";
-
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+import { useLoaderData } from "react-router-dom";
 function ProfilePage() {
   const toast = useToast();
-
+  const [token, setToken] = useState(null);
+  const [userData, setUserData] = useState({});
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [newAvatar, setNewAvatar] = useState(null);
   // Sample user data
   const [originalUser, setOriginalUser] = useState({
     name: "Pukachu",
     email: "pukachu@example.com",
-    phone: "0123456789",
+    numPhone: "0123456789",
     dob: "2000-01-01",
     password: "******",
     avatar: "https://bit.ly/broken-link",
   });
+  // useEffect để lấy token từ localStorage và giải mã nó
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      setToken(storedToken);
+      try {
+        const decodedUser = jwtDecode(storedToken);
+        setUserData(decodedUser);
+      } catch (error) {
+        console.error("Lỗi giải mã token:", error);
+      }
+    }
+  }, []); // Chạy một lần khi thành phần được gắn vào
 
-  const [user, setUser] = useState(originalUser);
-  const [isEditing, setIsEditing] = useState(false);
-  const [newAvatar, setNewAvatar] = useState(null);
+  // useEffect để gọi API và lấy thông tin người dùng
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (token && userData.id) {
+        // Chỉ gọi API khi token và userData.id đã sẵn sàng
+        try {
+          const response = await axios.get(
+            `${process.env.REACT_APP_API}/user/${userData.id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              timeout: 10000,
+            }
+          );
+          setUser(response.data.data);
+        } catch (error) {
+          console.error("Lỗi khi lấy thông tin người dùng:", error);
+        }
+      }
+    };
+
+    fetchUser();
+  }, [token, userData.id]); // Chạy khi token hoặc userData.id thay đổi
 
   const toggleEdit = () => {
     if (isEditing) {
@@ -81,9 +122,9 @@ function ProfilePage() {
     <Box maxW="md" mx="auto" p={4} textAlign="center">
       <Box position="relative" display="inline-block">
         <Avatar
-          name={user.name}
+          name={user?.name || `Đang tải...`}
           size="2xl"
-          src={newAvatar || user.avatar}
+          src={newAvatar}
           mb={4}
         />
         {isEditing && (
@@ -115,7 +156,7 @@ function ProfilePage() {
         <Input
           width="70%"
           name="name"
-          value={user.name}
+          value={user?.name || `Đang tải...`}
           onChange={handleChange}
           fontSize="2xl"
           fontWeight="bold"
@@ -125,7 +166,7 @@ function ProfilePage() {
         />
       ) : (
         <Text fontSize="2xl" fontWeight="bold">
-          {user.name}
+          {user?.name || `Đang tải...`}
         </Text>
       )}
 
@@ -137,12 +178,12 @@ function ProfilePage() {
             <Input
               width="70%"
               name="email"
-              value={user.email}
+              value={user?.email || "Đang tải ..."}
               onChange={handleChange}
               size="sm"
             />
           ) : (
-            <Text>{user.email}</Text>
+            <Text>{user?.email || "Đang tải..."}</Text>
           )}
         </HStack>
         <HStack justify="space-between" width="100%">
@@ -150,13 +191,13 @@ function ProfilePage() {
           {isEditing ? (
             <Input
               width="70%"
-              name="phone"
-              value={user.phone}
+              name="numPhone"
+              value={user.numPhone}
               onChange={handleChange}
               size="sm"
             />
           ) : (
-            <Text>{user.phone}</Text>
+            <Text>{user?.numPhone || "Đang tải..."}</Text>
           )}
         </HStack>
         <HStack justify="space-between" width="100%">
@@ -171,20 +212,7 @@ function ProfilePage() {
               size="sm"
             />
           ) : (
-            <Text>{user.dob}</Text>
-          )}
-        </HStack>
-        <HStack justify="space-between" width="100%">
-          <Text fontWeight="medium">Mật khẩu:</Text>
-          {isEditing ? (
-            <Input
-              name="password"
-              value={user.password}
-              onChange={handleChange}
-              width="70%"
-            />
-          ) : (
-            <Text>******</Text>
+            <Text>{user?.dob || "Đang tải..."}</Text>
           )}
         </HStack>
       </VStack>

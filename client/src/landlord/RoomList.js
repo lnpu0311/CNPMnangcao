@@ -22,7 +22,9 @@ import {
   useDisclosure,
   Flex,
   Grid,
-  Tag,
+  VStack,
+  HStack,
+  Avatar,
 } from "@chakra-ui/react";
 
 import {
@@ -43,7 +45,7 @@ const RoomList = () => {
     const fetchRooms = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/landlord/hostel/${facilityId}`,
+          `${process.env.REACT_APP_API}/landlord/hostel/${facilityId}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -69,14 +71,24 @@ const RoomList = () => {
 
   const navigate = useNavigate();
   const {
-    isOpen: isOpenRoom,
-    onOpen: onOpenRoom,
-    onClose: onCloseRoom,
+    isOpen: isOpenNewRoom,
+    onOpen: onOpenNewRoom,
+    onClose: onCloseNewRoom,
   } = useDisclosure();
   const {
     isOpen: isOpenContract,
     onOpen: onOpenContract,
     onClose: onCloseContract,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenInfoRoom,
+    onOpen: onOpenInfoRoom,
+    onClose: onCloseInfoRoom,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenRoom,
+    onOpen: onOpenRoom,
+    onClose: onCloseRoom,
   } = useDisclosure();
   const [newRoom, setNewRoom] = useState({
     roomTitle: "",
@@ -88,7 +100,10 @@ const RoomList = () => {
     deposit: "",
     images: [],
   });
+
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(selectedRoom?.images[0]);
+
   const [contractDetails, setContractDetails] = useState({
     startDate: "",
     endDate: "",
@@ -99,6 +114,13 @@ const RoomList = () => {
     tenantName: "",
     landlordName: "",
   });
+  // Cập nhật hình ảnh mặc định khi chọn phòng thay đổi
+  useEffect(() => {
+    if (selectedRoom) {
+      setSelectedImage(selectedRoom.images[0]);
+    }
+  }, [selectedRoom]);
+  // Tạo trạng thái để lưu trữ hình ảnh được chọn
 
   const handleEditRoom = (room) => {
     console.log("Editing room:", room);
@@ -122,15 +144,22 @@ const RoomList = () => {
 
   const handleRoomClick = (room) => {
     setSelectedRoom(room);
-    onOpenRoom();
+    onOpenInfoRoom();
   };
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewRoom((prevRoom) => ({
+  // Update field in selectedRoom object
+  const handleInputChange = (field, value) => {
+    setSelectedRoom((prevRoom) => ({
       ...prevRoom,
-      [name]: value,
+      [field]: value,
     }));
   };
+
+  // Save changes to database or state
+  const handleSaveChanges = () => {
+    // Call backend or update state with new room details
+    console.log("Saved room details:", selectedRoom);
+  };
+
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 5) {
@@ -192,7 +221,7 @@ const RoomList = () => {
     console.log(Array.from(data.entries()));
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/landlord/room/${facilityId}/create`,
+        `${process.env.REACT_APP_API}/landlord/room/${facilityId}/create`,
         data,
         {
           headers: {
@@ -213,7 +242,7 @@ const RoomList = () => {
           deposit: "",
           images: [],
         });
-        onCloseRoom();
+        onCloseNewRoom();
       } else {
         alert("Có lỗi xảy ra: " + response.data.message);
       }
@@ -237,7 +266,11 @@ const RoomList = () => {
         >
           Quay lại
         </Button>
-        <Button onClick={onOpenRoom} colorScheme="green" rightIcon={<FaPlus />}>
+        <Button
+          onClick={onOpenNewRoom}
+          colorScheme="green"
+          rightIcon={<FaPlus />}
+        >
           Thêm phòng mới
         </Button>
       </Flex>
@@ -283,7 +316,7 @@ const RoomList = () => {
                 colorScheme="teal"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleEditRoom(room);
+                  onOpenRoom(room);
                 }}
               >
                 Chỉnh sửa
@@ -333,7 +366,7 @@ const RoomList = () => {
         ))}
       </SimpleGrid>
       {/* Modal for Adding New Room */}
-      <Modal isCentered isOpen={isOpenRoom} onClose={onCloseRoom}>
+      <Modal isCentered isOpen={isOpenNewRoom} onClose={onCloseNewRoom}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader textAlign={"center"}>Thêm phòng mới</ModalHeader>
@@ -432,13 +465,12 @@ const RoomList = () => {
             <Button colorScheme="green" mr={3} onClick={handleCreateRoom}>
               Tạo phòng
             </Button>
-            <Button colorScheme="red" onClick={onCloseRoom}>
+            <Button colorScheme="red" onClick={onCloseNewRoom}>
               Hủy
             </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
-
       {/* Modal for Creating Contract */}
       <Modal isOpen={isOpenContract} onClose={onCloseContract}>
         <ModalOverlay />
@@ -531,6 +563,162 @@ const RoomList = () => {
             </Button>
             <Button variant="ghost" onClick={onCloseContract}>
               Hủy
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      {/* Modal for information of room */}
+      <Modal isOpen={isOpenInfoRoom} onClose={onCloseInfoRoom} size={"2xl"}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            <Text fontSize="2xl" fontWeight="bold" align={"center"}>
+              {selectedRoom?.roomName || "Đang tải..."}
+            </Text>
+          </ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody>
+            {/* Main Image and Details */}
+            <HStack align="start" spacing={4}>
+              <Image
+                src={selectedImage || "Đang tải..."}
+                alt={selectedRoom?.roomName || "Đang tải..."}
+                borderRadius="md"
+                boxSize="250px"
+                objectFit="cover"
+              />
+
+              {/* Room Details */}
+
+              <VStack align={"start"} spacing={2} flex="1">
+                <Text fontWeight="bold">Số điện:</Text>{" "}
+                <Text> {selectedRoom?.electricity || "Đang tải..."}</Text>
+                <Text fontWeight="bold">Số nước:</Text>{" "}
+                <Text>{selectedRoom?.water || "Đang tải..."}</Text>
+                <Text fontWeight="bold">Giá phòng:</Text>{" "}
+                <Text>{selectedRoom?.price || "Đang tải..."} VND</Text>
+                <Text fontWeight="bold">Diện tích:</Text>{" "}
+                <Text>{selectedRoom?.area || "Đang tải..."} m²</Text>
+                <Text fontWeight="bold">Mô tả:</Text>{" "}
+                <Text>{selectedRoom?.description || "Đang tải..."}</Text>
+              </VStack>
+            </HStack>
+
+            {/* Thumbnail Images */}
+            <HStack mt={4} spacing={2}>
+              {selectedRoom?.images.map((image, index) => (
+                <Image
+                  key={index}
+                  src={image}
+                  alt={`Thumbnail ${index + 1}`}
+                  boxSize="50px"
+                  objectFit="cover"
+                  borderRadius="md"
+                  cursor="pointer"
+                  onClick={() => setSelectedImage(image)} // Cập nhật hình ảnh khi nhấp vào
+                />
+              )) || "Đang tải"}
+            </HStack>
+
+            {/* Tenant Information */}
+            <Box mt={6} borderWidth="1px" borderRadius="md" p={4}>
+              <Text fontWeight="bold" mb={2}>
+                Khách thuê:
+              </Text>
+              <HStack spacing={3}>
+                <Avatar src={newRoom.tenantAvatar} />
+                <VStack align="start" spacing={0}>
+                  <Text>Tên khách thuê: {newRoom.tenantName}</Text>
+                  <Text>Số điện thoại: {newRoom.tenantPhone}</Text>
+                </VStack>
+              </HStack>
+            </Box>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="gray" mr={3} onClick={onCloseInfoRoom}>
+              Đóng
+            </Button>
+            <Button colorScheme="blue">Chi tiết hợp đồng</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      {/* Modal for edit information of room*/}
+      <Modal isOpen={isOpenRoom} onClose={onCloseRoom} size={"2xl"}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            <Input
+              w={"80%"}
+              value={selectedRoom?.roomName || ""}
+              onChange={(e) => handleInputChange("roomName", e.target.value)}
+              fontSize="2xl"
+              fontWeight="bold"
+              align={"center"}
+              placeholder="Tên phòng"
+            />
+          </ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody>
+            {/* Main Image and Details */}
+            <HStack align="start" spacing={4}>
+              <Image
+                src={selectedRoom?.images || ""}
+                alt={selectedRoom?.roomName || "Đang tải..."}
+                borderRadius="md"
+                boxSize="250px"
+                objectFit="cover"
+              />
+              <VStack align={"start"} spacing={2} flex="1">
+                <Text fontWeight="bold">Giá phòng:</Text>
+                <Input
+                  type="number"
+                  value={selectedRoom?.price || ""}
+                  onChange={(e) => handleInputChange("price", e.target.value)}
+                  placeholder="Giá phòng (VND)"
+                />
+                <Text fontWeight="bold">Diện tích:</Text>
+                <Input
+                  type="number"
+                  value={selectedRoom?.area || ""}
+                  onChange={(e) => handleInputChange("area", e.target.value)}
+                  placeholder="Diện tích (m²)"
+                />
+                <Text fontWeight="bold">Mô tả:</Text>
+                <Textarea
+                  value={selectedRoom?.description || ""}
+                  onChange={(e) =>
+                    handleInputChange("description", e.target.value)
+                  }
+                  placeholder="Mô tả phòng"
+                />
+              </VStack>
+            </HStack>
+
+            {/* Thumbnail Images */}
+            <HStack mt={4} spacing={2}>
+              {selectedRoom?.images?.map((image, index) => (
+                <Image
+                  key={index}
+                  src={image}
+                  alt={`Thumbnail ${index + 1}`}
+                  boxSize="50px"
+                  objectFit="cover"
+                  borderRadius="md"
+                  cursor="pointer"
+                />
+              ))}
+            </HStack>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="gray" mr={3} onClick={onCloseRoom}>
+              Đóng
+            </Button>
+            <Button colorScheme="blue" onClick={handleSaveChanges}>
+              Lưu thay đổi
             </Button>
           </ModalFooter>
         </ModalContent>

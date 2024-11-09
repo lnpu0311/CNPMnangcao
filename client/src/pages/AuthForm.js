@@ -185,7 +185,7 @@ const AuthForm = () => {
 
       try {
         const response = await axios.post(
-          `http://localhost:5000/api/auth/login`,
+          `${process.env.REACT_APP_API}/auth/login`,
           {
             email: email,
             password: password,
@@ -232,7 +232,7 @@ const AuthForm = () => {
 
       try {
         const response = await axios.post(
-          `http://localhost:5000/api/auth/register`,
+          `${process.env.REACT_APP_API}/auth/register`,
           data,
           {
             headers: {
@@ -261,7 +261,7 @@ const AuthForm = () => {
     try {
       const email = registerFormData.email;
       const response = await axios.post(
-        "http://localhost:5000/api/auth/resend-otp",
+        `${process.env.REACT_APP_API}/auth/resend-otp`,
         { email: email }
       );
       console.log(response.data);
@@ -280,7 +280,7 @@ const AuthForm = () => {
     const otpData = otp;
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/auth/verify-otp`,
+        `${process.env.REACT_APP_API}/auth/verify-otp`,
         {
           email: emailData,
           verifyOTP: otpData,

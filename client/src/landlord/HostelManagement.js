@@ -23,27 +23,27 @@ import {
   Avatar,
   HStack,
   Badge,
+  Stack,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { PlusSquareIcon } from "@chakra-ui/icons";
 import { jwtDecode } from "jwt-decode";
-import vietnamData from "../data/dvhcvn.json"
-import Chat from '../components/Chat';
-
+import vietnamData from "../data/dvhcvn.json";
+import Chat from "../components/Chat";
 
 const FacilityItem = ({ facility, onDelete }) => {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
-  const [wards,setWards] = useState([]);
+  const [wards, setWards] = useState([]);
   const handleEditClick = () => {
     navigate(`/landlord/room-list/${facility.id}`);
   };
 
   const handleDeleteClick = async () => {
     try {
-      await axios.delete(`http://localhost:5000/api/hostel/${facility.id}`, {
+      await axios.delete(`${process.env.REACT_APP_API}/hostel/${facility.id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -154,7 +154,7 @@ const HostelManagement = () => {
     const fetchFacilities = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/landlord/hostel",
+          `${process.env.REACT_APP_API}/landlord/hostel`,
           {
             params: {
               landlordId: user.id,
@@ -183,21 +183,24 @@ const HostelManagement = () => {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token) return;
 
-        const response = await axios.get('http://localhost:5000/api/user/current', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await axios.get(
+          `${process.env.REACT_APP_API}/user/current`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         if (response.data.success) {
-          console.log('Current user data:', response.data.data);
+          console.log("Current user data:", response.data.data);
           const userData = response.data.data;
           setCurrentUser(userData);
           setToken(token);
         }
       } catch (error) {
-        console.error('Error fetching current user:', error);
+        console.error("Error fetching current user:", error);
       }
     };
 
@@ -207,13 +210,16 @@ const HostelManagement = () => {
   useEffect(() => {
     const fetchUnreadMessages = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5000/api/messages/unread', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          `${process.env.REACT_APP_API}/messages/unread`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setUnreadMessages(response.data.data);
       } catch (error) {
-        console.error('Error fetching unread messages:', error);
+        console.error("Error fetching unread messages:", error);
       }
     };
 
@@ -233,25 +239,25 @@ const HostelManagement = () => {
 
   const handleProvinceChange = (e) => {
     const provinceName = e.target.value;
-    const province = provinces.find(p => p.name === provinceName);
+    const province = provinces.find((p) => p.name === provinceName);
     setDistricts(province ? province.level2s : []);
     setWards([]);
     setFormData({
       ...formData,
       city: provinceName,
-      district: '',
-      ward: ''
+      district: "",
+      ward: "",
     });
   };
 
   const handleDistrictChange = (e) => {
     const districtName = e.target.value;
-    const district = districts.find(d => d.name === districtName);
+    const district = districts.find((d) => d.name === districtName);
     setWards(district ? district.level3s : []);
     setFormData({
       ...formData,
       district: districtName,
-      ward: ''
+      ward: "",
     });
   };
 
@@ -259,7 +265,7 @@ const HostelManagement = () => {
     const wardName = e.target.value;
     setFormData({
       ...formData,
-      ward: wardName
+      ward: wardName,
     });
   };
 
@@ -275,7 +281,7 @@ const HostelManagement = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/landlord/hostel/create",
+        `${process.env.REACT_APP_API}/landlord/hostel/create`,
         data,
         {
           headers: {
@@ -301,7 +307,7 @@ const HostelManagement = () => {
 
   const handleDeleteFacility = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/hostel/${id}`, {
+      await axios.delete(`${process.env.REACT_APP_API}/hostel/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -321,64 +327,112 @@ const HostelManagement = () => {
     };
 
     return (
-      <Flex
-        bg="brand.2"
-        p={4}
-        mb={4}
-        alignItems="center"
-        justifyContent="space-between"
-        borderRadius="md"
-        shadow={"lg"}
+      <Stack
+        mx="auto"
+        justifyContent={"center"}
+        w={{ base: "100%", md: "6xl" }}
+        spacing={4}
       >
-        <Flex>
-          <Image
-            borderRadius={8}
-            src={facility.imageUrl}
-            alt={facility.name}
-            boxSize="200px"
-            mr={4}
-            objectFit={"cover"}
-          />
-          <Box textAlign="left" display="flex" flexDirection="column">
-            <Text fontSize="x-large" fontWeight="bold" color="blue.500">
-              {facility.name}
-            </Text>
-            <Text fontSize="md" color="gray.600">
-              Địa chỉ: {facility.address}
-            </Text>
+        {facilities.map((facility) => (
+          <Box
+            key={facility.id}
+            p={{ base: 2, md: 4 }}
+            borderWidth="1px"
+            borderRadius="md"
+            shadow="sm"
+            bg="brand.2"
+          >
+            <Flex flexDirection={{ base: "column", md: "row" }}>
+              {/* Image Column */}
+              <Box width={{ base: "100%", md: "30%" }} pr={{ base: 0, md: 4 }}>
+                <Image
+                  borderRadius={8}
+                  src={facility.imageUrl}
+                  alt={facility.name}
+                  width="100%"
+                  height="200px"
+                  objectFit="cover"
+                />
+              </Box>
+
+              {/* Content Column */}
+              <Box
+                width={{ base: "100%", md: "50%" }}
+                display="flex"
+                flexDirection="column"
+                gap={{ base: 1, md: 2 }}
+              >
+                <Heading
+                  textAlign={{ base: "center", md: "left" }}
+                  as="h4"
+                  fontSize={{ base: "xl", md: "2xl" }}
+                  color="blue.500"
+                >
+                  {facility.name}
+                </Heading>
+                <Box display="flex" alignItems="center">
+                  <Text fontSize="md" color="gray.600" mr={2}>
+                    Địa chỉ:
+                  </Text>
+                  <Text fontSize="md" fontWeight={"bold"}>
+                    {facility.address}
+                  </Text>
+                </Box>
+                <Box display="flex" alignItems="center">
+                  <Text fontSize="md" color="gray.600" mr={2}>
+                    Thành phố:
+                  </Text>
+                  <Text fontSize="md" fontWeight={"bold"}>
+                    {facility.city}
+                  </Text>
+                </Box>
+                <Box display="flex" alignItems="center">
+                  <Text fontSize="md" color="gray.600" mr={2}>
+                    Quận:
+                  </Text>
+                  <Text fontSize="md" fontWeight={"bold"}>
+                    {facility.district}
+                  </Text>
+                </Box>
+              </Box>
+
+              {/* Buttons Column */}
+              <Box width={{ base: "100%", md: "20%" }}>
+                <Flex justifyContent="flex-end">
+                  <Button onClick={handleEditClick} colorScheme="blue" mr={2}>
+                    Chỉnh sửa
+                  </Button>
+                  {(facility.roomCount === 0 || !facility.roomCount) && (
+                    <Button
+                      onClick={() => handleDeleteFacility(facility.id)}
+                      colorScheme="red"
+                    >
+                      Xóa cơ sở
+                    </Button>
+                  )}
+                </Flex>
+              </Box>
+            </Flex>
           </Box>
-        </Flex>
-        <Flex>
-          <Button onClick={handleEditClick} colorScheme="blue" mr={2}>
-            Chỉnh sửa
-          </Button>
-          {(facility.roomCount === 0 || !facility.roomCount) && (
-            <Button
-              onClick={() => handleDeleteFacility(facility.id)}
-              colorScheme="red"
-            >
-              Xóa cơ sở
-            </Button>
-          )}
-        </Flex>
-      </Flex>
+        ))}
+      </Stack>
     );
   };
 
   const handleChatWithTenant = (tenant) => {
     if (!currentUser || !tenant) {
-      console.error('Missing data:', { currentUser, tenant });
+      console.error("Missing data:", { currentUser, tenant });
       return;
     }
 
-    console.log('Chat data:', {
+    console.log("Chat data:", {
       currentUser: currentUser,
-      tenant: tenant
+      tenant: tenant,
     });
 
     setSelectedTenant({
       id: tenant.id || tenant._id,
-      name: tenant.name
+      name: tenant.name,
     });
     setShowChat(true);
   };
@@ -510,37 +564,42 @@ const HostelManagement = () => {
       ))}
 
       <Box mt={4}>
-        <Heading size="md" mb={4}>Tin nhắn từ người thuê</Heading>
+        <Heading size="md" mb={4}>
+          Tin nhắn từ người thuê
+        </Heading>
         <VStack spacing={3} align="stretch">
-          {unreadMessages && unreadMessages.map((message) => (
-            <Box
-              key={message._id}
-              p={3}
-              bg="gray.50"
-              borderRadius="md"
-              cursor="pointer"
-              onClick={() => handleChatWithTenant({
-                id: message.senderId._id,
-                name: message.senderId.name
-              })}
-            >
-              <HStack spacing={3}>
-                <Avatar size="sm" name={message.senderId.name} />
-                <Box flex={1}>
-                  <Text fontWeight="bold">{message.senderId.name}</Text>
-                  <Text noOfLines={1}>{message.content}</Text>
-                  <Text fontSize="xs" color="gray.500">
-                    {new Date(message.timestamp).toLocaleString()}
-                  </Text>
-                </Box>
-                {message.count > 1 && (
-                  <Badge colorScheme="red" borderRadius="full">
-                    {message.count}
-                  </Badge>
-                )}
-              </HStack>
-            </Box>
-          ))}
+          {unreadMessages &&
+            unreadMessages.map((message) => (
+              <Box
+                key={message._id}
+                p={3}
+                bg="gray.50"
+                borderRadius="md"
+                cursor="pointer"
+                onClick={() =>
+                  handleChatWithTenant({
+                    id: message.senderId._id,
+                    name: message.senderId.name,
+                  })
+                }
+              >
+                <HStack spacing={3}>
+                  <Avatar size="sm" name={message.senderId.name} />
+                  <Box flex={1}>
+                    <Text fontWeight="bold">{message.senderId.name}</Text>
+                    <Text noOfLines={1}>{message.content}</Text>
+                    <Text fontSize="xs" color="gray.500">
+                      {new Date(message.timestamp).toLocaleString()}
+                    </Text>
+                  </Box>
+                  {message.count > 1 && (
+                    <Badge colorScheme="red" borderRadius="full">
+                      {message.count}
+                    </Badge>
+                  )}
+                </HStack>
+              </Box>
+            ))}
         </VStack>
       </Box>
 

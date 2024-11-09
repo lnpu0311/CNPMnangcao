@@ -24,9 +24,10 @@ import {
   HStack,
   Badge,
   Stack,
+  IconButton,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import { PlusSquareIcon } from "@chakra-ui/icons";
+import { DeleteIcon, EditIcon, PlusSquareIcon } from "@chakra-ui/icons";
 import { jwtDecode } from "jwt-decode";
 import vietnamData from "../data/dvhcvn.json";
 import Chat from "../components/Chat";
@@ -36,6 +37,13 @@ const HostelManagement = () => {
   const [token, setToken] = useState(null);
   const [facilities, setFacilities] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showChat, setShowChat] = useState(false);
+  const [selectedTenant, setSelectedTenant] = useState(null);
+  const [unreadMessages, setUnreadMessages] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -44,13 +52,6 @@ const HostelManagement = () => {
     ward: "",
     image: null,
   });
-  const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [wards, setWards] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [showChat, setShowChat] = useState(false);
-  const [selectedTenant, setSelectedTenant] = useState(null);
-  const [unreadMessages, setUnreadMessages] = useState([]);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -229,7 +230,6 @@ const HostelManagement = () => {
     }
   };
 
-  // Component FacilityItem nested bên trong HostelManagement
   const FacilityItem = ({ facility }) => {
     const navigate = useNavigate();
 
@@ -239,10 +239,10 @@ const HostelManagement = () => {
 
     return (
       <Stack
-        mx="auto"
+        marginBlockEnd={4}
         justifyContent={"center"}
-        w={{ base: "100%", md: "6xl" }}
         spacing={4}
+        boxShadow="xl"
       >
         <Box
           key={facility.id}
@@ -254,7 +254,12 @@ const HostelManagement = () => {
         >
           <Flex flexDirection={{ base: "column", md: "row" }}>
             {/* Image Column */}
-            <Box width={{ base: "100%", md: "30%" }} pr={{ base: 0, md: 4 }}>
+            <Box
+              cursor="pointer"
+              onClick={handleEditClick}
+              width={{ base: "100%", md: "30%" }}
+              pr={{ base: 0, md: 4 }}
+            >
               <Image
                 borderRadius={8}
                 src={facility.imageUrl}
@@ -267,6 +272,8 @@ const HostelManagement = () => {
 
             {/* Content Column */}
             <Box
+              cursor="pointer"
+              onClick={handleEditClick}
               width={{ base: "100%", md: "50%" }}
               display="flex"
               flexDirection="column"
@@ -309,16 +316,19 @@ const HostelManagement = () => {
             {/* Buttons Column */}
             <Box width={{ base: "100%", md: "20%" }}>
               <Flex justifyContent="flex-end">
-                <Button onClick={handleEditClick} colorScheme="blue" mr={2}>
-                  Chỉnh sửa
-                </Button>
+                <IconButton
+                  icon={<EditIcon />}
+                  colorScheme="blue"
+                  mr={2}
+                ></IconButton>
                 {(facility.roomCount === 0 || !facility.roomCount) && (
-                  <Button
+                  <IconButton
                     onClick={() => handleDeleteFacility(facility.id)}
                     colorScheme="red"
+                    icon={<DeleteIcon />}
                   >
                     Xóa cơ sở
-                  </Button>
+                  </IconButton>
                 )}
               </Flex>
             </Box>

@@ -470,10 +470,10 @@ const RoomList = () => {
         </ModalContent>
       </Modal>
       {/* Modal for Creating Contract */}
-      <Modal isOpen={isOpenContract} onClose={onCloseContract}>
+      <Modal isCentered isOpen={isOpenContract} onClose={onCloseContract}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Hợp đồng mới</ModalHeader>
+          <ModalHeader textAlign={"center"}>Hợp đồng mới</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Grid templateColumns="repeat(2, 1fr)" gap={4}>
@@ -556,7 +556,7 @@ const RoomList = () => {
             </Grid>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="teal" mr={3} onClick={handleCreateContract}>
+            <Button colorScheme="green" mr={3} onClick={handleCreateContract}>
               Tạo hợp đồng
             </Button>
             <Button variant="ghost" onClick={onCloseContract}>
@@ -566,7 +566,12 @@ const RoomList = () => {
         </ModalContent>
       </Modal>
       {/* Modal for information of room */}
-      <Modal isOpen={isOpenInfoRoom} onClose={onCloseInfoRoom} size={"2xl"}>
+      <Modal
+        isCentered
+        isOpen={isOpenInfoRoom}
+        onClose={onCloseInfoRoom}
+        size={"2xl"}
+      >
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>
@@ -643,7 +648,7 @@ const RoomList = () => {
         </ModalContent>
       </Modal>
       {/* Modal for edit information of room*/}
-      <Modal isOpen={isOpenRoom} onClose={onCloseRoom} size={"2xl"}>
+      <Modal isCentered isOpen={isOpenRoom} onClose={onCloseRoom} size={"2xl"}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>

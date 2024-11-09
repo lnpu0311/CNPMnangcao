@@ -165,6 +165,7 @@ function TenantHome() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsAuthenticated(false);
+    navigate(`/login`);
   };
 
   const toggleNav = () => {

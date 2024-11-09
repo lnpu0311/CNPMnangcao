@@ -45,12 +45,12 @@ function HomeDashboard() {
   return (
     <Box p={5}>
       <Text fontSize="2xl" fontWeight="bold">
-        Welcome, {userData.name}!
+        Chào mừng trở lại, {userData.name}!
       </Text>
 
       <VStack align="start" spacing={4} mb={5}>
         <Text fontSize="lg" fontWeight="bold">
-          Quick Actions
+          Tác vụ nhanh
         </Text>
         <Flex gap={3}>
           <Button

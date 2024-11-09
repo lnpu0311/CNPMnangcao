@@ -35,7 +35,6 @@ import {
   FaFileInvoiceDollar,
 } from "react-icons/fa";
 import axios from "axios";
-// Giả sử đây là dữ liệu phòng mẫu
 const RoomList = () => {
   const [hostel, setHostel] = useState();
   const [rooms, setRooms] = useState([]);
@@ -61,7 +60,6 @@ const RoomList = () => {
     };
     fetchRooms();
   }, [facilityId]);
-
   // Kiểm tra dữ liệu của hostel khi nó thay đổi
   useEffect(() => {
     if (hostel) {
@@ -297,12 +295,11 @@ const RoomList = () => {
       <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={6}>
         {rooms.map((room) => (
           <Box
-            border="2px solid"
             key={room.id}
             borderRadius="lg"
             overflow="hidden"
             boxShadow="xl"
-            bg={room.status === "occupied" ? "brand.200" : "white"}
+            bg={room.status === "occupied" ? "brand.200" : "brand.0"}
             position="relative"
             p={3}
             display="flex"
@@ -311,7 +308,6 @@ const RoomList = () => {
             justifyContent="center"
             onClick={() => handleRoomClick(room)}
             cursor="pointer"
-            borderColor="brand.2"
           >
             <Image
               boxSize="200px"
@@ -487,15 +483,15 @@ const RoomList = () => {
         </ModalContent>
       </Modal>
       {/* Modal for Creating Contract */}
-      <Modal isOpen={isOpenContract} onClose={onCloseContract}>
+      <Modal isCentered isOpen={isOpenContract} onClose={onCloseContract}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Hợp đồng mới</ModalHeader>
+          <ModalHeader textAlign={"center"}>Hợp đồng mới</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-              <FormControl>
-                <FormLabel>Ngày tạo*</FormLabel>
+              <FormControl isRequired>
+                <FormLabel>Ngày tạo</FormLabel>
                 <Input
                   name="startDate"
                   type="date"
@@ -503,8 +499,8 @@ const RoomList = () => {
                   onChange={handleAddTenant}
                 />
               </FormControl>
-              <FormControl>
-                <FormLabel>Ngày hết hạn*</FormLabel>
+              <FormControl isRequired>
+                <FormLabel>Ngày hết hạn</FormLabel>
                 <Input
                   name="endDate"
                   type="date"
@@ -512,8 +508,8 @@ const RoomList = () => {
                   onChange={handleAddTenant}
                 />
               </FormControl>
-              <FormControl>
-                <FormLabel>Tiền cọc*</FormLabel>
+              <FormControl isRequired>
+                <FormLabel>Tiền cọc</FormLabel>
                 <Input
                   name="deposit"
                   type="number"
@@ -522,8 +518,8 @@ const RoomList = () => {
                   placeholder="Nhập tiền cọc"
                 />
               </FormControl>
-              <FormControl>
-                <FormLabel>Tiền thuê phòng*</FormLabel>
+              <FormControl isRequired>
+                <FormLabel>Tiền thuê phòng</FormLabel>
                 <Input
                   name="rent"
                   type="number"
@@ -532,8 +528,8 @@ const RoomList = () => {
                   placeholder="Nhập tiền thuê phòng"
                 />
               </FormControl>
-              <FormControl>
-                <FormLabel>Số tiền điện*</FormLabel>
+              <FormControl isRequired>
+                <FormLabel>Số tiền điện</FormLabel>
                 <Input
                   name="electricityBill"
                   type="number"
@@ -542,8 +538,8 @@ const RoomList = () => {
                   placeholder="Nhập tiền điện"
                 />
               </FormControl>
-              <FormControl>
-                <FormLabel>Số tiền nước*</FormLabel>
+              <FormControl isRequired>
+                <FormLabel>Số tiền nước</FormLabel>
                 <Input
                   name="waterBill"
                   type="number"
@@ -552,8 +548,8 @@ const RoomList = () => {
                   placeholder="Nhập tiền nước"
                 />
               </FormControl>
-              <FormControl>
-                <FormLabel>Tên bên thuê*</FormLabel>
+              <FormControl isRequired>
+                <FormLabel>Tên bên thuê</FormLabel>
                 <Input
                   name="tenantName"
                   value={contractDetails.tenantName}
@@ -561,8 +557,8 @@ const RoomList = () => {
                   placeholder="Nhập tên bên thuê"
                 />
               </FormControl>
-              <FormControl>
-                <FormLabel>Tên bên cho thuê *</FormLabel>
+              <FormControl isRequired>
+                <FormLabel>Tên bên cho thuê </FormLabel>
                 <Input
                   name="landlordName"
                   value={contractDetails.landlordName}
@@ -573,7 +569,7 @@ const RoomList = () => {
             </Grid>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="teal" mr={3} onClick={handleCreateContract}>
+            <Button colorScheme="green" mr={3} onClick={handleCreateContract}>
               Tạo hợp đồng
             </Button>
             <Button variant="ghost" onClick={onCloseContract}>
@@ -583,7 +579,12 @@ const RoomList = () => {
         </ModalContent>
       </Modal>
       {/* Modal for information of room */}
-      <Modal isOpen={isOpenInfoRoom} onClose={onCloseInfoRoom} size={"2xl"}>
+      <Modal
+        isCentered
+        isOpen={isOpenInfoRoom}
+        onClose={onCloseInfoRoom}
+        size={"2xl"}
+      >
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>
@@ -660,7 +661,7 @@ const RoomList = () => {
         </ModalContent>
       </Modal>
       {/* Modal for edit information of room*/}
-      <Modal isOpen={isOpenRoom} onClose={onCloseRoom} size={"2xl"}>
+      <Modal isCentered isOpen={isOpenRoom} onClose={onCloseRoom} size={"2xl"}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>

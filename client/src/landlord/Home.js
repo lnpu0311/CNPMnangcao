@@ -194,7 +194,7 @@ function HomeLayout() {
             <MenuButton>
               <Text fontWeight={600}>{userData.name}</Text>
             </MenuButton>
-            <MenuList bgColor={"brand.2"} textColor={"brand.500"}>
+            <MenuList bgColor={"brand.2"}>
               <MenuItem
                 fontWeight={"bold"}
                 onClick={handleEditProfile}
@@ -350,6 +350,7 @@ function HomeLayout() {
                 }
                 to={item.path}
                 key={item.name}
+                end
                 onClick={() => {
                   handleMenuClick(item.name);
                   onClose();
@@ -371,7 +372,12 @@ function HomeLayout() {
         mt={{ base: 16, md: 0 }}
         p={1}
       >
-        <Box bg={"white"} mr={{ base: "0", md: "10px" }} p={6}>
+        <Box
+          h={"fit-content"}
+          bg={"white"}
+          mr={{ base: "0", md: "10px" }}
+          p={6}
+        >
           <Outlet />
         </Box>
       </GridItem>

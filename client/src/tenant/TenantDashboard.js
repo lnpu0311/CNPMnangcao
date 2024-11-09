@@ -164,7 +164,7 @@ function TenantDashboard() {
 
   // Tự động chuyển đổi hình ảnh sau mỗi 5 giây
   useEffect(() => {
-    const interval = setInterval(nextImage, 5000);
+    const interval = setInterval(nextImage, 4000);
     return () => clearInterval(interval); // Dọn dẹp interval khi component unmount
   }, []);
 
@@ -177,7 +177,7 @@ function TenantDashboard() {
 
   // Tự động chuyển đổi nội dung sau mỗi 5 giây
   useEffect(() => {
-    const interval = setInterval(nextContent, 5000);
+    const interval = setInterval(nextContent, 6000);
     return () => clearInterval(interval); // Dọn dẹp interval khi component unmount
   }, []);
 

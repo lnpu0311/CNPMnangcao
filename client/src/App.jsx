@@ -22,7 +22,8 @@ import RevenueStats from "./landlord/RevenueStats";
 import AdminDashboard from "./admin/AdminDashboard";
 import SearchResults from "./pages/SearchResults";
 import MessageManagement from "./landlord/MessageManagement";
-
+import TenantBookingManagement from "./tenant/TenantBookingManagement";
+import BookingManagement from "./landlord/BookingManagement";
 function App() {
   return (
     <ChakraProvider theme={theme}>
@@ -72,6 +73,7 @@ function App() {
             <Route path="room-list/:facilityId" element={<RoomList />} />
             <Route path="profile-page" element={<ProfilePage />} />
             <Route path="messages" element={<MessageManagement />} />
+            <Route path="booking-management" element={<BookingManagement />} />
           </Route>
 
           {/* Tenant routes */}
@@ -88,6 +90,7 @@ function App() {
             <Route path="contract" element={<TenantContract />} />
             <Route path="payments" element={<TenantPayments />} />
             <Route path="profile-page" element={<ProfilePage />} />
+            <Route path="bookings" element={<TenantBookingManagement />} />
           </Route>
 
           <Route path="/search-results" element={<SearchResults />} />

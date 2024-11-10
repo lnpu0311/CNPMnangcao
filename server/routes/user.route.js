@@ -48,9 +48,7 @@ router.put(
   authMiddleware(["tenant", "landlord", "manager"]),
   changePassword
 );
-
-
-// Thêm route mới để lấy thông tin user hiện tại
+//Lấy user hiện tại 
 router.get(
   "/current",
   authMiddleware(["tenant", "landlord", "manager"]),

@@ -59,6 +59,8 @@ import {
   FaFacebook,
   FaYoutube,
   FaInstagram,
+  FaCalendarAlt,
+  FaCalendarCheck,
 } from "react-icons/fa";
 import {
   NavLink,
@@ -143,6 +145,11 @@ function TenantHome() {
       name: "Danh sách phòng",
       path: "room-list",
       icon: <FaBuilding />,
+    },
+    {
+      name: "Lịch sử đặt phòng",
+      path: "bookings",
+      icon: <FaCalendarCheck />,
     },
     {
       name: "Thông tin hợp đồng",

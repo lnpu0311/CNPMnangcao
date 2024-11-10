@@ -656,7 +656,6 @@ const RoomList = () => {
             <Button colorScheme="gray" mr={3} onClick={onCloseInfoRoom}>
               Đóng
             </Button>
-            <Button colorScheme="blue">Chi tiết hợp đồng</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

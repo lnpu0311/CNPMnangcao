@@ -25,16 +25,17 @@ import {
   Badge,
   Stack,
   IconButton,
+  useToast,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import { DeleteIcon, EditIcon, PlusSquareIcon } from "@chakra-ui/icons";
+import { DeleteIcon, EditIcon, PlusSquareIcon, CloseIcon } from "@chakra-ui/icons";
 import { jwtDecode } from "jwt-decode";
 import vietnamData from "../data/dvhcvn.json";
 import Chat from "../components/Chat";
 
 const HostelManagement = () => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
+  
+  const [token, setToken] = useState(localStorage.getItem('token'));
   const [facilities, setFacilities] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [provinces, setProvinces] = useState([]);
@@ -52,13 +53,14 @@ const HostelManagement = () => {
     ward: "",
     image: null,
   });
+  const toast = useToast();
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
       setToken(storedToken);
       const decodedUser = jwtDecode(storedToken);
-      setUser(decodedUser);
+      setCurrentUser(decodedUser);
     }
   }, []);
 
@@ -69,7 +71,7 @@ const HostelManagement = () => {
           `${process.env.REACT_APP_API}/landlord/hostel`,
           {
             params: {
-              landlordId: user.id,
+              landlordId: currentUser.id,
             },
             headers: {
               Authorization: `Bearer ${token}`,
@@ -83,10 +85,10 @@ const HostelManagement = () => {
       }
     };
 
-    if (user && token) {
+    if (currentUser && token) {
       fetchFacilities();
     }
-  }, [user, token]);
+  }, [currentUser, token]);
 
   useEffect(() => {
     setProvinces(vietnamData.data);
@@ -95,7 +97,6 @@ const HostelManagement = () => {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const token = localStorage.getItem("token");
         if (!token) return;
 
         const response = await axios.get(
@@ -106,18 +107,26 @@ const HostelManagement = () => {
         );
 
         if (response.data.success) {
-          console.log("Current user data:", response.data.data);
           const userData = response.data.data;
-          setCurrentUser(userData);
-          setToken(token);
+          setCurrentUser({
+            id: userData._id,
+            name: userData.name,
+          });
         }
       } catch (error) {
         console.error("Error fetching current user:", error);
+        toast({
+          title: "Lỗi",
+          description: "Không thể tải thông tin người dùng",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
       }
     };
 
     fetchCurrentUser();
-  }, []);
+  }, [token, toast]);
 
   useEffect(() => {
     const fetchUnreadMessages = async () => {
@@ -189,7 +198,7 @@ const HostelManagement = () => {
     data.append("district", formData.district);
     data.append("ward", formData.ward);
     data.append("image", formData.image);
-    data.append("landlordId", user.id);
+    data.append("landlordId", currentUser.id);
 
     try {
       const response = await axios.post(
@@ -339,21 +348,41 @@ const HostelManagement = () => {
   };
 
   const handleChatWithTenant = (tenant) => {
-    if (!currentUser || !tenant) {
-      console.error("Missing data:", { currentUser, tenant });
+    if (!currentUser) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng đăng nhập lại",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
       return;
     }
 
-    console.log("Chat data:", {
-      currentUser: currentUser,
-      tenant: tenant,
-    });
+    if (!tenant || !tenant.id) {
+      console.error("Invalid tenant data:", tenant);
+      toast({
+        title: "Lỗi",
+        description: "Không thể bắt đầu chat. Thiếu thông tin người thuê.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
 
+    console.log("Starting chat with tenant:", tenant);
+    
     setSelectedTenant({
       id: tenant.id || tenant._id,
-      name: tenant.name,
+      name: tenant.name || "Người thuê",
     });
     setShowChat(true);
+  };
+
+  const handleCloseChat = () => {
+    setShowChat(false);
+    setSelectedTenant(null);
   };
 
   return (
@@ -523,12 +552,44 @@ const HostelManagement = () => {
       </Box>
 
       {showChat && currentUser && selectedTenant && (
-        <Box position="fixed" bottom="20px" right="20px" zIndex={1000}>
-          <Chat
-            currentUserId={currentUser.id || currentUser._id}
-            recipientId={selectedTenant.id}
-            recipientName={selectedTenant.name || "Người thuê"}
-          />
+        <Box 
+          position="fixed" 
+          bottom="20px" 
+          right="20px" 
+          zIndex={1000}
+          maxWidth="400px"
+          width="100%"
+        >
+          <Box 
+            position="relative" 
+            backgroundColor="white" 
+            borderRadius="md" 
+            boxShadow="lg"
+          >
+            <IconButton
+              icon={<CloseIcon />}
+              position="absolute"
+              right="-10px"
+              top="-10px"
+              size="sm"
+              colorScheme="red"
+              borderRadius="full"
+              onClick={() => {
+                setShowChat(false);
+                setSelectedTenant(null);
+              }}
+              zIndex={1001}
+            />
+            <Chat
+              currentUserId={currentUser.id}
+              recipientId={selectedTenant.id}
+              recipientName={selectedTenant.name}
+              onClose={() => {
+                setShowChat(false);
+                setSelectedTenant(null);
+              }}
+            />
+          </Box>
         </Box>
       )}
     </Box>

@@ -1,6 +1,6 @@
 const Hostel = require("../models/hostel.model");
 const Room = require("../models/room.model");
-
+const Contracts = require("../models/contracts.model");
 const createHostel = async (req, res) => {
   const hostel = req.body;
   console.log(req.file);
@@ -80,6 +80,38 @@ const createRoom = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+const createContract = async(req,res) =>{
+  const contract = req.body;
+  console.log(req.file);
+  if(!contract.roomId||!contract.tenantId||!contract.starDate||!contract.endDate||!contract.depositFee||!contract.rentFee||!contract.electricityFee||!contract.waterFee||!contract.serviceFee||!contract.landlordId){
+    return res.status(400).json({success:false,message:"Please create all fields"});
+  }
+  if (contract.electricityFee < 0 || contract.waterFee < 0||contract.serviceFee<0) {
+    return res.status(400).json({
+      success: false,
+      message: "electricityFee,waterFee,serviceFee must not be less than 0",
+    });
+  }
+  const newContract = new Contracts({
+    roomId:contract.roomId,
+    startDate:contract.startDate,
+    endDate:contract.endDate,
+    depositFee:contract.depositFee,
+    rentFee:contract.rentFee,
+    electricityFee:contract.electricityFee,
+    waterFee:contract.waterFee,
+    serviceFee:contract.serviceFee,
+    tenantId:contract.tenantId,
+    landlordId:contract.landlordId,
+  });
+  try{
+    await newContract.save();
+    res.status(200).json({success:true,data:newContract});
+  }catch(error){
+    res.status(500).json({success:false,message:error.message});
+  }
+
+}
 const getHostelByLandLordId = async (req, res) => {
   const { landlordId } = req.query;
   console.log(landlordId);
@@ -138,4 +170,5 @@ module.exports = {
   getHostelById,
   getRoomById,
   createRoom,
+  createContract
 };

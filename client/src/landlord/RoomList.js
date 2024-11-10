@@ -177,20 +177,35 @@ const RoomList = () => {
       [name]: value,
     }));
   };
-  const handleCreateContract = () => {
-    console.log("Creating Contract:", contractDetails);
-    // Add logic to save the contract to the database here
-    setContractDetails({
-      startDate: "",
-      endDate: "",
-      deposit: "",
-      rent: "",
-      electricityBill: "",
-      waterBill: "",
-      tenantName: "",
-      landlordName: "",
-    });
-    onCloseContract();
+  const handleCreateContract = async () => {
+    try{
+      const response = await axios.post(
+        'https://localhost:5000/api/landlord/contract/create',
+        contractDetails,
+        {
+          headers:{
+            Authorization:`Bearer ${localStorage.getItem('token')}`,
+          }
+        }
+      );
+      if(response.data.success){
+        alert("Tạo hợp đồng thành công");
+        setContractDetails({
+          startDate:"",
+          endDate:"",
+          deposit:"",
+          rent:"",
+          electricityFee:"",
+          waterFee:"",
+          tenantName:"",
+          landlordName:"",
+        });
+        onCloseContract();
+      }
+    }catch(error){
+      console.error("Lỗi khi tạo hợp đồng",error);
+      alert("Không thể tạo hợp đồng : "+error.response.data.message);
+    }
   };
 
   const handleCreateRoom = async () => {

@@ -46,6 +46,9 @@ const TenantRoomList = () => {
           return;
         }
 
+        console.log("Fetching rooms with token:", token);
+        console.log("API URL:", `${process.env.REACT_APP_API}/user/rooms`);
+
         const response = await axios.get(
           `${process.env.REACT_APP_API}/user/rooms`,
           {
@@ -54,6 +57,8 @@ const TenantRoomList = () => {
             },
           }
         );
+
+        console.log("API Response:", response.data);
 
         if (response.data.success && Array.isArray(response.data.data)) {
           const formattedRooms = response.data.data.map((room) => ({
@@ -83,12 +88,14 @@ const TenantRoomList = () => {
               "Tự do giờ giấc",
             ],
           }));
+          console.log("Formatted Rooms:", formattedRooms);
           setRooms(formattedRooms);
         } else {
+          console.log("No rooms data or invalid format");
           setRooms([]);
         }
       } catch (error) {
-        console.error("Error fetching rooms:", error);
+        console.error("Error fetching rooms:", error.response || error);
         setRooms([]);
       } finally {
         setIsLoading(false);
@@ -281,6 +288,7 @@ const TenantRoomList = () => {
             >
               Liên hệ chủ trọ
             </Button>
+            
           </ModalFooter>
         </ModalContent>
       </Modal>

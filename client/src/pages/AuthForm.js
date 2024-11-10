@@ -303,14 +303,14 @@ const AuthForm = () => {
       height="fit-content"
       align="center"
       justify="center"
-      p={4}
+      p={{ base: 4, md: 12, lg: 16 }}
       flexDirection={{ base: "column", lg: "row" }}
     >
       {/* left content */}
       <Box
         position="relative"
         overflow="hidden"
-        flex="4"
+        flex="5"
         height="fit-content"
         textAlign="center"
         display="flex"
@@ -320,7 +320,6 @@ const AuthForm = () => {
         mb={{ base: 6, lg: 0 }}
         p={4}
       >
-        {/* right content */}
         <Box
           as={"section"}
           display={{ base: "none", md: "block" }}
@@ -355,6 +354,7 @@ const AuthForm = () => {
         width={{ base: "100%", md: "80%", lg: "800px" }}
         maxWidth="90%"
         minHeight="650px"
+        flex="5"
       >
         <Flex
           position="absolute"

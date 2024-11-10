@@ -13,6 +13,11 @@ const {
   getAllRooms,
   getUserById,
 } = require("../controllers/user.controller");
+// Lấy danh sách phòng cho tenant
+router.get("/rooms", authMiddleware(["tenant"]), getAllRooms);
+
+// Tìm kiếm phòng trọ
+router.get("/search", authMiddleware(["tenant"]), searchAccommodation);
 
 // Lấy thông tin người dùng
 router.get("/", authMiddleware(["tenant", "landlord", "manager"]), getUser);
@@ -44,11 +49,6 @@ router.put(
   changePassword
 );
 
-// Lấy danh sách phòng cho tenant
-router.get("/rooms", authMiddleware(["tenant"]), getAllRooms);
-
-// Tìm kiếm phòng trọ
-router.get("/search", authMiddleware(["tenant"]), searchAccommodation);
 
 // Thêm route mới để lấy thông tin user hiện tại
 router.get(

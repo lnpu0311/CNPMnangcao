@@ -11,49 +11,35 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import Chat from "../components/Chat";
+import { jwtDecode } from 'jwt-decode';
 
 const MessageManagement = () => {
   const [unreadMessages, setUnreadMessages] = useState([]);
+  const [token, setToken] = useState(localStorage.getItem('token'));
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedTenant, setSelectedTenant] = useState(null);
   const [showChat, setShowChat] = useState(false);
   const toast = useToast();
 
-  // Fetch current user
+  // Set token and current user from localStorage
   useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
-        const response = await axios.get(
-          `${process.env.REACT_APP_API}/user/current`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        if (response.data.success) {
-          console.log("Current user data:", response.data.data);
-          const userData = response.data.data;
-          setCurrentUser({
-            id: userData._id || userData.id,
-            name: userData.name,
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching current user:", error);
-      }
-    };
-
-    fetchCurrentUser();
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      setToken(storedToken);
+      const decodedUser = jwtDecode(storedToken);
+      setCurrentUser({
+        id: decodedUser.id,
+        name: decodedUser.name
+      });
+    }
   }, []);
 
   // Fetch unread messages
   useEffect(() => {
     const fetchUnreadMessages = async () => {
       try {
-        const token = localStorage.getItem("token");
+        if (!token) return;
+        
         const response = await axios.get(
           `${process.env.REACT_APP_API}/messages/unread`,
           {
@@ -72,10 +58,24 @@ const MessageManagement = () => {
         });
       }
     };
-    fetchUnreadMessages();
-  }, [toast]);
+
+    if (currentUser) {
+      fetchUnreadMessages();
+    }
+  }, [currentUser, token, toast]);
 
   const handleSelectTenant = (tenant) => {
+    if (!currentUser) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng đăng nhập lại",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
     setSelectedTenant(tenant);
     setShowChat(true);
   };

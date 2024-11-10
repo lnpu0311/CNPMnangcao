@@ -156,17 +156,22 @@ const changePassword = async (req, res) => {
 const getAllRooms = async (req, res) => {
   try {
     console.log("Fetching all rooms...");
-    const rooms = await Room.find().populate({
-      path: "hostelId",
-      select: "name address district city ward landlordId",
-      populate: {
-        path: "landlordId",
-        select: "name",
-      },
-    });
+    
+    // Thêm điều kiện lọc phòng có status là "available"
+    const rooms = await Room.find({ status: "available" })
+      .populate({
+        path: "hostelId",
+        select: "name address district city ward landlordId imageUrl",
+        populate: {
+          path: "landlordId",
+          select: "name email",
+        },
+      })
+      .select("roomTitle roomName images status price area description deposit");
 
     console.log("Found rooms:", rooms);
 
+    // Kiểm tra và format dữ liệu trước khi trả về
     if (!rooms || rooms.length === 0) {
       console.log("No rooms found");
       return res.status(200).json({
@@ -175,9 +180,32 @@ const getAllRooms = async (req, res) => {
       });
     }
 
+    // Format dữ liệu trả về để match với client
+    const formattedRooms = rooms.map(room => ({
+      _id: room._id,
+      roomTitle: room.roomTitle,
+      roomName: room.roomName,
+      hostelId: {
+        _id: room.hostelId._id,
+        name: room.hostelId.name,
+        address: room.hostelId.address,
+        district: room.hostelId.district,
+        city: room.hostelId.city,
+        ward: room.hostelId.ward,
+        landlordId: room.hostelId.landlordId,
+        imageUrl: room.hostelId.imageUrl
+      },
+      images: room.images,
+      status: room.status,
+      price: room.price,
+      area: room.area,
+      description: room.description,
+      deposit: room.deposit
+    }));
+
     res.status(200).json({
       success: true,
-      data: rooms,
+      data: formattedRooms,
     });
   } catch (error) {
     console.error("Error in getAllRooms:", error);

@@ -69,6 +69,14 @@ function HomeDashboard() {
           >
             Danh sách yêu cầu
           </Button>
+          <Button
+            leftIcon={<CalendarIcon />}
+            colorScheme="purple"
+            variant="outline"
+            onClick={() => navigate("/landlord/booking-management")}
+          >
+            Quản lý đặt lịch
+          </Button>
         </Flex>
       </VStack>
 

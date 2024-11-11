@@ -40,6 +40,7 @@ const TenantRoomList = () => {
   useEffect(() => {
     const fetchRooms = async () => {
       try {
+        console.log(localStorage.getItem("token"))
         const token = localStorage.getItem("token");
         if (!token) {
           console.error("No token found");
@@ -54,7 +55,7 @@ const TenantRoomList = () => {
             },
           }
         );
-
+        console.log(response.data)
         if (response.data.success && Array.isArray(response.data.data)) {
           const formattedRooms = response.data.data.map((room) => ({
             id: room._id,

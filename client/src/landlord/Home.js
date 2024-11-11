@@ -29,6 +29,7 @@ import {
   BellIcon,
   ArrowForwardIcon,
   EditIcon,
+  ChatIcon,
 } from "@chakra-ui/icons";
 import {
   FaBuilding,
@@ -44,14 +45,13 @@ import { FaMoneyCheckDollar } from "react-icons/fa6";
 import { MdOutlineMeetingRoom } from "react-icons/md";
 import { RiParentFill } from "react-icons/ri";
 import { jwtDecode } from "jwt-decode";
-import axios from "axios";
+
 function HomeLayout() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [hasNewNotification, setHasNewNotification] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(true);
   const navigate = useNavigate();
-
   const [userData, setUserData] = useState({});
 
   useEffect(() => {
@@ -66,52 +66,52 @@ function HomeLayout() {
     onClose();
   };
   const handleEditProfile = () => {
-    navigate(`/profile-page`);
+    navigate(`/landlord/profile-page`);
     onClose();
   };
   const menuItems = [
-    { name: "Trang chủ", path: "/", icon: <IoHomeSharp /> },
+    { name: "Trang chủ", path: "/landlord", icon: <IoHomeSharp /> },
     {
       name: "Quản lý cơ sở",
-      path: "/hostel-management",
+      path: "/landlord/hostel-management",
       icon: <FaBuilding />,
     },
     {
       name: "Quản lý nhân viên",
-      path: "/employee-management",
+      path: "/landlord/employee-management",
       icon: <RiParentFill />,
     },
     {
       name: "Quản lý yêu cầu thuê phòng",
-      path: "/rental-request",
+      path: "/landlord/rental-request",
       icon: <MdOutlineMeetingRoom />,
     },
     {
       name: "Danh sách khách thuê",
-      path: "/tenant-list",
+      path: "/landlord/tenant-list",
       icon: <FaAddressCard />,
     },
     {
       name: "Danh sách thanh toán",
-      path: "/payment-list",
+      path: "/landlord/payment-list",
       icon: <FaMoneyCheckDollar />,
     },
     {
       name: "Thống kê doanh thu",
-      path: "/revenue-stats",
+      path: "/landlord/revenue-stats",
       icon: <FaChartLine />,
     },
+    {
+      name: "Quản lý tin nhắn",
+      path: "/landlord/messages",
+      icon: <ChatIcon />,
+    },
   ];
-
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("role");
-
     setIsAuthenticated(false);
-
     navigate(`/register`);
   };
-
   const toggleNav = () => {
     setIsNavOpen(!isNavOpen);
   };
@@ -194,12 +194,13 @@ function HomeLayout() {
             <MenuButton>
               <Text fontWeight={600}>{userData.name}</Text>
             </MenuButton>
-            <MenuList width={"250px"} textColor={"brand.500"}>
+            <MenuList bgColor={"brand.2"}>
               <MenuItem
                 fontWeight={"bold"}
                 onClick={handleEditProfile}
                 // leftIcon={<EditIcon />}
                 iconSpacing="4px"
+                icon={<EditIcon />}
               >
                 Chỉnh sửa thông tin cá nhân
               </MenuItem>
@@ -208,6 +209,7 @@ function HomeLayout() {
                 iconSpacing="8px"
                 fontWeight={"bold"}
                 onClick={handleLogout}
+                icon={<IoLogOut />}
               >
                 Đăng xuất
               </MenuItem>
@@ -227,7 +229,7 @@ function HomeLayout() {
         <DrawerOverlay />
         <DrawerContent textColor={"white"}>
           <DrawerCloseButton />
-          <DrawerBody bg={"brand.800"}>
+          <DrawerBody py={4} bg={"brand.800"}>
             <VStack align="start">
               <Flex alignItems="center" gap={2}>
                 <Avatar
@@ -322,7 +324,7 @@ function HomeLayout() {
         <VStack align="start" spacing={4}>
           <Flex justify="space-between" width="100%">
             <Image
-              src="../eco-house.png"
+              src="../../../eco-house.png"
               alt="Logo"
               boxSize="150px"
               mx="auto"
@@ -348,6 +350,7 @@ function HomeLayout() {
                 }
                 to={item.path}
                 key={item.name}
+                end
                 onClick={() => {
                   handleMenuClick(item.name);
                   onClose();
@@ -369,7 +372,12 @@ function HomeLayout() {
         mt={{ base: 16, md: 0 }}
         p={1}
       >
-        <Box bg={"white"} mr={{ base: "0", md: "10px" }} p={6}>
+        <Box
+          h={"fit-content"}
+          bg={"white"}
+          mr={{ base: "0", md: "10px" }}
+          p={6}
+        >
           <Outlet />
         </Box>
       </GridItem>

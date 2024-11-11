@@ -24,8 +24,10 @@ import {
   Text,
   Modal,
   AlertIcon,
+  IconButton,
 } from "@chakra-ui/react";
 import axios from "axios";
+import { Fa500Px, FaArrowLeft } from "react-icons/fa";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -42,7 +44,9 @@ const ForgotPassword = () => {
   const finalRef = React.useRef(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [apiMessage, setApiMessage] = useState("");
-
+  const handleGoBack = () => {
+    navigate(-1);
+  };
   // Countdown timer for OTP resend
   useEffect(() => {
     let timer;
@@ -69,7 +73,7 @@ const ForgotPassword = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/forgot-password",
+        `${process.env.REACT_APP_API}/auth/forgot-password`,
         { email }
       );
       onOpen(); // Open OTP modal
@@ -79,7 +83,8 @@ const ForgotPassword = () => {
       setStep(2);
     } catch (error) {
       setErrors({
-        email: error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại",
+        email:
+          error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại",
       });
     }
   };
@@ -88,10 +93,10 @@ const ForgotPassword = () => {
     setCanResend(false);
     setIsOtpValid(true);
     setRemainingTime(60);
-    
+
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/resend-otp",
+        `${process.env.REACT_APP_API}/auth/resend-otp`,
         { email }
       );
       setIsOtpMessage("Đã gửi lại mã OTP");
@@ -111,13 +116,13 @@ const ForgotPassword = () => {
   const handleVerifyOTP = async (otpValue = otp) => {
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/auth/verify-otp`,
+        `${process.env.REACT_APP_API}/auth/verify-otp`,
         {
           email,
           verifyOTP: otpValue, // Thay đổi tên field từ 'otp' thành 'verifyOTP'
         }
       );
-      
+
       if (response.data.success) {
         setIsOtpValid(true);
         setIsOtpMessage("Xác thực OTP thành công");
@@ -139,11 +144,11 @@ const ForgotPassword = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/auth/reset-password`,
+        `${process.env.REACT_APP_API}/auth/reset-password`,
         {
           email: email,
           newPassword: newPassword,
-          verifyOTP: otp
+          verifyOTP: otp,
         }
       );
 
@@ -156,7 +161,8 @@ const ForgotPassword = () => {
     } catch (error) {
       console.error("Reset password error:", error.response?.data || error);
       setErrors({
-        password: error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại"
+        password:
+          error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại",
       });
     }
   };
@@ -182,135 +188,158 @@ const ForgotPassword = () => {
   };
 
   return (
-    <Box maxWidth="400px" mx="auto" mt="100px" p={4} borderWidth={1} borderRadius="lg" boxShadow="lg">
-      <Heading textAlign="center" size="md" mb={6} color="blue.600">
-        Quên Mật Khẩu
-      </Heading>
-      
-      <VStack spacing={4} as="form">
-        {step === 1 && (
-          <>
-            <FormControl isRequired isInvalid={!!errors.email}>
-              <FormLabel>Email</FormLabel>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Nhập email của bạn"
-              />
-              <FormErrorMessage>{errors.email}</FormErrorMessage>
-            </FormControl>
+    <Box>
+      <Text
+        textAlign={"center"}
+        mt={8}
+        marginBlockEnd={4}
+        fontSize={{ base: "3xl", md: "xxx-large" }}
+        fontWeight="bold"
+        bgGradient="linear(to-l, #07c8f9, #0d41e1)"
+        bgClip="text"
+      >
+        Hostel Community
+      </Text>
+      <Box
+        maxWidth="400px"
+        mx="auto"
+        p={4}
+        borderWidth={1}
+        borderRadius="lg"
+        boxShadow="lg"
+      >
+        <IconButton
+          onClick={handleGoBack}
+          variant={"ghost"}
+          icon={<FaArrowLeft />}
+        ></IconButton>
+        <Heading textAlign="center" size="md" mb={6} color="blue.600">
+          Quên Mật Khẩu
+        </Heading>
 
-            <Button
-              width="100%"
-              colorScheme="blue"
-              onClick={handleRequestOTP}
-            >
-              Gửi mã xác thực
-            </Button>
-          </>
-        )}
-
-        {step === 3 && (
-          <>
-            <FormControl isRequired isInvalid={!!errors.newPassword}>
-              <FormLabel>Mật Khẩu Mới</FormLabel>
-              <Input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Nhập mật khẩu mới"
-              />
-              <FormErrorMessage>{errors.newPassword}</FormErrorMessage>
-            </FormControl>
-
-            <FormControl isRequired isInvalid={!!errors.confirmNewPassword}>
-              <FormLabel>Xác Nhận Mật Khẩu</FormLabel>
-              <Input
-                type="password"
-                value={confirmNewPassword}
-                onChange={(e) => setConfirmNewPassword(e.target.value)}
-                placeholder="Nhập lại mật khẩu mới"
-              />
-              <FormErrorMessage>{errors.confirmNewPassword}</FormErrorMessage>
-            </FormControl>
-
-            <Button
-              width="100%"
-              colorScheme="blue"
-              onClick={handleResetPassword}
-            >
-              Đặt lại mật khẩu
-            </Button>
-          </>
-        )}
-
-        {/* OTP Modal */}
-        <Modal
-          finalFocusRef={finalRef}
-          isOpen={isOpen}
-          onClose={onClose}
-          isCentered
-          closeOnOverlayClick={false}
-        >
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader textAlign="center">
-              Xác thực mã OTP
-            </ModalHeader>
-            <ModalBody textAlign="center">
-              <Text mb={4}>
-                Mã OTP đã được gửi tới địa chỉ email của bạn.
-                Vui lòng kiểm tra và nhập mã để xác thực.
-              </Text>
-
-              <Flex justifyContent="center" alignItems="center">
-                <HStack>
-                  <PinInput
-                    otp
-                    size="lg"
-                    value={otp}
-                    onChange={handleOtpChange}
-                    isInvalid={!isOtpValid}
-                  >
-                    <PinInputField />
-                    <PinInputField />
-                    <PinInputField />
-                    <PinInputField />
-                    <PinInputField />
-                    <PinInputField />
-                  </PinInput>
-                </HStack>
-              </Flex>
+        <VStack spacing={4} as="form">
+          {step === 1 && (
+            <>
+              <FormControl isRequired isInvalid={!!errors.email}>
+                <FormLabel>Email</FormLabel>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Nhập email của bạn"
+                />
+                <FormErrorMessage>{errors.email}</FormErrorMessage>
+              </FormControl>
 
               <Button
-                mt={4}
-                size="sm"
-                variant="outline"
-                onClick={handleResendOTP}
-                isDisabled={!canResend}
+                width="100%"
+                colorScheme="blue"
+                onClick={handleRequestOTP}
               >
-                {canResend ? "Gửi lại OTP" : `Gửi lại sau ${remainingTime}s`}
+                Gửi mã xác thực
               </Button>
+            </>
+          )}
 
-              {isOtpMessage && (
-                <Alert status={isOtpValid ? "success" : "error"} mt={4}>
-                  <AlertIcon />
-                  {isOtpMessage}
-                </Alert>
-              )}
-            </ModalBody>
-          </ModalContent>
-        </Modal>
+          {step === 3 && (
+            <>
+              <FormControl isRequired isInvalid={!!errors.newPassword}>
+                <FormLabel>Mật Khẩu Mới</FormLabel>
+                <Input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Nhập mật khẩu mới"
+                />
+                <FormErrorMessage>{errors.newPassword}</FormErrorMessage>
+              </FormControl>
 
-        {/* Success/Error Messages */}
-        {apiMessage && (
-          <Alert status="success" mt={4}>
-            <AlertIcon />
-            {apiMessage}
-          </Alert>
-        )}
-      </VStack>
+              <FormControl isRequired isInvalid={!!errors.confirmNewPassword}>
+                <FormLabel>Xác Nhận Mật Khẩu</FormLabel>
+                <Input
+                  type="password"
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  placeholder="Nhập lại mật khẩu mới"
+                />
+                <FormErrorMessage>{errors.confirmNewPassword}</FormErrorMessage>
+              </FormControl>
+
+              <Button
+                width="100%"
+                colorScheme="blue"
+                onClick={handleResetPassword}
+              >
+                Đặt lại mật khẩu
+              </Button>
+            </>
+          )}
+
+          {/* OTP Modal */}
+          <Modal
+            finalFocusRef={finalRef}
+            isOpen={isOpen}
+            onClose={onClose}
+            isCentered
+            closeOnOverlayClick={false}
+          >
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader textAlign="center">Xác thực mã OTP</ModalHeader>
+              <ModalBody textAlign="center">
+                <Text mb={4}>
+                  Mã OTP đã được gửi tới địa chỉ email của bạn. Vui lòng kiểm
+                  tra và nhập mã để xác thực.
+                </Text>
+
+                <Flex justifyContent="center" alignItems="center">
+                  <HStack>
+                    <PinInput
+                      otp
+                      size="lg"
+                      value={otp}
+                      onChange={handleOtpChange}
+                      isInvalid={!isOtpValid}
+                    >
+                      <PinInputField />
+                      <PinInputField />
+                      <PinInputField />
+                      <PinInputField />
+                      <PinInputField />
+                      <PinInputField />
+                    </PinInput>
+                  </HStack>
+                </Flex>
+
+                <Button
+                  mt={4}
+                  size="sm"
+                  variant="outline"
+                  onClick={handleResendOTP}
+                  isDisabled={!canResend}
+                >
+                  {canResend ? "Gửi lại OTP" : `Gửi lại sau ${remainingTime}s`}
+                </Button>
+
+                {isOtpMessage && (
+                  <Alert status={isOtpValid ? "success" : "error"} mt={4}>
+                    <AlertIcon />
+                    {isOtpMessage}
+                  </Alert>
+                )}
+              </ModalBody>
+            </ModalContent>
+          </Modal>
+
+          {/* Success/Error Messages */}
+          {apiMessage && (
+            <Alert status="success" mt={4}>
+              <AlertIcon />
+              {apiMessage}
+            </Alert>
+          )}
+        </VStack>
+      </Box>
     </Box>
   );
 };

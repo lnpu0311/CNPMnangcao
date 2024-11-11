@@ -1,50 +1,120 @@
 const express = require("express");
 const app = express();
+const http = require("http");
+const server = http.createServer(app);
+const { Server } = require("socket.io");
 const PORT = process.env.PORT || 5000;
 require("dotenv").config();
 
-const bodyParser = require("body-parser");
+const Message = require("./models/message.model");
+const bookingRoutes = require("./routes/booking.route");
 const morgan = require("morgan");
 const cors = require("cors");
 
-const allowedOrigins = ["http://localhost:3000"]; // Thêm các URL frontend bạn muốn cho phép
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://hostel-community.vercel.app",
+];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.indexOf(origin) === -1) {
-        const msg =
-          "The CORS policy for this site does not allow access from the specified origin.";
-        return callback(new Error(msg), false);
+      // Kiểm tra nếu origin không có (khi gọi từ chính server) hoặc thuộc allowedOrigins
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
       }
-      return callback(null, true);
+      const msg =
+        "The CORS policy for this site does not allow access from the specified origin.";
+      return callback(new Error(msg), false);
     },
+    credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(bodyParser.json());
 app.use(morgan("combined"));
 
-//Kết nối với database
+// Khởi tạo Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: ["http://localhost:3000", "https://hostel-community.vercel.app"],
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
+app.get("/", (req, res) => {
+  res.send("<h1> Deploy successfully </h1>");
+});
+
+// Socket connection handling
+const userSockets = new Map();
+
+io.on("connection", (socket) => {
+  socket.on("login", (userId) => {
+    userSockets.set(userId, socket.id);
+    console.log("User logged in:", userId);
+  });
+
+  socket.on("send_message", async (data) => {
+    try {
+      const { senderId, recipientId, content } = data;
+
+      if (!senderId || !recipientId || !content) {
+        throw new Error("Missing required fields");
+      }
+
+      const message = new Message({
+        senderId: senderId.toString(),
+        recipientId: recipientId.toString(),
+        content,
+        timestamp: new Date(),
+        read: false,
+      });
+      await message.save();
+
+      const recipientSocketId = userSockets.get(recipientId);
+      if (recipientSocketId) {
+        io.to(recipientSocketId).emit("receive_message", message);
+      }
+
+      socket.emit("message_sent", { success: true, data: message });
+    } catch (error) {
+      console.error("Error sending message:", error);
+      socket.emit("message_sent", { success: false, error: error.message });
+    }
+  });
+
+  socket.on("disconnect", () => {
+    for (const [userId, socketId] of userSockets.entries()) {
+      if (socketId === socket.id) {
+        userSockets.delete(userId);
+        break;
+      }
+    }
+  });
+});
+// Kết nối với database
 const connectDB = require("./configs/db.js");
 connectDB();
 
-//Router
+// Router
 const hostelRoute = require("./routes/hostel.route.js");
 const roomRoute = require("./routes/room.route.js");
 const userRoute = require("./routes/user.route.js");
 const authRoutes = require("./routes/auth.route");
 const landlordRoute = require("./routes/landlord.route");
-//Api
-app.use("/api/hostel", hostelRoute);
+const messageRoute = require("./routes/message.route");
+
+
+// Api
 app.use("/api/room", roomRoute);
 app.use("/api/user", userRoute);
 app.use("/api/auth", authRoutes);
 app.use("/api/landlord", landlordRoute);
-
-app.listen(PORT, () =>
-  console.log(`Server is running on port http://localhost:${PORT}`)
+app.use("/api/messages", messageRoute);
+app.use("/api/booking", bookingRoutes);
+server.listen(PORT, () =>
+  console.log(`Server is running on http://localhost:${PORT}`)
 );

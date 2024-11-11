@@ -7,7 +7,6 @@ import {
   Th,
   Td,
   Text,
-  VStack,
   Select,
   HStack,
   Heading,

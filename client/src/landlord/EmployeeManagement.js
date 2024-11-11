@@ -20,9 +20,7 @@ import {
   ModalFooter,
   FormErrorMessage,
   Text,
-  Image,
   Avatar,
-  useColorModeValue,
 } from "@chakra-ui/react";
 import { FaEdit, FaTrash, FaSave } from "react-icons/fa";
 import { EditIcon, PlusSquareIcon } from "@chakra-ui/icons";
@@ -283,31 +281,59 @@ const EmployeeManagement = () => {
               boxShadow="lg"
               bg={"brand.2"}
               key={employee.id}
-              justify="space-between"
-              align="center"
               p={4}
               borderRadius="md"
+              flexDirection={{ base: "column", md: "row" }}
+              align="center"
+              gap={{ base: 2, md: 4 }}
             >
-              <Flex flex="2" align="center">
+              {/* Employee Avatar and Name */}
+              <Flex
+                flex="2"
+                align="center"
+                mb={{ base: 2, md: 0 }}
+                width={{ base: "100%", md: "auto" }}
+                justify={{ base: "center", md: "flex-start" }}
+              >
                 <Avatar
-                  mr={4}
+                  mr={{ base: 2, md: 4 }}
                   name={employee.name}
                   src="https://bit.ly/broken-link"
                 />
-                <Text fontWeight="bold" mr={4}>
+                <Text
+                  fontWeight="bold"
+                  textAlign={{ base: "center", md: "left" }}
+                >
                   {employee.name}
                 </Text>
               </Flex>
 
-              <Flex flex="2" align="center">
-                <Text mr={2}>Số điện thoại:</Text>
-                <Text fontWeight="bold" mr={4}>
-                  {employee.phone}
+              {/* Employee Phone Number */}
+              <Flex
+                flex="2"
+                align="center"
+                mb={{ base: 2, md: 0 }}
+                width={{ base: "100%", md: "auto" }}
+                justify={{ base: "center", md: "flex-start" }}
+              >
+                <Text color="gray.600" mr={2} textAlign="center">
+                  Số điện thoại:
                 </Text>
+                <Text fontWeight="bold">{employee.phone}</Text>
               </Flex>
 
-              <Flex flex="3" align="center">
-                <Text mr={2}>Cơ sở:</Text>
+              {/* Employee Hostel */}
+              <Flex
+                flex="3"
+                align="center"
+                mb={{ base: 2, md: 0 }}
+                width={{ base: "100%", md: "auto" }}
+                justify={{ base: "center", md: "flex-start" }}
+                flexDirection={{ base: "column", md: "row" }}
+              >
+                <Text color="gray.600" mr={2} textAlign="center">
+                  Cơ sở:
+                </Text>
                 {employee.isEditing ? (
                   <Input
                     value={employee.hostel}
@@ -316,13 +342,23 @@ const EmployeeManagement = () => {
                     }
                     placeholder="Sửa cơ sở trực thuộc"
                     textColor={"black"}
+                    width={{ base: "100%", md: "auto" }}
+                    mb={{ base: 2, md: 0 }}
                   />
                 ) : (
-                  <Text fontWeight="bold">{employee.hostel}</Text>
+                  <Text fontWeight="bold" textAlign="center">
+                    {employee.hostel}
+                  </Text>
                 )}
               </Flex>
 
-              <Flex flex="1" justify="flex-end" gap={2}>
+              {/* Action Buttons */}
+              <Flex
+                flex="1"
+                justify={{ base: "center", md: "flex-end" }}
+                width={{ base: "100%", md: "auto" }}
+                gap={2}
+              >
                 {employee.isEditing ? (
                   <IconButton
                     aria-label="Lưu"

@@ -8,7 +8,8 @@ const MotionBox = motion(Box);
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-
+  const [searchResult, setSearchResult] = useState("");
+  const navigate = useNavigate();
   const bgColor = useColorModeValue("teal.300", "teal.600");
   const searchBgColor = useColorModeValue("gray.100", "gray.700");
   const inputBgColor = useColorModeValue("white", "gray.600");
@@ -23,7 +24,24 @@ const Header = () => {
     window.addEventListener("scroll", debouncedHandleScroll);
     return () => window.removeEventListener("scroll", debouncedHandleScroll);
   }, []);
-
+  const handleSearch = async () =>{
+    if(!searchValue.trim()) return;
+    try{
+      const response = await axios.get(`http://localhost:5000/api/user/search`,{
+        params:{
+          keyword:searchValue
+        }
+      });
+      if(response.data.success){
+        //Lưu kết quả tìm kiếm vào state hoặc context để hiển thị 
+        setSearchResult(response.data.data);
+        //Chuyển hướng đến trang kết quả tìm kiếm với query params
+        navigate(`/search-result?keyword=${encodeURIComponent(searchValue)}`);
+      }
+    }catch(error){
+      console.error("Search error:",error);
+    }
+  }
   const searchVariants = {
     initial: {
       width: "60%",
@@ -84,15 +102,26 @@ const Header = () => {
           alignItems="center"
         >
           <Input
-            placeholder="Search for rooms..."
+            placeholder="Tìm kiếm phòng..."
             size="md"
             borderRadius="md"
             bg={inputBgColor}
             mr={2}
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
+            onKeyPress={(e) =>{
+              if(e.key === 'Enter'){
+                handleSearch();
+              }
+            }}
           />
-          <Button colorScheme="teal">Search</Button>
+          <Button 
+          colorScheme="teal"
+          onClick={handleSearch}
+          isLoading={isSearching}
+          >
+            Tìm kiếm
+          </Button>
         </MotionBox>
 
         {/* Login and Sign Up Buttons */}

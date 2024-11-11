@@ -1,17 +1,12 @@
-import { Box, ChakraProvider, useColorModeValue } from "@chakra-ui/react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate,
-} from "react-router-dom";
+import { Box, ChakraProvider } from "@chakra-ui/react";
+import { Route, Routes, Navigate } from "react-router-dom";
 import theme from "./theme";
 import AuthForm from "./pages/AuthForm";
-import LandlordHome from "./landlord/Home"; // Import HomeLayout if it's a separate component
-import HomeDashboard from "./landlord/HomeDashboard"; // Import HomeDashboard if needed
-import HostelManagement from "./landlord/HostelManagement"; // Import necessary components
-import RoomList from "./landlord/RoomList"; // Import necessary components
-import ProfilePage from "./landlord/Profile"; // Import ProfilePage
+import LandlordHome from "./landlord/Home";
+import HomeDashboard from "./landlord/HomeDashboard";
+import HostelManagement from "./landlord/HostelManagement";
+import RoomList from "./landlord/RoomList";
+import ProfilePage from "./landlord/Profile";
 import EmployeeManagement from "./landlord/EmployeeManagement";
 import RentalRequest from "./landlord/RentalRequests";
 import TenantRoomList from "./tenant/TenantRoomList";
@@ -24,7 +19,11 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Receipt from "./landlord/Receipt";
 import TenantList from "./landlord/TenantList";
 import RevenueStats from "./landlord/RevenueStats";
-
+import AdminDashboard from "./admin/AdminDashboard";
+import SearchResults from "./pages/SearchResults";
+import MessageManagement from "./landlord/MessageManagement";
+import TenantBookingManagement from "./tenant/TenantBookingManagement";
+import BookingManagement from "./landlord/BookingManagement";
 function App() {
   return (
     <ChakraProvider theme={theme}>
@@ -36,9 +35,18 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
 
+          {/* Admin routes */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute rolesRequired={["admin"]}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          ></Route>
           {/* Landlord and Manager routes */}
           <Route
-            path="/"
+            path="/landlord"
             element={
               <ProtectedRoute rolesRequired={["landlord", "manager"]}>
                 <LandlordHome />
@@ -64,6 +72,8 @@ function App() {
             <Route path="tenant-list" element={<TenantList />} />
             <Route path="room-list/:facilityId" element={<RoomList />} />
             <Route path="profile-page" element={<ProfilePage />} />
+            <Route path="messages" element={<MessageManagement />} />
+            <Route path="booking-management" element={<BookingManagement />} />
           </Route>
 
           {/* Tenant routes */}
@@ -80,7 +90,10 @@ function App() {
             <Route path="contract" element={<TenantContract />} />
             <Route path="payments" element={<TenantPayments />} />
             <Route path="profile-page" element={<ProfilePage />} />
+            <Route path="bookings" element={<TenantBookingManagement />} />
           </Route>
+
+          <Route path="/search-results" element={<SearchResults />} />
         </Routes>
       </Box>
     </ChakraProvider>

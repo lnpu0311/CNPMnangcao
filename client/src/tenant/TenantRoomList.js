@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Box,
   SimpleGrid,
   Image,
   Text,
+  Tag,
   VStack,
   Heading,
   Flex,
@@ -19,221 +21,359 @@ import {
   ListItem,
   ListIcon,
   Center,
-  Tag,
+  Spinner,
+  useToast,
+  FormControl,
+  FormLabel,
+  Input,
+  Textarea,
 } from "@chakra-ui/react";
 import { MdCheckCircle } from "react-icons/md";
-
-const rooms = [
-  {
-    id: 1,
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRbcrj53mGyk-u4JwrIb6z1RBAeCpxR78gfQ&s",
-    address: "123 Nguyễn Huệ, Quận 1, Tp.Hồ Chí Minh",
-    status: "Đã thuê",
-    price: "2tr/tháng",
-    amenities: [
-      "Gần trung tâm thương mại",
-      "Ban công rộng rãi",
-      "Bếp riêng hiện đại",
-      "Bảo vệ 24/7",
-    ],
-  },
-  {
-    id: 2,
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRbcrj53mGyk-u4JwrIb6z1RBAeCpxR78gfQ&s",
-    address: "456 Lê Lợi, Quận 3, Tp.Hồ Chí Minh",
-    status: "Còn trống",
-    price: "4tr/tháng",
-    amenities: [
-      "Gần công viên",
-      "Phòng gym trong tòa nhà",
-      "Hồ bơi chung",
-      "Wifi tốc độ cao",
-    ],
-  },
-  {
-    id: 3,
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRbcrj53mGyk-u4JwrIb6z1RBAeCpxR78gfQ&s",
-    address: "789 Điện Biên Phủ, Bình Thạnh, Tp.Hồ Chí Minh",
-    status: "Còn trống",
-    price: "2.8tr/tháng",
-    amenities: [
-      "Gần trường đại học",
-      "Nhiều quán ăn xung quanh",
-      "Phòng rộng rãi",
-      "Có chỗ để xe máy",
-    ],
-  },
-  {
-    id: 4,
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRbcrj53mGyk-u4JwrIb6z1RBAeCpxR78gfQ&s",
-    address: "101 Võ Văn Tần, Quận 10, Tp.Hồ Chí Minh",
-    status: "Còn trống",
-    price: "3.2tr/tháng",
-    amenities: [
-      "Gần bệnh viện",
-      "Có máy giặt chung",
-      "An ninh cao",
-      "Cửa sổ lớn, thoáng mát",
-    ],
-  },
-  {
-    id: 5,
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRbcrj53mGyk-u4JwrIb6z1RBAeCpxR78gfQ&s",
-    address: "222 Nguyễn Văn Cừ, Quận 5, Tp.Hồ Chí Minh",
-    status: "Còn trống",
-    price: "2.5tr/tháng",
-    amenities: [
-      "Gần khu ẩm thực",
-      "Có ban công riêng",
-      "Nội thất cơ bản",
-      "Miễn phí gửi xe",
-    ],
-  },
-  {
-    id: 6,
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRbcrj53mGyk-u4JwrIb6z1RBAeCpxR78gfQ&s",
-    address: "333 Cách Mạng Tháng 8, Quận 3, Tp.Hồ Chí Minh",
-    status: "Còn trống",
-    price: "3.8tr/tháng",
-    amenities: [
-      "View thành phố đẹp",
-      "Bảo vệ 24/7",
-      "Có thang máy",
-      "Gần trạm xe buýt",
-    ],
-  },
-  {
-    id: 7,
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRbcrj53mGyk-u4JwrIb6z1RBAeCpxR78gfQ&s",
-    address: "444 Lý Thường Kiệt, Quận 10, Tp.Hồ Chí Minh",
-    status: "Còn trống",
-    price: "3.5tr/tháng",
-    amenities: [
-      "Gần khu công nghiệp",
-      "Có nhà để xe riêng",
-      "Cửa khóa vân tay",
-      "Miễn phí nước",
-    ],
-  },
-  {
-    id: 8,
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRbcrj53mGyk-u4JwrIb6z1RBAeCpxR78gfQ&s",
-    address: "555 Trần Hưng Đạo, Quận 1, Tp.Hồ Chí Minh",
-    status: "Còn trống",
-    price: "4.5tr/tháng",
-    amenities: [
-      "Nội thất cao cấp",
-      "Gần trung tâm thành phố",
-      "Bảo vệ nghiêm ngặt",
-      "Có phòng giặt ủi chung",
-    ],
-  },
-];
+import Chat from "../components/Chat";
+import { jwtDecode } from "jwt-decode";
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 const TenantRoomList = () => {
+  const [rooms, setRooms] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const toast = useToast();
+  const [isOpenBooking, setIsOpenBooking] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.error("No token found");
+          return;
+        }
+
+        console.log("Fetching rooms with token:", token);
+        console.log("API URL:", `${process.env.REACT_APP_API}/user/rooms`);
+
+        const response = await axios.get(
+          `${process.env.REACT_APP_API}/user/rooms`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log("API Response:", response.data);
+
+        if (response.data.success && Array.isArray(response.data.data)) {
+          const formattedRooms = response.data.data.map((room) => ({
+            id: room._id,
+            roomTitle: room.roomTitle || "Không có tiêu đề",
+            roomName: room.roomName || "Không có tên",
+            landlordId:
+              room.hostelId?.landlordId?._id || room.hostelId?.landlordId,
+            image:
+              room.images && room.images.length > 0
+                ? room.images[0]
+                : "https://via.placeholder.com/200",
+            address: room.hostelId
+              ? `${room.hostelId.address || ""}, ${room.hostelId.ward || ""}, ${
+                  room.hostelId.district || ""
+                }, ${room.hostelId.city || ""}`
+              : "Địa chỉ không có sẵn",
+            status: room.status === "available" ? "Còn trống" : "Đã thuê",
+            price: room.price || 0,
+            area: room.area || 0,
+            description: room.description || "Không có mô tả",
+            deposit: room.deposit || 0,
+            amenities: [
+              "Wifi miễn phí",
+              "Bảo vệ 24/7",
+              "Chỗ để xe",
+              "Tự do giờ giấc",
+            ],
+          }));
+          console.log("Formatted Rooms:", formattedRooms);
+          setRooms(formattedRooms);
+        } else {
+          console.log("No rooms data or invalid format");
+          setRooms([]);
+        }
+      } catch (error) {
+        console.error("Error fetching rooms:", error.response || error);
+        setRooms([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRooms();
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setCurrentUser(decoded);
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+  }, []);
 
   const handleRoomClick = (room) => {
     setSelectedRoom(room);
     setIsOpenDetail(true);
   };
 
-  const handleCloseDetail = () => {
-    setIsOpenDetail(false);
+  const BookingModal = ({ isOpen, onClose, room, currentUser }) => {
+    const [bookingData, setBookingData] = useState({
+      proposedDate: '',
+      alternativeDate: '',
+      message: ''
+    });
+    const toast = useToast();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async () => {
+      try {
+        setIsSubmitting(true);
+        if (!bookingData.proposedDate) {
+          toast({
+            title: "Lỗi",
+            description: "Vui lòng chọn ngày xem phòng",
+            status: "error",
+            duration: 3000,
+            isClosable: true
+          });
+          return;
+        }
+
+        console.log('Sending booking data:', {
+          roomId: room.id,
+          landlordId: room.landlordId,
+          ...bookingData
+        });
+
+        const response = await axios.post(
+          `${process.env.REACT_APP_API}/booking/create`,
+          {
+            roomId: room.id,
+            landlordId: room.landlordId,
+            proposedDate: bookingData.proposedDate,
+            alternativeDate: bookingData.alternativeDate || null,
+            message: bookingData.message || ''
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (response.data.success) {
+          toast({
+            title: "Thành công",
+            description: (
+              <Box>
+                <Text>Đã gửi yêu cầu xem phòng</Text>
+                <Button
+                  onClick={() => navigate('/tenant/bookings')}
+                  size="sm"
+                  mt={2}
+                  colorScheme="blue"
+                >
+                  Xem lịch sử đặt phòng
+                </Button>
+              </Box>
+            ),
+            status: "success",
+            duration: 5000,
+            isClosable: true
+          });
+          onClose();
+        }
+      } catch (error) {
+        console.error('Booking error:', error.response?.data || error);
+        toast({
+          title: "Lỗi",
+          description: error.response?.data?.message || "Không thể gửi yêu cầu xem phòng",
+          status: "error",
+          duration: 3000,
+          isClosable: true
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+    return (
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Đặt lịch xem phòng</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Box mb={4} p={4} borderWidth={1} borderRadius="md">
+              <Heading size="sm" mb={2}>Thông tin phòng:</Heading>
+              <Text><strong>Tên phòng:</strong> {room.roomName}</Text>
+              <Text><strong>Giá thuê:</strong> {new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(room.price)}</Text>
+              <Text><strong>Diện tích:</strong> {room.area}m²</Text>
+            </Box>
+
+            <VStack spacing={4}>
+              <FormControl isRequired>
+                <FormLabel>Ngày xem phòng</FormLabel>
+                <Input
+                  type="datetime-local"
+                  value={bookingData.proposedDate}
+                  onChange={(e) => setBookingData({
+                    ...bookingData,
+                    proposedDate: e.target.value
+                  })}
+                />
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>Ngày xem thay thế (không bắt buộc)</FormLabel>
+                <Input
+                  type="datetime-local"
+                  value={bookingData.alternativeDate}
+                  onChange={(e) => setBookingData({
+                    ...bookingData,
+                    alternativeDate: e.target.value
+                  })}
+                />
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>Lời nhắn</FormLabel>
+                <Textarea
+                  value={bookingData.message}
+                  onChange={(e) => setBookingData({
+                    ...bookingData,
+                    message: e.target.value
+                  })}
+                  placeholder="Nhập lời nhắn cho chủ trọ..."
+                />
+              </FormControl>
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button 
+              colorScheme="blue" 
+              mr={3} 
+              onClick={handleSubmit}
+              isLoading={isSubmitting}
+              loadingText="Đang gửi..."
+            >
+              Gửi yêu cầu
+            </Button>
+            <Button variant="ghost" onClick={onClose}>Hủy</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    );
   };
+
+  const onOpenBooking = () => setIsOpenBooking(true);
+  const onCloseBooking = () => setIsOpenBooking(false);
 
   return (
     <Box p={4}>
       <Center mb={4}>
         <Heading fontSize="2xl" fontWeight="bold">
-          Thông tin phòng
+          Danh sách phòng trọ
         </Heading>
       </Center>
-      <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={6}>
-        {rooms.map((room) => (
-          <Box
-            key={room.id}
-            borderWidth="1px"
-            borderRadius="lg"
-            overflow="hidden"
-            boxShadow="md"
-            bg="white"
-            onClick={() => handleRoomClick(room)}
-            cursor="pointer"
-            display="flex"
-            flexDirection="column"
-          >
-            <Image
-              src={room.image}
-              alt={`Phòng ${room.id}`}
-              w="100%"
-              h="200px"
-              objectFit="cover"
-            />
-            <VStack p={4} align="stretch" spacing={2} flex={1}>
-              <Box>
+
+      {isLoading ? (
+        <Center>
+          <Spinner size="xl" />
+        </Center>
+      ) : rooms.length === 0 ? (
+        <Center>
+          <Text>Không có phòng nào</Text>
+        </Center>
+      ) : (
+        <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={6}>
+          {rooms.map((room) => (
+            <Box
+              key={room.id}
+              borderWidth="1px"
+              borderRadius="lg"
+              overflow="hidden"
+              boxShadow="md"
+              bg="white"
+              onClick={() => handleRoomClick(room)}
+              cursor="pointer"
+              _hover={{ transform: "scale(1.02)", transition: "all 0.2s" }}
+            >
+              <Image
+                src={room.image}
+                alt={room.roomName}
+                w="100%"
+                h="200px"
+                objectFit="cover"
+                fallbackSrc="https://via.placeholder.com/200"
+              />
+              <VStack p={4} align="stretch" spacing={2}>
+                <Text fontWeight="bold" fontSize="lg">
+                  {room.roomTitle}
+                </Text>
                 <Flex alignItems="flex-start">
-                  <Text
-                    fontWeight="bold"
-                    color="black"
-                    width="70px"
-                    flexShrink={0}
-                  >
+                  <Text fontWeight="bold" width="70px" flexShrink={0}>
                     Địa chỉ:
                   </Text>
                   <Text color="gray.600" fontSize="sm">
                     {room.address}
                   </Text>
                 </Flex>
-              </Box>
-              <Flex justifyContent="space-between" alignItems="center">
-                <Text fontWeight="bold" color="black">
-                  Tình trạng:
-                </Text>
-                <Tag
-                  colorScheme={
-                    room.status.toLowerCase().includes("còn trống")
-                      ? "green"
-                      : "orange"
-                  }
-                  size="md" 
-                  fontSize="md" 
-                >
-                  {room.status}
-                </Tag>
-              </Flex>
-              <Flex justifyContent="space-between">
-                <Text fontWeight="bold" color="black">
-                  Giá:
-                </Text>
-                <Text color="gray.600">{room.price}</Text>
-              </Flex>
-            </VStack>
-          </Box>
-        ))}
-      </SimpleGrid>
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Text fontWeight="bold">Tình trạng:</Text>
+                  <Tag
+                    colorScheme={room.status === "Còn trống" ? "green" : "red"}
+                  >
+                    {room.status}
+                  </Tag>
+                </Flex>
+                <Flex justifyContent="space-between">
+                  <Text fontWeight="bold">Giá:</Text>
+                  <Text>
+                    {new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(room.price)}
+                  </Text>
+                </Flex>
+              </VStack>
+            </Box>
+          ))}
+        </SimpleGrid>
+      )}
 
-      {/* Modal hiển thị chi tiết phòng */}
-      <Modal isOpen={isOpenDetail} onClose={handleCloseDetail} size="xl">
+      <Modal
+        isOpen={isOpenDetail}
+        onClose={() => setIsOpenDetail(false)}
+        size="xl"
+      >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Thông tin phòng</ModalHeader>
+          <ModalHeader>Chi tiết phòng</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             {selectedRoom && (
               <Flex direction={{ base: "column", md: "row" }} gap={6}>
                 <Image
                   src={selectedRoom.image}
-                  alt={`Phòng ${selectedRoom.id}`}
+                  alt={selectedRoom.roomName}
                   w={{ base: "100%", md: "50%" }}
                   h="300px"
                   objectFit="cover"
@@ -245,37 +385,33 @@ const TenantRoomList = () => {
                   w={{ base: "100%", md: "50%" }}
                 >
                   <Box>
-                    <Text fontWeight="bold" color="black">
-                      Địa chỉ:
-                    </Text>
+                    <Text fontWeight="bold">Địa chỉ:</Text>
                     <Text color="gray.600">{selectedRoom.address}</Text>
                   </Box>
                   <Box>
-                    <Text fontWeight="bold" color="black">
-                      Giá:
-                    </Text>
-                    <Text color="gray.600">{selectedRoom.price}</Text>
+                    <Text fontWeight="bold">Diện tích:</Text>
+                    <Text color="gray.600">{selectedRoom.area} m²</Text>
                   </Box>
                   <Box>
-                    <Text fontWeight="bold" color="black">
-                      Tình trạng:
+                    <Text fontWeight="bold">Giá thuê:</Text>
+                    <Text color="gray.600">
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(selectedRoom.price)}
                     </Text>
-                    <Tag
-                      colorScheme={
-                        selectedRoom.status.toLowerCase().includes("còn trống")
-                          ? "green"
-                          : "orange"
-                      }
-                      size="md"
-                      fontSize="md"
-                    >
-                      {selectedRoom.status}
-                    </Tag>
                   </Box>
                   <Box>
-                    <Text fontWeight="bold" color="black">
-                      Tiện ích:
+                    <Text fontWeight="bold">Đặt cọc:</Text>
+                    <Text color="gray.600">
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(selectedRoom.deposit)}
                     </Text>
+                  </Box>
+                  <Box>
+                    <Text fontWeight="bold">Tiện ích:</Text>
                     <List spacing={2}>
                       {selectedRoom.amenities.map((amenity, index) => (
                         <ListItem key={index} color="gray.600">
@@ -290,13 +426,72 @@ const TenantRoomList = () => {
             )}
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="red" mr={3} onClick={handleCloseDetail}>
+            <Button
+              colorScheme="red"
+              mr={3}
+              onClick={() => setIsOpenDetail(false)}
+            >
               Đóng
             </Button>
-            <Button colorScheme="teal">Liên hệ</Button>
+            <Button
+              colorScheme="teal"
+              mr={3}
+              onClick={() => {
+                if (currentUser) {
+                  setShowChat(true);
+                  setIsOpenDetail(false);
+                } else {
+                  toast({
+                    title: "Vui lòng đăng nhập",
+                    description: "Bạn cần đăng nhập để chat với chủ trọ",
+                    status: "warning",
+                    duration: 3000,
+                    isClosable: true,
+                  });
+                }
+              }}
+            >
+              Liên hệ chủ trọ
+            </Button>
+            <Button
+              colorScheme="blue"
+              onClick={() => {
+                if (currentUser) {
+                  setIsOpenDetail(false);
+                  onOpenBooking(); 
+                } else {
+                  toast({
+                    title: "Vui lòng đăng nhập",
+                    description: "Bạn cần đăng nhập để đặt lịch xem phòng",
+                    status: "warning", 
+                    duration: 3000,
+                    isClosable: true,
+                  });
+                }
+              }}
+            >
+              Đặt lịch xem phòng
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      {showChat && currentUser && selectedRoom && selectedRoom.landlordId && (
+        <Chat
+          currentUserId={currentUser.id}
+          recipientId={selectedRoom.landlordId.toString()}
+          recipientName={selectedRoom.landlordName || "Chủ trọ"}
+        />
+      )}
+
+      {isOpenBooking && selectedRoom && (
+        <BookingModal
+          isOpen={isOpenBooking}
+          onClose={onCloseBooking}
+          room={selectedRoom}
+          currentUser={currentUser}
+        />
+      )}
     </Box>
   );
 };

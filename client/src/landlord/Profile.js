@@ -10,6 +10,7 @@ import {
   Input,
   useToast,
   IconButton,
+  Stack,
 } from "@chakra-ui/react";
 import { EditIcon } from "@chakra-ui/icons";
 import { jwtDecode } from "jwt-decode";
@@ -119,117 +120,119 @@ function ProfilePage() {
   };
 
   return (
-    <Box maxW="md" mx="auto" p={4} textAlign="center">
-      <Box position="relative" display="inline-block">
-        <Avatar
-          name={user?.name || `Đang tải...`}
-          size="2xl"
-          src={newAvatar}
-          mb={4}
-        />
-        {isEditing && (
-          <IconButton
-            icon={<EditIcon />}
-            position="absolute"
-            bottom={3}
-            left={20}
-            onClick={() => document.getElementById("avatar-input").click()}
-            aria-label="Chỉnh sửa avatar"
-            size="sm"
-            bg="rgba(0, 0, 0, 0.5)"
-            color="white"
-            borderRadius="50%"
-            _hover={{ bg: "rgba(0, 0, 0, 0.7)" }}
-            _focus={{ outline: "none" }}
+    <Stack>
+      <Box maxW="md" mx="auto" p={4} textAlign="center">
+        <Box position="relative" display="inline-block">
+          <Avatar
+            name={user?.name || `Đang tải...`}
+            size="2xl"
+            src={newAvatar}
+            mb={4}
           />
+          {isEditing && (
+            <IconButton
+              icon={<EditIcon />}
+              position="absolute"
+              bottom={3}
+              left={20}
+              onClick={() => document.getElementById("avatar-input").click()}
+              aria-label="Chỉnh sửa avatar"
+              size="sm"
+              bg="rgba(0, 0, 0, 0.5)"
+              color="white"
+              borderRadius="50%"
+              _hover={{ bg: "rgba(0, 0, 0, 0.7)" }}
+              _focus={{ outline: "none" }}
+            />
+          )}
+          <input
+            id="avatar-input"
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarChange}
+            style={{ display: "none" }}
+          />
+        </Box>
+
+        {isEditing ? (
+          <Input
+            width="70%"
+            name="name"
+            value={user?.name || `Đang tải...`}
+            onChange={handleChange}
+            fontSize="2xl"
+            fontWeight="bold"
+            mb={2}
+            textAlign="center"
+            placeholder="Tên của bạn"
+          />
+        ) : (
+          <Text fontSize="2xl" fontWeight="bold">
+            {user?.name || `Đang tải...`}
+          </Text>
         )}
-        <input
-          id="avatar-input"
-          type="file"
-          accept="image/*"
-          onChange={handleAvatarChange}
-          style={{ display: "none" }}
-        />
-      </Box>
 
-      {isEditing ? (
-        <Input
-          width="70%"
-          name="name"
-          value={user?.name || `Đang tải...`}
-          onChange={handleChange}
-          fontSize="2xl"
-          fontWeight="bold"
-          mb={2}
-          textAlign="center"
-          placeholder="Tên của bạn"
-        />
-      ) : (
-        <Text fontSize="2xl" fontWeight="bold">
-          {user?.name || `Đang tải...`}
-        </Text>
-      )}
-
-      <Divider my={4} />
-      <VStack spacing={4}>
-        <HStack justify="space-between" width="100%">
-          <Text fontWeight="medium">Email:</Text>
-          {isEditing ? (
-            <Input
-              width="70%"
-              name="email"
-              value={user?.email || "Đang tải ..."}
-              onChange={handleChange}
-              size="sm"
-            />
-          ) : (
-            <Text>{user?.email || "Đang tải..."}</Text>
-          )}
-        </HStack>
-        <HStack justify="space-between" width="100%">
-          <Text fontWeight="medium">Số điện thoại:</Text>
-          {isEditing ? (
-            <Input
-              width="70%"
-              name="numPhone"
-              value={user.numPhone}
-              onChange={handleChange}
-              size="sm"
-            />
-          ) : (
-            <Text>{user?.numPhone || "Đang tải..."}</Text>
-          )}
-        </HStack>
-        <HStack justify="space-between" width="100%">
-          <Text fontWeight="medium">Ngày sinh:</Text>
-          {isEditing ? (
-            <Input
-              width="70%"
-              name="dob"
-              type="date"
-              value={user.dob}
-              onChange={handleChange}
-              size="sm"
-            />
-          ) : (
-            <Text>{user?.dob || "Đang tải..."}</Text>
-          )}
-        </HStack>
-      </VStack>
-      <Divider my={4} />
-      <Button
-        colorScheme="blue"
-        mt={4}
-        onClick={isEditing ? handleSave : toggleEdit}
-      >
-        {isEditing ? "Lưu thay đổi" : "Chỉnh sửa thông tin"}
-      </Button>
-      {isEditing && (
-        <Button colorScheme="gray" mt={4} ml={2} onClick={toggleEdit}>
-          Hủy
+        <Divider my={4} />
+        <VStack spacing={4}>
+          <HStack justify="space-between" width="100%">
+            <Text fontWeight="medium">Email:</Text>
+            {isEditing ? (
+              <Input
+                width="70%"
+                name="email"
+                value={user?.email || "Đang tải ..."}
+                onChange={handleChange}
+                size="sm"
+              />
+            ) : (
+              <Text>{user?.email || "Đang tải..."}</Text>
+            )}
+          </HStack>
+          <HStack justify="space-between" width="100%">
+            <Text fontWeight="medium">Số điện thoại:</Text>
+            {isEditing ? (
+              <Input
+                width="70%"
+                name="numPhone"
+                value={user.numPhone}
+                onChange={handleChange}
+                size="sm"
+              />
+            ) : (
+              <Text>{user?.numPhone || "Đang tải..."}</Text>
+            )}
+          </HStack>
+          <HStack justify="space-between" width="100%">
+            <Text fontWeight="medium">Ngày sinh:</Text>
+            {isEditing ? (
+              <Input
+                width="70%"
+                name="dob"
+                type="date"
+                value={user.dob}
+                onChange={handleChange}
+                size="sm"
+              />
+            ) : (
+              <Text>{user?.dob || "Đang tải..."}</Text>
+            )}
+          </HStack>
+        </VStack>
+        <Divider my={4} />
+        <Button
+          colorScheme="blue"
+          mt={4}
+          onClick={isEditing ? handleSave : toggleEdit}
+        >
+          {isEditing ? "Lưu thay đổi" : "Chỉnh sửa thông tin"}
         </Button>
-      )}
-    </Box>
+        {isEditing && (
+          <Button colorScheme="gray" mt={4} ml={2} onClick={toggleEdit}>
+            Hủy
+          </Button>
+        )}
+      </Box>
+    </Stack>
   );
 }
 

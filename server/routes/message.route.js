@@ -22,7 +22,8 @@ router.get('/history/:userId', authMiddleware(['tenant', 'landlord']), async (re
       $or: [
         { senderId: currentUserId, recipientId: recipientId },
         { senderId: recipientId, recipientId: currentUserId }
-      ]
+      ],
+      deletedFor: { $ne: currentUserId }
     })
     .sort({ timestamp: 1 })
     .limit(50);
@@ -84,6 +85,52 @@ router.get('/unread', authMiddleware(['landlord']), async (req, res) => {
   } catch (error) {
     console.error('Error getting unread messages:', error);
     res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Xóa cuộc trò chuyện (chỉ ẩn với người xóa)
+router.delete('/delete-conversation', authMiddleware(['tenant', 'landlord']), async (req, res) => {
+  try {
+    const { recipientId } = req.body;
+    const currentUserId = req.user.id;
+
+    if (!recipientId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Thiếu thông tin người nhận'
+      });
+    }
+
+    // Thêm trường deletedFor để đánh dấu tin nhắn đã bị xóa bởi ai
+    const result = await Message.updateMany(
+      {
+        $or: [
+          { senderId: currentUserId, recipientId: recipientId },
+          { senderId: recipientId, recipientId: currentUserId }
+        ]
+      },
+      {
+        $addToSet: { deletedFor: currentUserId }
+      }
+    );
+
+    console.log('Marked messages as deleted for user:', result);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Đã xóa tin nhắn thành công',
+      data: {
+        modifiedCount: result.modifiedCount
+      }
+    });
+
+  } catch (error) {
+    console.error('Error deleting conversation:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Lỗi server khi xóa tin nhắn',
+      error: error.message
+    });
   }
 });
 

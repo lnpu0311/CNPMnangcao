@@ -5,6 +5,7 @@ const sendverificationCode = require("../middlewares/sendEmail");
 
 //Đăng ký, tạo user
 const createUser = async (req, res) => {
+
   const user = req.body;
 
   if (
@@ -71,6 +72,7 @@ const createUser = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 //Đăng nhập
 const loginUser = async (req, res) => {
   console.log(req.body);

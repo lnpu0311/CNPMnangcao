@@ -35,7 +35,7 @@ function HomeDashboard() {
     "Facility 2 - Address",
     "Facility 3 - Address",
   ];
-
+  
   const bookingRequests = [
     "John Doe requested - Room 101",
     "Jane Smith requested - Room 202",
@@ -45,12 +45,12 @@ function HomeDashboard() {
   return (
     <Box p={5}>
       <Text fontSize="2xl" fontWeight="bold">
-        Welcome, {userData.name}!
+        Chào mừng trở lại, {userData.name}!
       </Text>
 
       <VStack align="start" spacing={4} mb={5}>
         <Text fontSize="lg" fontWeight="bold">
-          Quick Actions
+          Tác vụ nhanh
         </Text>
         <Flex gap={3}>
           <Button
@@ -68,6 +68,14 @@ function HomeDashboard() {
             onClick={() => navigate("/landlord/rental-request")}
           >
             Danh sách yêu cầu
+          </Button>
+          <Button
+            leftIcon={<CalendarIcon />}
+            colorScheme="purple"
+            variant="outline"
+            onClick={() => navigate("/landlord/booking-management")}
+          >
+            Quản lý đặt lịch
           </Button>
         </Flex>
       </VStack>

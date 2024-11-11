@@ -59,6 +59,8 @@ import {
   FaFacebook,
   FaYoutube,
   FaInstagram,
+  FaCalendarAlt,
+  FaCalendarCheck,
 } from "react-icons/fa";
 import {
   NavLink,
@@ -145,6 +147,11 @@ function TenantHome() {
       icon: <FaBuilding />,
     },
     {
+      name: "Lịch sử đặt phòng",
+      path: "bookings",
+      icon: <FaCalendarCheck />,
+    },
+    {
       name: "Thông tin hợp đồng",
       path: "contract",
       icon: <FaFileInvoiceDollar />,
@@ -165,6 +172,7 @@ function TenantHome() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsAuthenticated(false);
+    navigate(`/login`);
   };
 
   const toggleNav = () => {

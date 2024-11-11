@@ -9,7 +9,6 @@ const {
   resetPassword,
 } = require("../controllers/auth.controller");
 const upload = require("../middlewares/uploadImage");
-
 router.post("/register", upload.single("image"), createUser);
 router.post("/login", loginUser);
 router.post("/verify-otp", verifyOTP);

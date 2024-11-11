@@ -7,7 +7,8 @@ const PORT = process.env.PORT || 5000;
 require("dotenv").config();
 
 const Message = require("./models/message.model");
-
+const bookingRoutes = require("./routes/booking.route");
+const rentalRequestRoutes = require('./routes/rentalRequest.route');
 const morgan = require("morgan");
 const cors = require("cors");
 
@@ -107,12 +108,15 @@ const authRoutes = require("./routes/auth.route");
 const landlordRoute = require("./routes/landlord.route");
 const messageRoute = require("./routes/message.route");
 
+
 // Api
 app.use("/api/room", roomRoute);
 app.use("/api/user", userRoute);
 app.use("/api/auth", authRoutes);
 app.use("/api/landlord", landlordRoute);
 app.use("/api/messages", messageRoute);
+app.use("/api/booking", bookingRoutes);
+app.use("/api/rental-request", rentalRequestRoutes);
 server.listen(PORT, () =>
   console.log(`Server is running on http://localhost:${PORT}`)
 );

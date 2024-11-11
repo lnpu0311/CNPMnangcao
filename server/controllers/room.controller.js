@@ -3,7 +3,7 @@ const Room = require("../models/room.model");
 
 const getRoom = async (req, res) => {
   try {
-    const rooms = await Room.find({});
+    const rooms = await Room.find({}).populate('tenantId', 'name phone');
     res.status(200).json({ success: true, data: rooms });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -12,11 +12,9 @@ const getRoom = async (req, res) => {
 const getRoomById = async (req, res) => {
   const { id } = req.params;
   try {
-    const room = await Room.findById(id);
+    const room = await Room.findById(id).populate('tenantId', 'name phone');
     if (!room) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Room not found" });
+      return res.status(404).json({ success: false, message: "Room not found" });
     }
     res.status(200).json({ success: true, data: room });
   } catch (error) {
@@ -27,12 +25,9 @@ const getRoomById = async (req, res) => {
 const getRoomByHostelId = async (req, res) => {
   const { id } = req.params;
   try {
-    const room = await Room.find({ hostelId: id });
-    console.log(id);
+    const room = await Room.find({ hostelId: id }).populate('tenantId', 'name phone');
     if (!room) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Room not found" });
+      return res.status(404).json({ success: false, message: "Room not found" });
     }
     res.status(200).json({ success: true, data: room });
   } catch (error) {

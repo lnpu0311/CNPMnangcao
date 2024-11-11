@@ -23,6 +23,7 @@ import {
   Collapse,
   Button,
   Divider,
+  Link,
 } from "@chakra-ui/react";
 import {
   HamburgerIcon,
@@ -253,6 +254,7 @@ function HomeLayout() {
                 <NavLink
                   to={item.path}
                   key={item.name}
+                  end
                   onClick={() => {
                     handleMenuClick(item.name);
                     onClose();
@@ -272,7 +274,7 @@ function HomeLayout() {
                       transition="background-color 0.2s ease"
                       _hover={{
                         backgroundColor: isActive ? "brand.600" : "brand.700",
-                        textColor: "gray.300",
+                        textColor: "whitesmoke",
                       }}
                     >
                       <Box as="span">{item.icon}</Box>
@@ -285,7 +287,7 @@ function HomeLayout() {
               ))}
               <Divider my={4} />
               <Button
-                _hover={{ bgColor: "brand.700", textColor: "gray.300" }}
+                _hover={{ bgColor: "brand.700", textColor: "whitesmoke" }}
                 textColor={"brand.0"}
                 p={2}
                 variant="ghost"
@@ -295,7 +297,7 @@ function HomeLayout() {
                 Chỉnh sửa thông tin cá nhân
               </Button>
               <Button
-                _hover={{ bgColor: "brand.700", textColor: "gray.300" }}
+                _hover={{ bgColor: "brand.700", textColor: "whitesmoke" }}
                 textColor={"brand.0"}
                 p={2}
                 variant="ghost"
@@ -344,10 +346,8 @@ function HomeLayout() {
           </Flex>
           <Collapse in={isNavOpen}>
             {menuItems.map((item) => (
-              <NavLink
-                className={({ isActive }) =>
-                  isActive ? "navlink active-navlink" : "navlink"
-                }
+              <Link
+                as={NavLink}
                 to={item.path}
                 key={item.name}
                 end
@@ -355,10 +355,30 @@ function HomeLayout() {
                   handleMenuClick(item.name);
                   onClose();
                 }}
+                _activeLink={{
+                  bg: "#0096c7",
+                  textColor: "white",
+                }}
+                _hover={{
+                  bg: "#0077b6",
+                  textColor: "whitesmoke",
+                }}
+                marginInlineStart={"5px"}
+                marginBlock={4}
+                display="flex"
+                alignItems="center"
+                gap="8px"
+                p="6px"
+                borderRadius="5px"
+                fontSize="18px"
+                fontWeight="600"
+                height="45px"
+                textColor="brand.0"
+                transition="background-color 0.2s ease"
               >
                 {item.icon}
-                {item.name}
-              </NavLink>
+                <Text color={"inherit"}>{item.name}</Text>
+              </Link>
             ))}
           </Collapse>
         </VStack>

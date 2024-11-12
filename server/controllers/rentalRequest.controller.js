@@ -76,81 +76,54 @@ exports.createRentalRequest = async(req,res) =>{
 };
 
 // Đổi tên function từ updateRentalRequest thành updateRentalRequestStatus
-exports.updateRentalRequestStatus = async (req,res) =>{
-    try{
-        const {id} = req.params;
-        const {status, rejectReason} = req.body;
-        
-        const request = await RentalRequest.findById(id)
-            .populate('tenantId', 'name phone');
-            
-        if(!request){
-            return res.status(404).json({
-                success:false,
-                message:"Không tìm thấy yêu cầu thuê"
-            });
-        }
+exports.updateRentalRequestStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, contractId } = req.body;
 
-        if(status === 'accepted') {
-            const room = await Room.findById(request.roomId);
-            if(!room) {
-                return res.status(404).json({
-                    success: false,
-                    message: "Không tìm thấy phòng"
-                });
-            }
-            
-            if(room.status !== 'available') {
-                return res.status(400).json({
-                    success: false,
-                    message: "Phòng đã được thuê"
-                });
-            }
-
-            // Chỉ cập nhật status và tenantId
-            await Room.findByIdAndUpdate(request.roomId, {
-                status: 'occupied',
-                tenantId: request.tenantId._id
-            });
-
-            // Từ chối và xóa các yêu cầu thuê khác
-            const otherRequests = await RentalRequest.find({
-                roomId: request.roomId,
-                _id: { $ne: request._id }
-            });
-
-            // Cập nhật trạng thái rejected cho các yêu cầu khác
-            for (const req of otherRequests) {
-                req.status = 'rejected';
-                req.rejectReason = 'Phòng đã được thuê bởi người khác';
-                await req.save();
-                // Xóa yêu cầu sau khi cập nhật trạng thái
-                await RentalRequest.findByIdAndDelete(req._id);
-            }
-        }
-
-        // Cập nhật trạng thái yêu cầu hiện tại
-        request.status = status;
-        if(rejectReason) {
-            request.rejectReason = rejectReason;
-        }
-        await request.save();
-        
-        // Xóa yêu cầu sau khi xử lý xong
-        await RentalRequest.findByIdAndDelete(id);
-
-        res.status(200).json({
-            success: true,
-            message: `Đã ${status === 'accepted' ? 'chấp nhận' : 'từ chối'} yêu cầu thuê phòng`
-        });
-
-    } catch (error) {
-        console.error('Update rental request error:', error);
-        return res.status(500).json({
-            success: false,
-            message: "Không thể cập nhật trạng thái: " + error.message
-        });
+    // Kiểm tra nếu status là accepted thì phải có contractId
+    if (status === 'accepted' && !contractId) {
+      return res.status(400).json({
+        success: false,
+        message: "Vui lòng tạo hợp đồng trước khi chấp nhận yêu cầu thuê"
+      });
     }
+
+    const request = await RentalRequest.findById(id);
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy yêu cầu thuê"
+      });
+    }
+
+    // Cập nhật trạng thái phòng và thêm contractId
+    if (status === 'accepted') {
+      await Room.findByIdAndUpdate(request.roomId, {
+        status: 'occupied',
+        tenantId: request.tenantId,
+        contractId: contractId
+      });
+    }
+
+    request.status = status;
+    if (status === 'accepted') {
+      request.contractId = contractId;
+    }
+    await request.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Đã ${status === 'accepted' ? 'chấp nhận' : 'từ chối'} yêu cầu thuê phòng`
+    });
+
+  } catch (error) {
+    console.error('Update rental request error:', error);
+    return res.status(500).json({
+      success: false,
+      message: "Không thể cập nhật trạng thái: " + error.message
+    });
+  }
 };
 
 // Lấy danh sách yêu cầu thuê cho landlord

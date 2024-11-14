@@ -246,31 +246,15 @@ const RentalRequest = () => {
       );
 
       if (contractResponse.data.success) {
-        // Sau khi tạo hợp đồng thành công, cập nhật trạng thái yêu cầu thuê
-        const requestResponse = await axios.put(
-          `${process.env.REACT_APP_API}/rental-request/${selectedRequest._id}/status`,
-          { 
-            status: 'accepted',
-            contractId: contractResponse.data.data._id // Thêm ID của hợp đồng vừa tạo
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-          }
-        );
-
-        if (requestResponse.data.success) {
-          toast({
-            title: "Thành công",
-            description: "Đã tạo hợp đồng và chấp nhận yêu cầu thuê phòng",
-            status: "success",
-            duration: 3000,
-            isClosable: true
-          });
-          closeContractModal();
-          fetchRentalRequests();
-        }
+        toast({
+          title: "Thành công",
+          description: "Đã tạo hợp đồng thành công",
+          status: "success",
+          duration: 3000,
+          isClosable: true
+        });
+        closeContractModal();
+        fetchRentalRequests();
       }
     } catch (error) {
       console.error('Contract creation error:', error);

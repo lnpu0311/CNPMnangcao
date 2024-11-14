@@ -160,22 +160,38 @@ const createContract = async(req,res) => {
 
     // Cập nhật trạng thái phòng
     await Room.findByIdAndUpdate(contract.roomId, {
-      status: 'pending_contract',
-      tenantId: contract.tenantId
+      status: 'occupied',
+      tenantId: contract.tenantId,
+      contractId: newContract._id
     });
 
-    // Xóa rental request sau khi tạo hợp đồng thành công
-    await RentalRequest.findOneAndDelete({
-      roomId: contract.roomId,
-      tenantId: contract.tenantId,
-      status: 'pending'
-    });
+    // Cập nhật rental request thay vì xóa
+    const updatedRequest = await RentalRequest.findOneAndUpdate(
+      {
+        roomId: contract.roomId,
+        tenantId: contract.tenantId,
+        status: 'pending'
+      },
+      {
+        status: 'accepted',
+        contractId: newContract._id
+      },
+      { new: true }
+    );
+
+    if (!updatedRequest) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy yêu cầu thuê phòng"
+      });
+    }
 
     res.status(200).json({
       success: true, 
       data: newContract,
       message: "Tạo hợp đồng thành công"
     });
+
   } catch(error) {
     console.error('Create contract error:', error);
     res.status(500).json({

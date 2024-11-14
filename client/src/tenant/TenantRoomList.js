@@ -29,6 +29,7 @@ import {
   Textarea,
   Grid,
   GridItem,
+  Select,
 } from "@chakra-ui/react";
 import { MdCheckCircle } from "react-icons/md";
 import Chat from "../components/Chat";
@@ -45,6 +46,88 @@ const TenantRoomList = () => {
   const toast = useToast();
   const [isOpenBooking, setIsOpenBooking] = useState(false);
   const navigate = useNavigate();
+
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterCity, setFilterCity] = useState("");
+  const [filterDistrict, setFilterDistrict] = useState("");
+  const [filterAddress, setFilterAddress] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [priceRange, setPriceRange] = useState("");
+
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleCityChange = (e) => {
+    setFilterCity(e.target.value);
+  };
+
+  const handleDistrictChange = (e) => {
+    setFilterDistrict(e.target.value);
+  };
+
+  const handleAddressChange = (e) => {
+    setFilterAddress(e.target.value);
+  };
+
+  const handleMinPriceChange = (e) => {
+    setMinPrice(e.target.value);
+  };
+
+  const handleMaxPriceChange = (e) => {
+    setMaxPrice(e.target.value);
+  };
+
+  const handlePriceRangeChange = (e) => {
+    setPriceRange(e.target.value);
+  };
+
+  const filteredRooms = rooms.filter((room) => {
+    const price = room.price || 0;
+    let minPrice = 0;
+    let maxPrice = Infinity;
+
+    switch (priceRange) {
+      case "500000-1000000":
+        minPrice = 500000;
+        maxPrice = 1000000;
+        break;
+      case "1000000-3000000":
+        minPrice = 1000000;
+        maxPrice = 3000000;
+        break;
+      case "3000000-6000000":
+        minPrice = 3000000;
+        maxPrice = 6000000;
+        break;
+      case "6000000-9000000":
+        minPrice = 6000000;
+        maxPrice = 9000000;
+        break;
+      case "9000000-10000000":
+        minPrice = 9000000;
+        maxPrice = 10000000;
+        break; 
+      case "10000000-20000000":
+        minPrice = 10000000;
+        maxPrice = 20000000;
+        break; 
+      default:
+        break;
+    }
+
+    return (
+      room.roomTitle.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      room.address.includes(filterCity) &&
+      room.address.includes(filterDistrict) &&
+      room.address.includes(filterAddress) &&
+      price >= minPrice &&
+      price <= maxPrice
+    );
+  });
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -297,70 +380,109 @@ const TenantRoomList = () => {
         </Heading>
       </Center>
 
-      {isLoading ? (
-        <Center>
-          <Spinner size="xl" />
-        </Center>
-      ) : rooms.length === 0 ? (
-        <Center>
-          <Text>Không có phòng nào</Text>
-        </Center>
-      ) : (
-        <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={6}>
-          {rooms.map((room) => (
-            <Box
-              key={room.id}
-              borderWidth="1px"
-              borderRadius="lg"
-              overflow="hidden"
-              boxShadow="md"
-              bg="white"
-              onClick={() => handleRoomClick(room)}
-              cursor="pointer"
-              _hover={{ transform: "scale(1.02)", transition: "all 0.2s" }}
-            >
-              <Image
-                src={room.image}
-                alt={room.roomName}
-                w="100%"
-                h="200px"
-                objectFit="cover"
-                fallbackSrc="https://via.placeholder.com/200"
-              />
-              <VStack p={4} align="stretch" spacing={2}>
-                <Text fontWeight="bold" fontSize="lg">
-                  {room.roomTitle}
-                </Text>
-                <Flex alignItems="flex-start">
-                  <Text fontWeight="bold" width="70px" flexShrink={0}>
-                    Địa chỉ:
+      
+      <Grid templateColumns={{ base: "1fr", md: "1fr 3fr" }} gap={6}>
+        <form>
+          <VStack 
+            spacing={4}
+            mb={4}
+            align="stretch"
+            position="sticky"
+            top="15%"
+            h="fit-content"
+          >
+            <Input
+              placeholder="Địa chỉ chi tiết..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+            <Select placeholder="Chọn thành phố" onChange={handleCityChange}>
+              {Array.from(new Set(rooms.map(room => room.address.split(', ')[3]))).map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </Select>
+            <Select placeholder="Chọn quận" onChange={handleDistrictChange}>
+              {Array.from(new Set(rooms.map(room => room.address.split(', ')[2]))).map(district => (
+                <option key={district} value={district}>{district}</option>
+              ))}
+            </Select>
+            <Select placeholder="Chọn khoảng giá" onChange={handlePriceRangeChange}>
+              <option value="500000-1000000">500.000 - 1.000.000</option>
+              <option value="1000000-3000000">1.000.000 - 3.000.000</option>
+              <option value="3000000-6000000">3.000.000 - 6.000.000</option>
+              <option value="6000000-9000000">6.000.000 - 9.000.000</option>
+              <option value="9000000-12000000">9.000.000 - 12.000.000</option>
+              <option value="12000000-20000000">12.000.000 - 20.000.000</option>
+            </Select>
+          </VStack>
+        </form>
+
+        {isLoading ? (
+          <Center>
+            <Spinner size="xl" />
+          </Center>
+        ) : filteredRooms.length === 0 ? (
+          <Center>
+            <Text>Không có phòng nào</Text>
+          </Center>
+        ) : (
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+            {filteredRooms.map((room) => (
+              <Box
+                key={room.id}
+                borderWidth="1px"
+                borderRadius="lg"
+                overflow="hidden"
+                boxShadow="md"
+                bg="white"
+                onClick={() => handleRoomClick(room)}
+                cursor="pointer"
+                _hover={{ transform: "scale(1.02)", transition: "all 0.2s" }}
+              >
+                <Image
+                  src={room.image}
+                  alt={room.roomName}
+                  w="100%"
+                  h="200px"
+                  objectFit="cover"
+                  fallbackSrc="https://via.placeholder.com/200"
+                />
+                <VStack p={4} align="stretch" spacing={2}>
+                  <Text fontWeight="bold" fontSize="lg">
+                    {room.roomTitle}
                   </Text>
-                  <Text color="gray.600" fontSize="sm">
-                    {room.address}
-                  </Text>
-                </Flex>
-                <Flex justifyContent="space-between" alignItems="center">
-                  <Text fontWeight="bold">Tình trạng:</Text>
-                  <Tag
-                    colorScheme={room.status === "Còn trống" ? "green" : "red"}
-                  >
-                    {room.status}
-                  </Tag>
-                </Flex>
-                <Flex justifyContent="space-between">
-                  <Text fontWeight="bold">Giá:</Text>
-                  <Text>
-                    {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(room.price)}
-                  </Text>
-                </Flex>
-              </VStack>
-            </Box>
-          ))}
-        </SimpleGrid>
-      )}
+                  <Flex alignItems="flex-start">
+                    <Text fontWeight="bold" width="70px" flexShrink={0}>
+                      Địa chỉ:
+                    </Text>
+                    <Text color="gray.600" fontSize="sm">
+                      {room.address}
+                    </Text>
+                  </Flex>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <Text fontWeight="bold">Tình trạng:</Text>
+                    <Tag
+                      colorScheme={room.status === "Còn trống" ? "green" : "red"}
+                    >
+                      {room.status}
+                    </Tag>
+                  </Flex>
+                  <Flex justifyContent="space-between">
+                    <Text fontWeight="bold">Giá:</Text>
+                    <Text>
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(room.price)}
+                    </Text>
+                  </Flex>
+                </VStack>
+              </Box>
+            ))}
+          </SimpleGrid>
+        )}
+      </Grid>
+
 
       <Modal
         isOpen={isOpenDetail}

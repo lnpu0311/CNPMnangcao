@@ -24,6 +24,7 @@ import SearchResults from "./pages/SearchResults";
 import MessageManagement from "./landlord/MessageManagement";
 import TenantBookingManagement from "./tenant/TenantBookingManagement";
 import BookingManagement from "./landlord/BookingManagement";
+import RoomDetail from "./tenant/RoomDetail";
 function App() {
   return (
     <ChakraProvider theme={theme}>
@@ -91,6 +92,7 @@ function App() {
             <Route path="payments" element={<TenantPayments />} />
             <Route path="profile-page" element={<ProfilePage />} />
             <Route path="bookings" element={<TenantBookingManagement />} />
+            <Route path="room-detail" element={<RoomDetail />} />
           </Route>
 
           <Route path="/search-results" element={<SearchResults />} />

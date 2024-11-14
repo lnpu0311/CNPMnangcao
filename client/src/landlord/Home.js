@@ -83,7 +83,7 @@ function HomeLayout() {
       icon: <RiParentFill />,
     },
     {
-      name: "Quản lý yêu cầu thuê phòng",
+      name: "Quản lý yêu cầu",
       path: "/landlord/rental-request",
       icon: <MdOutlineMeetingRoom />,
     },

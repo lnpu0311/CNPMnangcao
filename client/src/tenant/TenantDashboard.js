@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from "react"; 
-import axios from "axios";
 import React from "react";
 import { VStack, Box, Image, Heading, Text, Button, Grid, Stack, Link, Icon, HStack,  
   Modal,
@@ -12,15 +11,42 @@ import { VStack, Box, Image, Heading, Text, Button, Grid, Stack, Link, Icon, HSt
   ModalFooter,
   IconButton,
   Container,
-  Flex,
-  Tag
+  Flex
  } from "@chakra-ui/react";
-import { FaFacebook, FaYoutube, FaInstagram, FaChevronLeft, FaChevronRight, FaBuilding } from "react-icons/fa";
+import { FaFacebook, FaYoutube, FaInstagram, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Banner from "./Banner";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+
+const categories = [
+  { name: "Quận 1", image: "./house1.png" },
+  { name: "Quận 2", image: "./house2.png" },
+  { name: "Quận 3", image: "./house3.png" },
+  // Thêm các quận khác
+];
+
+const rooms = [
+  {
+    category: "Quận 1",
+    address: "39 Phan Xích Long, Phường 03, Quận Phú Nhuận, Thành phố Hồ Chí Minh",
+    area: "100 m²",
+    price: "10.000.000 ₫",
+    deposit: "500.000 ₫",
+    amenities: ["Wifi miễn phí", "Bảo vệ 24/7", "Chỗ để xe", "Tự do giờ giấc"],
+    image: "./house1.png",
+  },
+  {
+    category: "Quận 2",
+    address: "39 Phan Xích Long, Phường 03, Quận Phú Nhuận, Thành phố Hồ Chí Minh",
+    area: "100 m²",
+    price: "10.000.000 ₫",
+    deposit: "500.000 ₫",
+    amenities: ["Wifi miễn phí", "Bảo vệ 24/7", "Chỗ để xe", "Tự do giờ giấc"],
+    image: "./house2.png",
+  },
+  // Thêm các phòng khác
+];
+
 
 const heroImages = [
   "./house1.png",
@@ -145,70 +171,23 @@ function TenantDashboard() {
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
-  const [rooms, setRooms] = useState([]);
+  const handleCategoryClick = (categoryName) => {
+    setSelectedCategory(categoryName);
+  };
 
-  useEffect(() => {
-    const fetchRooms = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(
-          `${process.env.REACT_APP_API}/user/rooms`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-  
-        if (response.data.success && Array.isArray(response.data.data)) {
-          const formattedRooms = response.data.data.map((room) => ({
-            id: room._id,
-            roomTitle: room.roomTitle || "Không có tiêu đề",
-            address: room.hostelId
-              ? `${room.hostelId.address || ""}, ${room.hostelId.ward || ""}, ${
-                  room.hostelId.district || ""
-                }, ${room.hostelId.city || ""}`
-              : "Địa chỉ không có sẵn",
-            status: room.status === "available" ? "Còn trống" : "Đã thuê",
-            price: room.price || 0,
-            image: room.images && room.images.length > 0
-              ? room.images[0]
-              : "https://via.placeholder.com/200",
-          }));
-          setRooms(formattedRooms);
-        }
-      } catch (error) {
-        console.error("Error fetching rooms:", error);
-      }
-    };
-  
-    fetchRooms();
-  }, []);
+  const filteredRooms = rooms.filter(room => room.category === selectedCategory);
 
-  // Thêm cấu hình slider
-const sliderSettings = {
-  dots: false,
-  infinite: true,
-  speed: 500,
-  slidesToShow: 3,
-  slidesToScroll: 1,
-  arrows: true,
-  responsive: [
-    {
-      breakpoint: 1024,
-      settings: {
-        slidesToShow: 2,
-      }
-    },
-    {
-      breakpoint: 600,
-      settings: {
-        slidesToShow: 1,
-      }
-    }
-  ]
-};
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // const nextSlide = () => {
+  //   setCurrentIndex((prevIndex) => (prevIndex + 1) % rooms.length);
+  // };
+
+  // const prevSlide = () => {
+  //   setCurrentIndex((prevIndex) => (prevIndex - 1 + rooms.length) % rooms.length);
+  // };
 
     // Hàm mở modal
   const handleOpenDetails = (name) => {
@@ -258,76 +237,75 @@ const sliderSettings = {
         <Banner/>
       </Box>
 
-      <Box my={8} px={4}>
-  <Slider {...sliderSettings}>
-    {rooms.map((room) => (
-      <Box key={room.id} p={2}>
-        <Box
-          borderWidth="1px"
-          borderRadius="lg"
-          overflow="hidden"
-          bg="white"
-          boxShadow="sm"
-          _hover={{ boxShadow: "md" }}
-        >
-          <Image
-            src={room.image}
-            alt={room.roomTitle}
-            height="200px"
-            width="100%"
-            objectFit="cover"
-          />
-          <Box p={4}>
-            <Text fontWeight="bold" fontSize="lg" mb={2}>
-              {room.roomTitle}
-            </Text>
-            <Text fontSize="sm" color="gray.600" mb={2}>
-              Địa chỉ: {room.address}
-            </Text>
-            <Flex justify="space-between" align="center">
-              <Tag
-                colorScheme={room.status === "Còn trống" ? "green" : "red"}
-                size="sm"
-              >
-                {room.status}
-              </Tag>
-              <Text fontWeight="bold" color="orange.500">
-                {new Intl.NumberFormat("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                }).format(room.price)}
-              </Text>
-            </Flex>
-          </Box>
-        </Box>
-      </Box>
-    ))}
-  </Slider>
-</Box>
+      {/* <VStack spacing={10} align="center" p={4} w="100%">
+     
+      <Flex overflow="hidden" mb={10} w="100%" justifyContent="center" >
+        <Flex as={motion.div} whileTap={{ cursor: "grabbing" }} w="100%" overflowX="auto">
+          {categories.map((category, index) => (
+            <Box key={index} p={4} minW="200px" textAlign="center" onClick={() => handleCategoryClick(category.name)}>
+              <Image src={category.image} alt={category.name} boxSize="150px" objectFit="cover" />
+              <Text mt={2} fontWeight="bold">{category.name}</Text>
+            </Box>
+          ))}
+        </Flex>
+      </Flex>
 
-       {/* Room List Button */}
-       <Box my={20}>
+     
+      {selectedCategory && (
+        <Box w="100%">
+          <Heading size="md" mb={4}>Phòng tại {selectedCategory}</Heading>
+          {filteredRooms.map((room, index) => (
+            <Box key={index} p={4} mb={4} bg="white" borderRadius="lg" boxShadow="lg">
+              <Image src={room.image} alt="Room" w="100%" h="200px" objectFit="cover" borderRadius="md" />
+              <Text fontWeight="bold" mt={4}>Địa chỉ:</Text>
+              <Text>{room.address}</Text>
+              <Text fontWeight="bold" mt={2}>Diện tích:</Text>
+              <Text>{room.area}</Text>
+              <Text fontWeight="bold" mt={2}>Giá thuê:</Text>
+              <Text>{room.price}</Text>
+              <Text fontWeight="bold" mt={2}>Đặt cọc:</Text>
+              <Text>{room.deposit}</Text>
+              <Text fontWeight="bold" mt={2}>Tiện ích:</Text>
+              <VStack align="start" spacing={1}>
+                {room.amenities.map((amenity, idx) => (
+                  <Text key={idx}>- {amenity}</Text>
+                ))}
+              </VStack>
+            </Box>
+          ))}
+        </Box>
+      )}
+    </VStack> */}
+
+       {/* RoomList button */}
+       <Box 
+        display="flex" 
+        justifyContent="center" 
+        mb={20}
+      >
         <Button
           size="lg"
+          height="60px"
+          width={{ base: "90%", md: "400px" }}
           colorScheme="orange"
-        
+          
           onClick={() => navigate('room-list')}
+          fontSize="xl"
           _hover={{
             transform: 'translateY(-2px)',
-            boxShadow: 'lg',
+            boxShadow: 'xl',
           }}
           transition="all 0.2s"
         >
-          Tìm phòng ngay!
+          Tìm Phòng Ngay!
         </Button>
       </Box>
-
+      
       {/* Profile Section */}
       <Box 
-        py={15} 
+        py={10} 
         px={{ base: 4, md: 8 }} 
-        bg="gray.50"
-        mt={10} 
+        mt={5} 
       >
         <Container maxW="container.xl">
           <VStack spacing={16}>

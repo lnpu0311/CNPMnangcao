@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Text,
@@ -11,39 +11,16 @@ import {
   Td,
   Tag,
   Divider,
+  Spinner,
+  useToast
 } from "@chakra-ui/react";
-
-// Dữ liệu giả cho hợp đồng thuê
-const mockContracts = [
-  {
-    id: "CNT123456",
-    roomId: "P001",
-    roomName: "Phòng 1",
-    tenantName: "Nguyễn Văn A",
-    startDate: "01/01/2023",
-    endDate: "31/12/2023",
-    monthlyRent: 5000000,
-    deposit: 5000000,
-    area: "25m²",
-    status: "Đang hiệu lực",
-    address: "123 Đường ABC, Quận 1, TP.HCM",
-  },
-  {
-    id: "CNT123457",
-    roomId: "P002",
-    roomName: "Phòng 2",
-    tenantName: "Nguyễn Văn A",
-    startDate: "01/03/2023",
-    endDate: "01/03/2024",
-    monthlyRent: 6000000,
-    deposit: 6000000,
-    area: "30m²",
-    status: "Sắp hết hạn",
-    address: "456 Đường XYZ, Quận 2, TP.HCM",
-  },
-];
+import axios from "axios";
 
 function TenantContract() {
+  const [contracts, setContracts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const toast = useToast();
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -53,72 +30,118 @@ function TenantContract() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "Đang hiệu lực":
+      case "active":
         return "green";
-      case "Sắp hết hạn":
-        return "yellow";
-      case "Hết hạn":
+      case "expired":
         return "red";
+      case "pending":
+        return "yellow";
       default:
         return "gray";
     }
   };
 
-  return (
-    <VStack spacing={4} align="stretch" w="100%" p={4}>
-      <Text fontSize="2xl" fontWeight="bold">
-        Thông tin hợp đồng thuê phòng
-      </Text>
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('vi-VN');
+  };
 
-      <Box borderWidth={1} borderRadius="lg" p={4}>
-        <Text>Người thuê: Nguyễn Văn A</Text>
-        <Text>Số điện thoại: 0123456789</Text>
+  useEffect(() => {
+    const fetchContracts = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API}/user/tenant/contracts`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          }
+        );
+
+        if (response.data.success) {
+          setContracts(response.data.data);
+        }
+      } catch (error) {
+        toast({
+          title: "Lỗi",
+          description: "Không thể tải thông tin hợp đồng",
+          status: "error",
+          duration: 3000,
+          isClosable: true
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchContracts();
+  }, [toast]);
+
+  if (isLoading) {
+    return (
+      <Box textAlign="center" py={10}>
+        <Spinner size="xl" />
       </Box>
+    );
+  }
 
-      <Table variant="simple" borderWidth={1} borderRadius="lg">
-        <Thead bg="cyan.100">
-          <Tr>
-            <Th borderRightWidth={1}>Mã HĐ</Th>
-            <Th borderRightWidth={1}>Phòng</Th>
-            <Th borderRightWidth={1}>Địa chỉ</Th>
-            
-            <Th borderRightWidth={1}>Giá thuê</Th>
-            <Th borderRightWidth={1}>Tiền cọc</Th>
-            <Th borderRightWidth={1}>Ngày bắt đầu</Th>
-            <Th borderRightWidth={1}>Ngày kết thúc</Th>
-            <Th>Trạng thái</Th>
-          </Tr>
-        </Thead>
-        <Tbody textColor="black">
-          {mockContracts.map((contract, index) => (
-            <React.Fragment key={contract.id}>
-              {index > 0 && (
-                <Tr>
-                  <Td colSpan={9}>
-                    <Divider borderColor="black" borderWidth="1px" />
+  return (
+    <Box p={4}>
+      <Text fontSize="2xl" mb={4}>Danh sách hợp đồng</Text>
+      {isLoading ? (
+        <Spinner />
+      ) : (
+        <Table variant="simple">
+          <Thead>
+            <Tr>
+              <Th>Mã hợp đồng</Th>
+              <Th>Tên phòng</Th>
+              <Th>Địa chỉ</Th>
+              <Th>Chủ trọ</Th>
+              <Th>Tiền thuê</Th>
+              <Th>Tiền cọc</Th>
+              <Th>Tiền điện</Th>
+              <Th>Tiền nước</Th>
+              <Th>Phí dịch vụ</Th>
+              <Th>Ngày bắt đầu</Th>
+              <Th>Ngày kết thúc</Th>
+              <Th>Trạng thái</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {contracts && contracts.length > 0 ? (
+              contracts.map((contract) => (
+                <Tr key={contract._id}>
+                  <Td>{contract._id}</Td>
+                  <Td>{contract.roomName}</Td>
+                  <Td>{contract.address}</Td>
+                  <Td>
+                    <Text>{contract.landlordName}</Text>
+                    <Text fontSize="sm">{contract.landlordPhone}</Text>
+                  </Td>
+                  <Td>{formatCurrency(contract.rentFee)}</Td>
+                  <Td>{formatCurrency(contract.depositFee)}</Td>
+                  <Td>{formatCurrency(contract.electricityFee)}/kWh</Td>
+                  <Td>{formatCurrency(contract.waterFee)}/m³</Td>
+                  <Td>{formatCurrency(contract.serviceFee)}</Td>
+                  <Td>{formatDate(contract.startDate)}</Td>
+                  <Td>{formatDate(contract.endDate)}</Td>
+                  <Td>
+                    <Tag colorScheme={getStatusColor(contract.status)}>
+                      {contract.status === 'active' ? 'Đang hiệu lực' : 
+                       contract.status === 'expired' ? 'Hết hạn' : 'Chưa bắt đầu'}
+                    </Tag>
                   </Td>
                 </Tr>
-              )}
-              <Tr _hover={{ bg: "gray.50" }}>
-                <Td borderRightWidth={1}>{contract.id}</Td>
-                <Td borderRightWidth={1}>{contract.roomName}</Td>
-                <Td borderRightWidth={1}>{contract.address}</Td>
-              
-                <Td borderRightWidth={1}>{formatCurrency(contract.monthlyRent)}</Td>
-                <Td borderRightWidth={1}>{formatCurrency(contract.deposit)}</Td>
-                <Td borderRightWidth={1}>{contract.startDate}</Td>
-                <Td borderRightWidth={1}>{contract.endDate}</Td>
-                <Td>
-                  <Tag colorScheme={getStatusColor(contract.status)}>
-                    {contract.status}
-                  </Tag>
-                </Td>
+              ))
+            ) : (
+              <Tr>
+                <Td colSpan={12} textAlign="center">Không có hợp đồng nào</Td>
               </Tr>
-            </React.Fragment>
-          ))}
-        </Tbody>
-      </Table>
-    </VStack>
+            )}
+          </Tbody>
+        </Table>
+      )}
+    </Box>
   );
 }
 

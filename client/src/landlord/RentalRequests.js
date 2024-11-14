@@ -18,7 +18,10 @@ import {
   Image,
   Heading,
   Spinner,
-  useToast
+  useToast,
+  FormControl,
+  FormLabel,
+  Input
 } from "@chakra-ui/react";
 import axios from "axios";
 
@@ -28,6 +31,17 @@ const RentalRequest = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isOpenInfoRoom, setIsOpenInfoRoom] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [isOpenContract, setIsOpenContract] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [contractDetails, setContractDetails] = useState({
+    startDate: "",
+    endDate: "",
+    depositFee: "",
+    rentFee: "",
+    electricityFee: "",
+    waterFee: "",
+    serviceFee: "",
+  });
 
   // Wrap fetchRentalRequests trong useCallback
   const fetchRentalRequests = useCallback(async () => {
@@ -75,27 +89,7 @@ const RentalRequest = () => {
 
   const handleAccept = async (request) => {
     try {
-      const response = await axios.put(
-        `${process.env.REACT_APP_API}/rental-request/${request._id}/status`,
-        { status: 'accepted' },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
-
-      if (response.data.success) {
-        toast({
-          title: "Thành công",
-          description: "Đã chấp nhận yêu cầu thuê phòng",
-          status: "success",
-          duration: 3000,
-          isClosable: true
-        });
-        // Refresh danh sách
-        fetchRentalRequests();
-      }
+      openContractModal(request);
     } catch (error) {
       toast({
         title: "Lỗi",
@@ -137,6 +131,136 @@ const RentalRequest = () => {
       toast({
         title: "Lỗi", 
         description: error.response?.data?.message || "Không thể từ chối yêu cầu",
+        status: "error",
+        duration: 3000,
+        isClosable: true
+      });
+    }
+  };
+
+  const openContractModal = (request) => {
+    console.log('Request in openContractModal:', request);
+    if (!request.landlordId) {
+      toast({
+        title: "Lỗi",
+        description: "Không tìm thấy thông tin chủ trọ",
+        status: "error",
+        duration: 3000,
+        isClosable: true
+      });
+      return;
+    }
+    setSelectedRequest(request);
+    setIsOpenContract(true);
+  };
+
+  const closeContractModal = () => {
+    setIsOpenContract(false);
+    setSelectedRequest(null);
+    setContractDetails({
+      startDate: "",
+      endDate: "",
+      depositFee: "",
+      rentFee: "",
+      electricityFee: "",
+      waterFee: "",
+      serviceFee: "",
+    });
+  };
+
+  const handleContractDetailsChange = (e) => {
+    const { name, value } = e.target;
+    setContractDetails(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleCreateContract = async () => {
+    try {
+      // Kiểm tra các trường bắt buộc
+      if (!contractDetails.startDate || !contractDetails.endDate || 
+          !contractDetails.depositFee || !contractDetails.rentFee || 
+          !contractDetails.electricityFee || !contractDetails.waterFee || 
+          !contractDetails.serviceFee) {
+        toast({
+          title: "Lỗi",
+          description: "Vui lòng điền đầy đủ thông tin hợp đồng",
+          status: "error",
+          duration: 3000,
+          isClosable: true
+        });
+        return;
+      }
+
+      // Log để kiểm tra selectedRequest
+      console.log('Selected Request:', selectedRequest);
+
+      // Kiểm tra landlordId
+      if (!selectedRequest.landlordId) {
+        toast({
+          title: "Lỗi",
+          description: "Không tìm thấy thông tin chủ trọ",
+          status: "error",
+          duration: 3000,
+          isClosable: true
+        });
+        return;
+      }
+
+      // Tạo hợp đồng
+      const contractResponse = await axios.post(
+        `${process.env.REACT_APP_API}/landlord/contract/create`,
+        {
+          roomId: selectedRequest.roomId._id,
+          tenantId: selectedRequest.tenantId._id,
+          landlordId: selectedRequest.landlordId,
+          startDate: new Date(contractDetails.startDate),
+          endDate: new Date(contractDetails.endDate),
+          depositFee: Number(contractDetails.depositFee),
+          rentFee: Number(contractDetails.rentFee),
+          electricityFee: Number(contractDetails.electricityFee),
+          waterFee: Number(contractDetails.waterFee),
+          serviceFee: Number(contractDetails.serviceFee),
+          utilities: {
+            electricity: {
+              unitPrice: Number(contractDetails.electricityFee),
+              initialReading: 0,
+              currentReading: 0,
+              lastUpdated: new Date()
+            },
+            water: {
+              unitPrice: Number(contractDetails.waterFee),
+              initialReading: 0,
+              currentReading: 0,
+              lastUpdated: new Date()
+            }
+          },
+          monthlyFees: []
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+
+      if (contractResponse.data.success) {
+        toast({
+          title: "Thành công",
+          description: "Đã tạo hợp đồng thành công",
+          status: "success",
+          duration: 3000,
+          isClosable: true
+        });
+        closeContractModal();
+        fetchRentalRequests();
+      }
+    } catch (error) {
+      console.error('Contract creation error:', error);
+      toast({
+        title: "Lỗi",
+        description: error.response?.data?.message || "Không thể tạo hợp đồng",
         status: "error",
         duration: 3000,
         isClosable: true
@@ -290,6 +414,95 @@ const RentalRequest = () => {
             <Button colorScheme="gray" onClick={closeRoomInfoModal}>
               Đóng
             </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Modal tạo hợp đồng */}
+      <Modal isOpen={isOpenContract} onClose={closeContractModal} size="xl">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Tạo Hợp Đồng Thuê Phòng</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={4}>
+              <FormControl isRequired>
+                <FormLabel>Ngày bắt đầu</FormLabel>
+                <Input
+                  type="date"
+                  name="startDate"
+                  value={contractDetails.startDate}
+                  onChange={handleContractDetailsChange}
+                />
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel>Ngày kết thúc</FormLabel>
+                <Input
+                  type="date"
+                  name="endDate"
+                  value={contractDetails.endDate}
+                  onChange={handleContractDetailsChange}
+                />
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel>Tiền đặt cọc (VNĐ)</FormLabel>
+                <Input
+                  type="number"
+                  name="depositFee"
+                  value={contractDetails.depositFee}
+                  onChange={handleContractDetailsChange}
+                />
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel>Tiền thuê hàng tháng (VNĐ)</FormLabel>
+                <Input
+                  type="number"
+                  name="rentFee"
+                  value={contractDetails.rentFee}
+                  onChange={handleContractDetailsChange}
+                />
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel>Giá điện (VNĐ/số)</FormLabel>
+                <Input
+                  type="number"
+                  name="electricityFee"
+                  value={contractDetails.electricityFee}
+                  onChange={handleContractDetailsChange}
+                />
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel>Giá nước (VNĐ/khối)</FormLabel>
+                <Input
+                  type="number"
+                  name="waterFee"
+                  value={contractDetails.waterFee}
+                  onChange={handleContractDetailsChange}
+                />
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel>Phí dịch vụ (VNĐ)</FormLabel>
+                <Input
+                  type="number"
+                  name="serviceFee"
+                  value={contractDetails.serviceFee}
+                  onChange={handleContractDetailsChange}
+                />
+              </FormControl>
+            </VStack>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={handleCreateContract}>
+              Tạo hợp đồng
+            </Button>
+            <Button onClick={closeContractModal}>Hủy</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

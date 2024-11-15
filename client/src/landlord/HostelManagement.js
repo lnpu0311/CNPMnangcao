@@ -28,14 +28,18 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import { DeleteIcon, EditIcon, PlusSquareIcon, CloseIcon } from "@chakra-ui/icons";
+import {
+  DeleteIcon,
+  EditIcon,
+  PlusSquareIcon,
+  CloseIcon,
+} from "@chakra-ui/icons";
 import { jwtDecode } from "jwt-decode";
 import vietnamData from "../data/dvhcvn.json";
 import Chat from "../components/Chat";
 
 const HostelManagement = () => {
-  
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(localStorage.getItem("token"));
   const [facilities, setFacilities] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [provinces, setProvinces] = useState([]);
@@ -320,6 +324,14 @@ const HostelManagement = () => {
                   {facility.district}
                 </Text>
               </Box>
+              <Box display="flex" alignItems="center">
+                <Text fontSize="md" color="gray.600" mr={2}>
+                  Số phòng:
+                </Text>
+                <Text fontSize="md" fontWeight={"bold"}>
+                  {facility.roomCount}
+                </Text>
+              </Box>
             </Box>
 
             {/* Buttons Column */}
@@ -372,7 +384,7 @@ const HostelManagement = () => {
     }
 
     console.log("Starting chat with tenant:", tenant);
-    
+
     setSelectedTenant({
       id: tenant.id || tenant._id,
       name: tenant.name || "Người thuê",
@@ -552,34 +564,20 @@ const HostelManagement = () => {
       </Box>
 
       {showChat && currentUser && selectedTenant && (
-        <Box 
-          position="fixed" 
-          bottom="20px" 
-          right="20px" 
+        <Box
+          position="fixed"
+          bottom="20px"
+          right="20px"
           zIndex={1000}
           maxWidth="400px"
           width="100%"
         >
-          <Box 
-            position="relative" 
-            backgroundColor="white" 
-            borderRadius="md" 
+          <Box
+            position="relative"
+            backgroundColor="white"
+            borderRadius="md"
             boxShadow="lg"
           >
-            <IconButton
-              icon={<CloseIcon />}
-              position="absolute"
-              right="-10px"
-              top="-10px"
-              size="sm"
-              colorScheme="red"
-              borderRadius="full"
-              onClick={() => {
-                setShowChat(false);
-                setSelectedTenant(null);
-              }}
-              zIndex={1001}
-            />
             <Chat
               currentUserId={currentUser.id}
               recipientId={selectedTenant.id}

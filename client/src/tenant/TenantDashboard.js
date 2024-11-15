@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react"; 
+import axios from "axios";
 import React from "react";
 import { VStack, Box, Image, Heading, Text, Button, Grid, Stack, Link, Icon, HStack,  
   Modal,
@@ -9,11 +10,17 @@ import { VStack, Box, Image, Heading, Text, Button, Grid, Stack, Link, Icon, HSt
   ModalCloseButton,
   ModalBody,
   ModalFooter,
-  IconButton
+  IconButton,
+  Container,
+  Flex,
+  Tag
  } from "@chakra-ui/react";
-import { FaFacebook, FaYoutube, FaInstagram, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaFacebook, FaYoutube, FaInstagram, FaChevronLeft, FaChevronRight, FaBuilding } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-
+import Banner from "./Banner";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const heroImages = [
   "./house1.png",
@@ -139,6 +146,70 @@ function TenantDashboard() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
 
+  const [rooms, setRooms] = useState([]);
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          `${process.env.REACT_APP_API}/user/rooms`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+  
+        if (response.data.success && Array.isArray(response.data.data)) {
+          const formattedRooms = response.data.data.map((room) => ({
+            id: room._id,
+            roomTitle: room.roomTitle || "Không có tiêu đề",
+            address: room.hostelId
+              ? `${room.hostelId.address || ""}, ${room.hostelId.ward || ""}, ${
+                  room.hostelId.district || ""
+                }, ${room.hostelId.city || ""}`
+              : "Địa chỉ không có sẵn",
+            status: room.status === "available" ? "Còn trống" : "Đã thuê",
+            price: room.price || 0,
+            image: room.images && room.images.length > 0
+              ? room.images[0]
+              : "https://via.placeholder.com/200",
+          }));
+          setRooms(formattedRooms);
+        }
+      } catch (error) {
+        console.error("Error fetching rooms:", error);
+      }
+    };
+  
+    fetchRooms();
+  }, []);
+
+  // Thêm cấu hình slider
+const sliderSettings = {
+  dots: false,
+  infinite: true,
+  speed: 500,
+  slidesToShow: 3,
+  slidesToScroll: 1,
+  arrows: true,
+  responsive: [
+    {
+      breakpoint: 1024,
+      settings: {
+        slidesToShow: 2,
+      }
+    },
+    {
+      breakpoint: 600,
+      settings: {
+        slidesToShow: 1,
+      }
+    }
+  ]
+};
+
     // Hàm mở modal
   const handleOpenDetails = (name) => {
     const member = curriculumPathways.find(member => member.name === name);
@@ -158,9 +229,7 @@ function TenantDashboard() {
     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
   };
 
-  const prevImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex - 1 + heroImages.length) % heroImages.length);
-  };
+  
 
   // Tự động chuyển đổi hình ảnh sau mỗi 5 giây
   useEffect(() => {
@@ -181,130 +250,201 @@ function TenantDashboard() {
     return () => clearInterval(interval); // Dọn dẹp interval khi component unmount
   }, []);
 
-  const currentContent = contentData[currentContentIndex];
 
   return (
     <VStack spacing={10} align="center" p={4} w="100%">
-      {/* Hero Section */}
-      <Box w="100%" h="500px" position="relative" borderRadius="lg" overflow="hidden">
-        <Image 
-          src={heroImages[currentImageIndex]} 
-          alt="Hero Image" 
-          boxSize="100%" 
-          objectFit="cover" 
-          h="100%" 
-        />
-        <Box p={8} textAlign="center" color="white" bg="rgba(0, 0, 0, 0.5)" position="absolute" top={0} left={0} right={0} bottom={0}>
-        <Heading
-          bgGradient="linear(to-l, #9fccfa, #0974f1)"
-          bgClip="text"
-          fontSize="4xl"
-          fontWeight="bold"
-          _hover={{ transform: "scale(1.05)" }}
-              transition="transform 0.2s"
-        >
-          Welcome to Hostel Community
-        </Heading>
-          <Text color= "white" fontSize="lg">Luôn đồng hành cùng bạn!</Text>
-          {/* <Button mt={4} colorScheme="gray" onClick={() => navigate("/admissions")}>Learn More</Button> */}
-        </Box>
-        {/* Mũi tên trái */}
-        <IconButton 
-          icon={<FaChevronLeft />} 
-          aria-label="Previous Image" 
-          position="absolute" 
-          left={4} 
-          top="50%" 
-          transform="translateY(-50%)" 
-          onClick={prevImage} 
-          colorScheme="yellow"
-          _hover={{ bg: "yellow.300" }}
-        />
-        {/* Mũi tên phải */}
-        <IconButton 
-          icon={<FaChevronRight />} 
-          aria-label="Next Image" 
-          position="absolute" 
-          right={4} 
-          top="50%" 
-          transform="translateY(-50%)" 
-          onClick={nextImage} 
-          colorScheme="yellow"
-          _hover={{ bg: "yellow.300" }}
-        />
+      {/* Banner Section */}
+      <Box mb={20}> 
+        <Banner/>
       </Box>
 
-      {/* About & Values Section */}
-      <VStack spacing={8} align="center" p={6} w="100%">       
-        <Stack direction={{ base: "column", md: "row" }} spacing={6} align="center" justify="space-between" w="80%">
-          <Image 
-            src={currentContent.image} 
-            boxSize="400px" 
-            borderRadius="lg" 
-            alt="Môi trường sống" 
-            boxShadow="md" // Thêm bóng đổ
-            transition="transform 0.2s" // Hiệu ứng chuyển động
-            _hover={{ transform: "scale(1.05)" }}
+      <Box my={8} px={4}>
+  <Slider {...sliderSettings}>
+    {rooms.map((room) => (
+      <Box key={room.id} p={2}>
+        <Box
+          borderWidth="1px"
+          borderRadius="lg"
+          overflow="hidden"
+          bg="white"
+          boxShadow="sm"
+          _hover={{ boxShadow: "md" }}
+        >
+          <Image
+            src={room.image}
+            alt={room.roomTitle}
+            height="200px"
+            width="100%"
+            objectFit="cover"
           />
-          <Box>
-            <Heading fontSize="2xl" mb={4}>{currentContent.title}</Heading>
-            <Text fontSize="md">{currentContent.description}</Text>
-            <Stack spacing={2} mt={4}>
-              {currentContent.values.map((value, index) => (
-                <Text key={index}>
-                  <Text as="span" fontWeight="bold">{value.title}</Text> 
-                  <Text fontSize="sm">{value.description}</Text>
-                </Text>
+          <Box p={4}>
+            <Text fontWeight="bold" fontSize="lg" mb={2}>
+              {room.roomTitle}
+            </Text>
+            <Text fontSize="sm" color="gray.600" mb={2}>
+              Địa chỉ: {room.address}
+            </Text>
+            <Flex justify="space-between" align="center">
+              <Tag
+                colorScheme={room.status === "Còn trống" ? "green" : "red"}
+                size="sm"
+              >
+                {room.status}
+              </Tag>
+              <Text fontWeight="bold" color="orange.500">
+                {new Intl.NumberFormat("vi-VN", {
+                  style: "currency",
+                  currency: "VND",
+                }).format(room.price)}
+              </Text>
+            </Flex>
+          </Box>
+        </Box>
+      </Box>
+    ))}
+  </Slider>
+</Box>
+
+       {/* Room List Button */}
+       <Box my={20}>
+        <Button
+          size="lg"
+          colorScheme="orange"
+        
+          onClick={() => navigate('room-list')}
+          _hover={{
+            transform: 'translateY(-2px)',
+            boxShadow: 'lg',
+          }}
+          transition="all 0.2s"
+        >
+          Tìm phòng ngay!
+        </Button>
+      </Box>
+
+      {/* Profile Section */}
+      <Box 
+        py={15} 
+        px={{ base: 4, md: 8 }} 
+        bg="gray.50"
+        mt={10} 
+      >
+        <Container maxW="container.xl">
+          <VStack spacing={16}>
+            <Heading 
+              fontSize={{ base: "3xl", md: "4xl" }} 
+              textAlign="center"
+              bgGradient="linear(to-r, blue.400, blue.600)"
+              bgClip="text"
+            >
+              Đội ngũ của chúng tôi
+            </Heading>
+            
+            <Grid 
+              templateColumns={{ 
+                base: "1fr", 
+                md: "repeat(2, 1fr)", 
+                lg: "repeat(4, 1fr)" 
+              }} 
+              gap={8} 
+              w="100%"
+            >
+              {curriculumPathways.map(({ name, avatar, role, description }) => (
+                <Box 
+                  key={name} 
+                  bg="white" 
+                  borderRadius="xl" 
+                  overflow="hidden"
+                  boxShadow="lg"
+                  transition="all 0.3s"
+                  cursor="pointer"
+                  onClick={() => handleOpenDetails(name)}
+                  _hover={{ 
+                    transform: "translateY(-8px)",
+                    boxShadow: "xl"
+                  }}
+                >
+                  <Box position="relative" h="280px">
+                    <Image
+                      src={avatar} 
+                      alt={name}
+                      w="100%"
+                      h="100%"
+                      objectFit="cover"
+                    />
+                    {/* Gradient overlay */}
+                    <Box 
+                      position="absolute"
+                      bottom={0}
+                      left={0}
+                      right={0}
+                      h="50%"
+                      bgGradient="linear(to-t, blackAlpha.700, transparent)"
+                    />
+                    {/* Content overlay */}
+                    <VStack 
+                      position="absolute"
+                      bottom={4}
+                      left={0}
+                      right={0}
+                      spacing={1}
+                      color="white"
+                    >
+                      <Heading fontSize="xl">{name}</Heading>
+                      <Text 
+                        fontSize="md" 
+                        color="whiteAlpha.900"
+                        fontWeight="medium"
+                      >
+                        {role}
+                      </Text>
+                    </VStack>
+                  </Box>
+                </Box>
               ))}
-            </Stack>
-          </Box>
-        </Stack>
-      </VStack>
+            </Grid>
+          </VStack>
+        </Container>
+      </Box>
 
-      {/* Profile */}
-      <Heading fontSize="2xl" textAlign="center">Đội ngũ của chúng tôi</Heading>
-      <Grid templateColumns={{ base: "1fr", md: "repeat(4, 1fr)" }} gap={4} w="100%">
-        {curriculumPathways.map(({ name, avatar, role, description }) => (
-          <Box key={name} p={4} bg="gray.100" borderRadius="lg" textAlign="center" position="relative" onClick={() => handleOpenDetails(name)}>
-            <Image
-              src={avatar} 
-              alt={name}
-              borderRadius="lg" // Để ảnh có góc bo tròn
-              boxSize="100%" // Chiếm toàn bộ chiều rộng và chiều cao của Box
-              objectFit="cover" 
-              _hover={{ transform: "scale(1.05)" }}
-              transition="transform 0.2s"
-            />
-            <Box position="absolute" bottom={0} left={0} right={0} p={4} bg="gray.100" borderRadius="lg">
-              <Heading fontSize="25px" >{name}</Heading>
-              <Text fontSize="md">{role}</Text> {/* Thêm vai trò */}
-            </Box>
-          </Box>
-        ))}
-      </Grid>
-
-      {/* Modal để hiển thị thông tin chi tiết */}
-      <Modal isOpen={isOpen} onClose={handleClose}>
-        <ModalOverlay />
+      {/* Modal */}
+      <Modal isOpen={isOpen} onClose={handleClose} size="md">
+        <ModalOverlay bg="blackAlpha.700" backdropFilter="blur(10px)" />
         <ModalContent>
-          <ModalHeader>
-            <HStack spacing={4}>
+          <ModalHeader borderBottomWidth="1px" py={4}>
+            <HStack spacing={4} align="center">
               <Image
-                src={selectedMember?.avatar} // Sử dụng avatar từ selectedMember
+                src={selectedMember?.avatar}
                 alt={selectedMember?.name}
                 borderRadius="full"
-                boxSize="50px" // Kích thước ảnh đại diện
+                boxSize="60px"
+                objectFit="cover"
+                border="3px solid"
+                borderColor="blue.500"
               />
-              <Text>{selectedMember?.name}</Text>
+              <VStack align="start" spacing={1}>
+                <Heading size="md">{selectedMember?.name}</Heading>
+                <Text 
+                  color="blue.500" 
+                  fontWeight="medium"
+                  fontSize="sm"
+                >
+                  {selectedMember?.role}
+                </Text>
+              </VStack>
             </HStack>
           </ModalHeader>
           <ModalCloseButton />
-          <ModalBody>
-            <Text fontWeight="bold">Role: {selectedMember?.role}</Text>
-            <Text mt={2}>{selectedMember?.description}</Text>
+          <ModalBody py={6}>
+            <Text lineHeight="tall">{selectedMember?.description}</Text>
           </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="blue" onClick={handleClose}>
+          <ModalFooter borderTopWidth="1px" py={4}>
+            <Button 
+              colorScheme="blue" 
+              onClick={handleClose}
+              size="lg"
+              w="full"
+            >
               Đóng
             </Button>
           </ModalFooter>
@@ -312,7 +452,7 @@ function TenantDashboard() {
       </Modal>
 
       {/* Testimonials */}
-      <Heading fontSize="2xl" textAlign="center">Cộng đồng của chúng tôi</Heading>
+      {/* <Heading fontSize="2xl" textAlign="center">Cộng đồng của chúng tôi</Heading>
       <Stack spacing={4} align="center" w="60%">
         {testimonials.map(({ quote, author, avatar }, idx) => (
           <Box key={idx} w="80%" p={6} bg="yellow.100" borderRadius="lg" textAlign="left">
@@ -330,17 +470,17 @@ function TenantDashboard() {
             </HStack>
           </Box>
         ))}
-      </Stack>
+      </Stack> */}
 
       {/* News & Updates */}
-      <Heading fontSize="2xl" textAlign="center">Tin tức & Thành tựu</Heading>
+      {/* <Heading fontSize="2xl" textAlign="center">Tin tức & Thành tựu</Heading>
       <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4} w="100%">
         {images.map((img, idx) => (
           <Box key={idx} w="100%" h="250px" bgImage={`url(${img})`} bgSize="cover" borderRadius="lg" 
           _hover={{ transform: "scale(1.05)" }}
               transition="transform 0.2s" />
         ))}
-      </Grid>
+      </Grid> */}
 
       
     </VStack>

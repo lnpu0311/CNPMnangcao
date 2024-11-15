@@ -12,6 +12,7 @@ const {
   searchAccommodation,
   getAllRooms,
   getUserById,
+  getTenantContracts,
 } = require("../controllers/user.controller");
 // Lấy danh sách phòng cho tenant
 router.get("/rooms", authMiddleware(["tenant"]), getAllRooms);
@@ -67,5 +68,8 @@ router.get(
     }
   }
 );
+
+// Lấy hợp đồng của tenant
+router.get('/tenant/contracts', authMiddleware(['tenant']), getTenantContracts);
 
 module.exports = router;

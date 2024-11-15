@@ -78,11 +78,6 @@ function HomeLayout() {
       icon: <FaBuilding />,
     },
     {
-      name: "Quản lý nhân viên",
-      path: "/landlord/employee-management",
-      icon: <RiParentFill />,
-    },
-    {
       name: "Quản lý yêu cầu thuê phòng",
       path: "/landlord/rental-request",
       icon: <MdOutlineMeetingRoom />,

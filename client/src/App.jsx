@@ -62,10 +62,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="employee-management"
-              element={<EmployeeManagement />}
-            />
             <Route path="rental-request" element={<RentalRequest />} />
             <Route path="revenue-stats" element={<RevenueStats />} />
             <Route path="payment-list" element={<Receipt />} />

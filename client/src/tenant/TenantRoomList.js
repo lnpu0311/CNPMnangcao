@@ -27,6 +27,8 @@ import {
   FormLabel,
   Input,
   Textarea,
+  Grid,
+  GridItem,
 } from "@chakra-ui/react";
 import { MdCheckCircle } from "react-icons/md";
 import Chat from "../components/Chat";
@@ -127,6 +129,7 @@ const TenantRoomList = () => {
   const handleRoomClick = (room) => {
     setSelectedRoom(room);
     setIsOpenDetail(true);
+    
   };
 
   const BookingModal = ({ isOpen, onClose, room, currentUser }) => {
@@ -370,108 +373,120 @@ const TenantRoomList = () => {
           <ModalCloseButton />
           <ModalBody>
             {selectedRoom && (
-              <Flex direction={{ base: "column", md: "row" }} gap={6}>
+              <VStack spacing={4}>
                 <Image
                   src={selectedRoom.image}
                   alt={selectedRoom.roomName}
-                  w={{ base: "100%", md: "50%" }}
+                  w="100%"
                   h="300px"
                   objectFit="cover"
                   borderRadius="md"
                 />
-                <VStack
-                  align="stretch"
-                  spacing={4}
-                  w={{ base: "100%", md: "50%" }}
+                <Button
+                  colorScheme="yellow"
+                  width="100%"
+                  onClick={() => {
+                    setIsOpenDetail(false);
+                    navigate(`/tenant/rooms/${selectedRoom.id}`);
+                  }}
                 >
-                  <Box>
-                    <Text fontWeight="bold">Địa chỉ:</Text>
-                    <Text color="gray.600">{selectedRoom.address}</Text>
-                  </Box>
-                  <Box>
-                    <Text fontWeight="bold">Diện tích:</Text>
-                    <Text color="gray.600">{selectedRoom.area} m²</Text>
-                  </Box>
-                  <Box>
-                    <Text fontWeight="bold">Giá thuê:</Text>
-                    <Text color="gray.600">
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(selectedRoom.price)}
-                    </Text>
-                  </Box>
-                  <Box>
-                    <Text fontWeight="bold">Đặt cọc:</Text>
-                    <Text color="gray.600">
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(selectedRoom.deposit)}
-                    </Text>
-                  </Box>
-                  <Box>
-                    <Text fontWeight="bold">Tiện ích:</Text>
-                    <List spacing={2}>
-                      {selectedRoom.amenities.map((amenity, index) => (
-                        <ListItem key={index} color="gray.600">
-                          <ListIcon as={MdCheckCircle} color="green.500" />
-                          {amenity}
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Box>
-                </VStack>
-              </Flex>
+                  Xem chi tiết
+                </Button>
+                <Flex direction={{ base: "column", md: "row" }} gap={6} width="100%">
+                  <VStack
+                    align="stretch"
+                    spacing={4}
+                    w={{ base: "100%", md: "100%" }}
+                  >
+                    <Box>
+                      <Text fontWeight="bold">Địa chỉ:</Text>
+                      <Text color="gray.600">{selectedRoom.address}</Text>
+                    </Box>
+                    <Box>
+                      <Text fontWeight="bold">Diện tích:</Text>
+                      <Text color="gray.600">{selectedRoom.area} m²</Text>
+                    </Box>
+                    <Box>
+                      <Text fontWeight="bold">Giá thuê:</Text>
+                      <Text color="gray.600">
+                        {new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(selectedRoom.price)}
+                      </Text>
+                    </Box>
+                    <Box>
+                      <Text fontWeight="bold">Đặt cọc:</Text>
+                      <Text color="gray.600">
+                        {new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(selectedRoom.deposit)}
+                      </Text>
+                    </Box>
+                    <Box>
+                      <Text fontWeight="bold">Tiện ích:</Text>
+                      <List spacing={2}>
+                        {selectedRoom.amenities.map((amenity, index) => (
+                          <ListItem key={index} color="gray.600">
+                            <ListIcon as={MdCheckCircle} color="green.500" />
+                            {amenity}
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Box>
+                  </VStack>
+                </Flex>
+              </VStack>
             )}
           </ModalBody>
           <ModalFooter>
-            <Button
-              colorScheme="red"
-              mr={3}
-              onClick={() => setIsOpenDetail(false)}
-            >
-              Đóng
-            </Button>
-            <Button
-              colorScheme="teal"
-              mr={3}
-              onClick={() => {
-                if (currentUser) {
-                  setShowChat(true);
-                  setIsOpenDetail(false);
-                } else {
-                  toast({
-                    title: "Vui lòng đăng nhập",
-                    description: "Bạn cần đăng nhập để chat với chủ trọ",
-                    status: "warning",
-                    duration: 3000,
-                    isClosable: true,
-                  });
-                }
-              }}
-            >
-              Liên hệ chủ trọ
-            </Button>
-            <Button
-              colorScheme="blue"
-              onClick={() => {
-                if (currentUser) {
-                  setIsOpenDetail(false);
-                  onOpenBooking(); 
-                } else {
-                  toast({
-                    title: "Vui lòng đăng nhập",
-                    description: "Bạn cần đăng nhập để đặt lịch xem phòng",
-                    status: "warning", 
-                    duration: 3000,
-                    isClosable: true,
-                  });
-                }
-              }}
-            >
-              Đặt lịch xem phòng
-            </Button>
+            <Grid templateColumns="repeat(3, 1fr)" gap={3} width="100%">
+              <Button
+                colorScheme="red"
+                onClick={() => setIsOpenDetail(false)}
+              >
+                Đóng
+              </Button>
+              <Button
+                colorScheme="teal"
+                onClick={() => {
+                  if (currentUser) {
+                    setShowChat(true);
+                    setIsOpenDetail(false);
+                  } else {
+                    toast({
+                      title: "Vui lòng đăng nhập",
+                      description: "Bạn cần đăng nhập để chat với chủ trọ",
+                      status: "warning",
+                      duration: 3000,
+                      isClosable: true,
+                    });
+                  }
+                }}
+              >
+                Liên hệ chủ trọ
+              </Button>
+              <Button
+                colorScheme="blue"
+                onClick={() => {
+                  if (currentUser) {
+                    setIsOpenDetail(false);
+                    onOpenBooking(); 
+                  } else {
+                    toast({
+                      title: "Vui lòng đăng nhập",
+                      description: "Bạn cần đăng nhập để đặt lịch xem phòng",
+                      status: "warning", 
+                      duration: 3000,
+                      isClosable: true,
+                    });
+                  }
+                }}
+              >
+                Đặt lịch xem phòng
+              </Button>
+            </Grid>
           </ModalFooter>
         </ModalContent>
       </Modal>

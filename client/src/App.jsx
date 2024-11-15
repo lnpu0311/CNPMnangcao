@@ -7,7 +7,6 @@ import HomeDashboard from "./landlord/HomeDashboard";
 import HostelManagement from "./landlord/HostelManagement";
 import RoomList from "./landlord/RoomList";
 import ProfilePage from "./landlord/Profile";
-import EmployeeManagement from "./landlord/EmployeeManagement";
 import RentalRequest from "./landlord/RentalRequests";
 import TenantRoomList from "./tenant/TenantRoomList";
 import TenantContract from "./tenant/TenantContract";
@@ -61,10 +60,6 @@ function App() {
                   <HostelManagement />
                 </ProtectedRoute>
               }
-            />
-            <Route
-              path="employee-management"
-              element={<EmployeeManagement />}
             />
             <Route path="rental-request" element={<RentalRequest />} />
             <Route path="revenue-stats" element={<RevenueStats />} />

@@ -100,7 +100,7 @@ const RoomList = () => {
   });
 
   const [selectedRoom, setSelectedRoom] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(selectedRoom?.images[0]);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const [contractDetails, setContractDetails] = useState({
     startDate: "",
@@ -145,10 +145,11 @@ const RoomList = () => {
     onOpenInfoRoom();
   };
   // Update field in selectedRoom object
-  const handleInputChange = (field, value) => {
-    setSelectedRoom((prevRoom) => ({
+  const handleInputChange = (event) => {
+    const { name, value } = event.target; // Lấy name và value từ event
+    setNewRoom((prevRoom) => ({
       ...prevRoom,
-      [field]: value,
+      [name]: value, // Cập nhật state dựa trên name và value
     }));
   };
 
@@ -178,33 +179,33 @@ const RoomList = () => {
     }));
   };
   const handleCreateContract = async () => {
-    try{
+    try {
       const response = await axios.post(
-        'https://localhost:5000/api/landlord/contract/create',
+        "https://localhost:5000/api/landlord/contract/create",
         contractDetails,
         {
-          headers:{
-            Authorization:`Bearer ${localStorage.getItem('token')}`,
-          }
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
-      if(response.data.success){
+      if (response.data.success) {
         alert("Tạo hợp đồng thành công");
         setContractDetails({
-          startDate:"",
-          endDate:"",
-          deposit:"",
-          rent:"",
-          electricityFee:"",
-          waterFee:"",
-          tenantName:"",
-          landlordName:"",
+          startDate: "",
+          endDate: "",
+          deposit: "",
+          rent: "",
+          electricityFee: "",
+          waterFee: "",
+          tenantName: "",
+          landlordName: "",
         });
         onCloseContract();
       }
-    }catch(error){
-      console.error("Lỗi khi tạo hợp đồng",error);
-      alert("Không thể tạo hợp đồng : "+error.response.data.message);
+    } catch (error) {
+      console.error("Lỗi khi tạo hợp đồng", error);
+      alert("Không thể tạo hợp đồng : " + error.response.data.message);
     }
   };
 

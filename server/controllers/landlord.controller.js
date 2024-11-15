@@ -339,36 +339,24 @@ const createBill = async (req, res) => {
     const elecIndexDifference = newRecord.elecIndex - oldRecord.elecIndex;
     const aquaIndexDifference = newRecord.aquaIndex - oldRecord.aquaIndex;
 
+    // Hợp đồng
+    const contract = await Contracts.findOne({ roomId: roomId });
+    if (!contract) {
+      res
+        .status(400)
+        .json({ success: false, message: "Phòng chưa có hợp đồng" });
+    }
     // Tính chi phí điện
     const calculateElectricityFee = (kWh) => {
       let fee = 0;
-      if (kWh <= 50) {
-        fee = kWh * 1678;
-      } else if (kWh <= 100) {
-        fee = 50 * 1678 + (kWh - 50) * 1734;
-      } else if (kWh <= 200) {
-        fee = 50 * 1678 + 50 * 1734 + (kWh - 100) * 2014;
-      } else if (kWh <= 300) {
-        fee = 50 * 1678 + 50 * 1734 + 100 * 2014 + (kWh - 200) * 2536;
-      } else {
-        fee =
-          50 * 1678 + 50 * 1734 + 100 * 2014 + 100 * 2536 + (kWh - 300) * 2834;
-      }
+      fee = kWh * contract.electricityFee;
       return fee;
     };
 
     // Tính chi phí nước
     const calculateWaterFee = (m3) => {
       let fee = 0;
-      if (m3 <= 10) {
-        fee = m3 * 5973;
-      } else if (m3 <= 20) {
-        fee = 10 * 5973 + (m3 - 10) * 7052;
-      } else if (m3 <= 30) {
-        fee = 10 * 5973 + 10 * 7052 + (m3 - 20) * 8669;
-      } else {
-        fee = 10 * 5973 + 10 * 7052 + 10 * 8669 + (m3 - 30) * 15929;
-      }
+      fee = m3 * contract.waterFee;
       return fee;
     };
 
@@ -392,9 +380,9 @@ const createBill = async (req, res) => {
     });
 
     // Lưu hóa đơn vào cơ sở dữ liệu
-    const savedBill = await newBill.save();
+    const data = await newBill.save();
 
-    res.status(201).json({ success: true, data: savedBill });
+    res.status(201).json({ success: true, data: data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

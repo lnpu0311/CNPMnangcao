@@ -27,29 +27,36 @@ import {
   Avatar,
   Spinner,
   Center,
+  Icon,
+  Heading,
+  Select,
+  Tooltip,
 } from "@chakra-ui/react";
 
-import {
-  FaArrowLeft,
-  FaEdit,
-  FaPlus,
-  FaTrash,
-  FaFileInvoiceDollar,
-} from "react-icons/fa";
+import { FaArrowLeft, FaEdit, FaPlus, FaTrash, FaUpload } from "react-icons/fa";
+import { IoReceipt } from "react-icons/io5";
+import data from "../data/monthyear.json";
 import axios from "axios";
 const RoomList = () => {
   const [hostel, setHostel] = useState();
   const [rooms, setRooms] = useState([]);
-  const [isLoading,setIsLoading] = useState({
-    roomName:'',
-    area:'',
-    price:'',
-    description:'',
-    deposit:'',
-    images:[]
+  const [isLoading, setIsLoading] = useState({
+    roomName: "",
+    area: "",
+    price: "",
+    description: "",
+    deposit: "",
+    images: [],
   });
   const { facilityId } = useParams();
+  const [months, setMonths] = useState([]);
+  const [years, setYears] = useState([]);
 
+  useEffect(() => {
+    // Lấy dữ liệu từ file data.json và cập nhật vào state
+    setMonths(data.months);
+    setYears(data.years);
+  }, []);
   useEffect(() => {
     console.log("facilityId:", facilityId);
     const fetchRooms = async () => {
@@ -65,7 +72,11 @@ const RoomList = () => {
         console.log("API Response:", response.data);
         if (response.data.success && response.data.data) {
           setHostel(response.data.data);
-          setRooms(Array.isArray(response.data.data.rooms) ? response.data.data.rooms : []);
+          setRooms(
+            Array.isArray(response.data.data.rooms)
+              ? response.data.data.rooms
+              : []
+          );
         } else {
           console.error("Invalid response format:", response.data);
           setRooms([]);
@@ -107,6 +118,11 @@ const RoomList = () => {
     onOpen: onOpenRoom,
     onClose: onCloseRoom,
   } = useDisclosure();
+  const {
+    isOpen: isOpenUpdate,
+    onOpen: onOpenUpdate,
+    onClose: onCloseUpdate,
+  } = useDisclosure();
   const [newRoom, setNewRoom] = useState({
     roomTitle: "",
     roomName: "",
@@ -116,6 +132,10 @@ const RoomList = () => {
     hostelId: "",
     deposit: "",
     images: [],
+  });
+  const [update, setUpdate] = useState({
+    elecIndex: "",
+    aquaIndex: "",
   });
 
   const [selectedRoom, setSelectedRoom] = useState(null);
@@ -163,13 +183,19 @@ const RoomList = () => {
     setSelectedRoom(room);
     onOpenInfoRoom();
   };
-  // Update field in selectedRoom object
+
   const handleInputChange = (event) => {
-    const {name,value} = event.target;
+    const { name, value } = event.target;
     setNewRoom((prevRoom) => ({
       ...prevRoom,
       [name]: value,
     }));
+  };
+  const handleUpdate = (room) => {
+    // Thực hiện hành động cập nhật tại đây
+    console.log("Số điện:", update.elecIndex);
+    console.log("Số nước:", update.aquaIndex);
+    onCloseUpdate();
   };
 
   // Save changes to database or state
@@ -177,7 +203,6 @@ const RoomList = () => {
     // Call backend or update state with new room details
     console.log("Saved room details:", selectedRoom);
   };
-
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 5) {
@@ -189,7 +214,6 @@ const RoomList = () => {
       images: files,
     }));
   };
-
   const handleAddTenant = (e) => {
     const { name, value } = e.target;
     setContractDetails((prevDetails) => ({
@@ -307,16 +331,19 @@ const RoomList = () => {
           Thêm phòng mới
         </Button>
       </Flex>
-
-      <Text fontSize="2xl" fontWeight="bold" mb={4}>
+      <Heading
+        textColor={"blue.500"}
+        as="h3"
+        size="lg"
+        mb={{ base: 4, md: 12 }}
+      >
         Danh sách phòng của cơ sở: {hostel?.name || "Đang tải..."}
-      </Text>
-
+      </Heading>
       {isLoading ? (
         <Center>
           <Spinner size="xl" />
         </Center>
-      ) :!rooms || rooms.length === 0 ? (
+      ) : !rooms || rooms.length === 0 ? (
         <Center>
           <Text>Không có phòng nào</Text>
         </Center>
@@ -324,47 +351,51 @@ const RoomList = () => {
         <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={6}>
           {rooms.map((room) => (
             <Box
+              border={"1px solid"}
+              borderColor={"gray.200"}
+              rounded={"lg"}
               key={room.id}
               borderRadius="lg"
               overflow="hidden"
               boxShadow="xl"
-              bg={room.status === "occupied" ? "brand.200" : "brand.0"}
+              bg={room.status === "occupied" ? "brand.100" : "brand.2"}
               position="relative"
-              p={3}
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              justifyContent="center"
-              onClick={() => handleRoomClick(room)}
+              p={2}
               cursor="pointer"
+              onClick={() => handleRoomClick(room)}
             >
+              {/* Image taking full width of the card */}
               <Image
-                boxSize="200px"
+                width="100%"
+                height={"200px"}
                 src={room.images?.[0]}
                 alt={room.roomName}
-                mb={3}
                 borderRadius="md"
                 objectFit="cover"
               />
-              <Text fontWeight="bold" mb={1} textAlign="center">
+              <Text fontSize={"lg"} fontWeight={"bold"} my={2}>
                 {room.roomName}
               </Text>
-              <Flex mt={3} gap={2} justifyContent="center" wrap="wrap">
-                <Button
-                  leftIcon={<FaEdit />}
+              {/* Button container positioned below the image */}
+              <Flex
+                direction="row"
+                alignItems="center"
+                justifyContent="space-evenly"
+                mt={2}
+              >
+                <IconButton
+                  icon={<FaEdit />}
                   size="sm"
                   colorScheme="teal"
                   onClick={(e) => {
                     e.stopPropagation();
                     onOpenRoom(room);
                   }}
-                >
-                  Chỉnh sửa
-                </Button>
-                {/* Only show the Add button if the room is not occupied */}
-                {room.is_available !== true && (
-                  <Button
-                    leftIcon={<FaPlus />}
+                />
+
+                {room.status === "available" ? (
+                  <IconButton
+                    icon={<FaPlus />}
                     size="sm"
                     colorScheme="blue"
                     onClick={(e) => {
@@ -372,35 +403,57 @@ const RoomList = () => {
                       onOpenContract();
                       handleAddRoom(room);
                     }}
-                  >
-                    Thêm hợp đồng
-                  </Button>
+                  />
+                ) : (
+                  <>
+                    <IconButton
+                      icon={<IoReceipt />}
+                      size="sm"
+                      colorScheme="purple"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCreateBill(room);
+                      }}
+                    />
+                    <IconButton
+                      icon={<FaUpload />}
+                      size="sm"
+                      colorScheme="green"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenUpdate();
+                      }}
+                    />
+                    <Badge
+                      position="absolute"
+                      top={1}
+                      left={0}
+                      zIndex="1"
+                      colorScheme={
+                        room.paymentStatus === "paid" ? "green" : "red"
+                      }
+                      bg={room.paymentStatus === "paid" ? "green.500" : "red"}
+                      px={2}
+                      py={1}
+                    >
+                      {room.paymentStatus === "paid"
+                        ? "Đã thanh toán"
+                        : "Chưa thanh toán"}
+                    </Badge>
+                  </>
                 )}
-                <Button
-                  leftIcon={<FaTrash />}
-                  size="sm"
-                  colorScheme="red"
-                  onClick={(e) => {
-                    e.stopPropagation();
 
-                    handleDeleteRoom(room);
-                  }}
-                >
-                  Xóa phòng
-                </Button>
-                {room.status === "occupied" && (
-                  <Button
-                    leftIcon={<FaFileInvoiceDollar />}
+                <Tooltip label="Xóa phòng" aria-label="Xóa">
+                  <IconButton
+                    icon={<FaTrash />}
                     size="sm"
-                    colorScheme="purple"
+                    colorScheme="red"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleCreateBill(room);
+                      handleDeleteRoom(room);
                     }}
-                  >
-                    Tạo hóa đơn
-                  </Button>
-                )}
+                  />
+                </Tooltip>
               </Flex>
             </Box>
           ))}
@@ -764,6 +817,63 @@ const RoomList = () => {
             </Button>
             <Button colorScheme="blue" onClick={handleSaveChanges}>
               Lưu thay đổi
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      {/* Modal for update */}
+      <Modal isCentered isOpen={isOpenUpdate} onClose={onCloseUpdate}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Cập nhật số điện và số nước</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <FormControl id="electricity" mb={4}>
+              <FormLabel>Số điện</FormLabel>
+              <Input
+                type="number"
+                placeholder="Nhập số điện"
+                value={update.elecIndex}
+                onChange={handleUpdate}
+              />
+            </FormControl>
+            <FormControl id="water">
+              <FormLabel>Số nước</FormLabel>
+              <Input
+                type="number"
+                placeholder="Nhập số nước"
+                value={update.aquaIndex}
+                onChange={handleUpdate}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Tháng</FormLabel>
+              <Select placeholder="Chọn tháng" mb={4}>
+                {months.map((month, index) => (
+                  <option key={index} value={month}>
+                    {month}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl>
+              <FormLabel>Tháng</FormLabel>
+              <Select placeholder="Chọn năm">
+                {years.map((year, index) => (
+                  <option key={index} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={handleUpdate}>
+              Cập nhật
+            </Button>
+            <Button variant="ghost" onClick={onCloseUpdate} ml={3}>
+              Hủy
             </Button>
           </ModalFooter>
         </ModalContent>

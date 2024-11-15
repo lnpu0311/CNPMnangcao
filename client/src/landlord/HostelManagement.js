@@ -37,6 +37,7 @@ import {
 import { jwtDecode } from "jwt-decode";
 import vietnamData from "../data/dvhcvn.json";
 import Chat from "../components/Chat";
+import Pagination from '../components/Pagination';
 
 const HostelManagement = () => {
   const [token, setToken] = useState(localStorage.getItem("token"));
@@ -58,7 +59,10 @@ const HostelManagement = () => {
     image: null,
   });
   const toast = useToast();
-
+  const [currentPage,setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
+  
+  
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
@@ -397,6 +401,14 @@ const HostelManagement = () => {
     setSelectedTenant(null);
   };
 
+  const getCurrentPageData = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return facilities.slice(startIndex, endIndex);
+  };
+
+  const totalPages = Math.ceil(facilities.length / itemsPerPage);
+
   return (
     <Box>
       <Heading
@@ -519,9 +531,17 @@ const HostelManagement = () => {
           </ModalContent>
         </Modal>
       </Flex>
-      {facilities.map((facility) => (
+      {getCurrentPageData().map((facility) => (
         <FacilityItem key={facility.id} facility={facility} />
       ))}
+
+      <Box mt={4} display="flex" justifyContent="center">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      </Box>
 
       <Box mt={4}>
         <Heading size="md" mb={4}>

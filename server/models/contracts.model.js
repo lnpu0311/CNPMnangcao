@@ -81,6 +81,11 @@ const contractsSchema = new mongoose.Schema({
             default: 'pending'
         },
         paidAt: Date
-    }]
+    }],
+    status: {
+        type: String,
+        enum: ['active', 'terminated', 'expired'],
+        default: 'active'
+    }
 });
 module.exports = mongoose.model("Contracts", contractsSchema)

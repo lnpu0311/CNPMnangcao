@@ -8,7 +8,8 @@ const {
   getHostelById,
   getRoomById,
   createRoom,
-  createContract
+  createContract,
+  getTenantList
 } = require("../controllers/landlord.controller");
 const upload = require("../middlewares/uploadImage");
 
@@ -36,5 +37,7 @@ router.post(
 );
 //Tạo tài khoản Manager (chỉ Landlord làm được)
 router.post("/manager/create", authMiddleware(["landlord"]));
+
+router.get("/tenant-list", authMiddleware(["landlord"]), getTenantList);
 
 module.exports = router;

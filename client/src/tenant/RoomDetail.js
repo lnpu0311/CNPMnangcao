@@ -200,11 +200,13 @@ const RoomDetail = () => {
         </Grid>
       </Box>
 
-      {showChat && currentUser && room.landlordId && (
+      {showChat && currentUser && room.landlordId && 
+        currentUser.id !== room.landlordId && (
         <Chat
           currentUserId={currentUser.id}
           recipientId={room.landlordId.toString()}
           recipientName={room.landlordName || "Chủ trọ"}
+          onClose={() => setShowChat(false)}
         />
       )}
 

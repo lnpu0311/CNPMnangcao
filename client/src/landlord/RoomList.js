@@ -25,22 +25,52 @@ import {
   VStack,
   HStack,
   Avatar,
+  Spinner,
+  Center,
+  Icon,
+  Heading,
+  Select,
+  Tooltip,
 } from "@chakra-ui/react";
 
-import {
-  FaArrowLeft,
-  FaEdit,
-  FaPlus,
-  FaTrash,
-  FaFileInvoiceDollar,
-} from "react-icons/fa";
+import { FaArrowLeft, FaEdit, FaPlus, FaTrash, FaUpload } from "react-icons/fa";
+import { IoReceipt } from "react-icons/io5";
+import data from "../data/monthyear.json";
 import axios from "axios";
+import Pagination from '../components/Pagination';
 const RoomList = () => {
   const [hostel, setHostel] = useState();
   const [rooms, setRooms] = useState([]);
+  const [isLoading, setIsLoading] = useState({
+    roomName: "",
+    area: "",
+    price: "",
+    description: "",
+    deposit: "",
+    images: [],
+  });
   const { facilityId } = useParams();
+  const [months, setMonths] = useState([]);
+  const [years, setYears] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemPerPage] = useState(12);
+
+  //Tính toán số trang 
+  const totalPages = Math.ceil(rooms.length/itemPerPage);
+  //Lấy dữ liệu cho trang hiện tại 
+  const getCurrentPageData=() =>{
+    const startIndex = (currentPage-1) * itemPerPage;
+    const endIndex = startIndex + itemPerPage;
+    return rooms.slice(startIndex,endIndex);
+  }
+
   useEffect(() => {
-    console.log(facilityId);
+    // Lấy dữ liệu từ file data.json và cập nhật vào state
+    setMonths(data.months);
+    setYears(data.years);
+  }, []);
+  useEffect(() => {
+    console.log("facilityId:", facilityId);
     const fetchRooms = async () => {
       try {
         const response = await axios.get(
@@ -51,11 +81,23 @@ const RoomList = () => {
             },
           }
         );
-        console.log("Dữ liệu hostel:", response.data.data);
-        setHostel(response.data.data); // Gán dữ liệu hostel vào state
-        setRooms(response.data.data.rooms); // Gán dữ liệu phòng vào state
+        console.log("API Response:", response.data);
+        if (response.data.success && response.data.data) {
+          setHostel(response.data.data);
+          setRooms(
+            Array.isArray(response.data.data.rooms)
+              ? response.data.data.rooms
+              : []
+          );
+        } else {
+          console.error("Invalid response format:", response.data);
+          setRooms([]);
+        }
       } catch (error) {
-        console.log("Lỗi khi lấy dữ liệu:", error);
+        console.error("Error fetching rooms:", error);
+        setRooms([]);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchRooms();
@@ -88,6 +130,11 @@ const RoomList = () => {
     onOpen: onOpenRoom,
     onClose: onCloseRoom,
   } = useDisclosure();
+  const {
+    isOpen: isOpenUpdate,
+    onOpen: onOpenUpdate,
+    onClose: onCloseUpdate,
+  } = useDisclosure();
   const [newRoom, setNewRoom] = useState({
     roomTitle: "",
     roomName: "",
@@ -98,9 +145,13 @@ const RoomList = () => {
     deposit: "",
     images: [],
   });
+  const [update, setUpdate] = useState({
+    elecIndex: "",
+    aquaIndex: "",
+  });
 
   const [selectedRoom, setSelectedRoom] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(selectedRoom?.images[0]);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const [contractDetails, setContractDetails] = useState({
     startDate: "",
@@ -144,12 +195,19 @@ const RoomList = () => {
     setSelectedRoom(room);
     onOpenInfoRoom();
   };
-  // Update field in selectedRoom object
-  const handleInputChange = (field, value) => {
-    setSelectedRoom((prevRoom) => ({
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setNewRoom((prevRoom) => ({
       ...prevRoom,
-      [field]: value,
+      [name]: value,
     }));
+  };
+  const handleUpdate = (room) => {
+    // Thực hiện hành động cập nhật tại đây
+    console.log("Số điện:", update.elecIndex);
+    console.log("Số nước:", update.aquaIndex);
+    onCloseUpdate();
   };
 
   // Save changes to database or state
@@ -157,7 +215,6 @@ const RoomList = () => {
     // Call backend or update state with new room details
     console.log("Saved room details:", selectedRoom);
   };
-
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 5) {
@@ -169,7 +226,6 @@ const RoomList = () => {
       images: files,
     }));
   };
-
   const handleAddTenant = (e) => {
     const { name, value } = e.target;
     setContractDetails((prevDetails) => ({
@@ -178,33 +234,33 @@ const RoomList = () => {
     }));
   };
   const handleCreateContract = async () => {
-    try{
+    try {
       const response = await axios.post(
-        'https://localhost:5000/api/landlord/contract/create',
+        "https://localhost:5000/api/landlord/contract/create",
         contractDetails,
         {
-          headers:{
-            Authorization:`Bearer ${localStorage.getItem('token')}`,
-          }
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
-      if(response.data.success){
+      if (response.data.success) {
         alert("Tạo hợp đồng thành công");
         setContractDetails({
-          startDate:"",
-          endDate:"",
-          deposit:"",
-          rent:"",
-          electricityFee:"",
-          waterFee:"",
-          tenantName:"",
-          landlordName:"",
+          startDate: "",
+          endDate: "",
+          deposit: "",
+          rent: "",
+          electricityFee: "",
+          waterFee: "",
+          tenantName: "",
+          landlordName: "",
         });
         onCloseContract();
       }
-    }catch(error){
-      console.error("Lỗi khi tạo hợp đồng",error);
-      alert("Không thể tạo hợp đồng : "+error.response.data.message);
+    } catch (error) {
+      console.error("Lỗi khi tạo hợp đồng", error);
+      alert("Không thể tạo hợp đồng : " + error.response.data.message);
     }
   };
 
@@ -287,95 +343,143 @@ const RoomList = () => {
           Thêm phòng mới
         </Button>
       </Flex>
-
-      <Text fontSize="2xl" fontWeight="bold" mb={4}>
+      <Heading
+        textColor={"blue.500"}
+        as="h3"
+        size="lg"
+        mb={{ base: 4, md: 12 }}
+      >
         Danh sách phòng của cơ sở: {hostel?.name || "Đang tải..."}
-      </Text>
-
-      <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={6}>
-        {rooms.map((room) => (
-          <Box
-            key={room.id}
-            borderRadius="lg"
-            overflow="hidden"
-            boxShadow="xl"
-            bg={room.status === "occupied" ? "brand.200" : "brand.0"}
-            position="relative"
-            p={3}
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-            onClick={() => handleRoomClick(room)}
-            cursor="pointer"
-          >
-            <Image
-              boxSize="200px"
-              src={room.images[0]}
-              alt={room.roomName}
-              mb={3}
-              borderRadius="md"
-              objectFit="cover"
-            />
-            <Text fontWeight="bold" mb={1} textAlign="center">
-              {room.roomName}
-            </Text>
-            <Flex mt={3} gap={2} justifyContent="center" wrap="wrap">
-              <Button
-                leftIcon={<FaEdit />}
-                size="sm"
-                colorScheme="teal"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpenRoom(room);
-                }}
+      </Heading>
+      {isLoading ? (
+        <Center>
+          <Spinner size="xl" />
+        </Center>
+      ) : !rooms || rooms.length === 0 ? (
+        <Center>
+          <Text>Không có phòng nào</Text>
+        </Center>
+      ) : (
+        <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={6}>
+          {getCurrentPageData().map((room) => (
+            <Box
+              border={"1px solid"}
+              borderColor={"gray.200"}
+              rounded={"lg"}
+              key={room.id}
+              borderRadius="lg"
+              overflow="hidden"
+              boxShadow="xl"
+              bg={room.status === "occupied" ? "brand.100" : "brand.2"}
+              position="relative"
+              p={2}
+              cursor="pointer"
+              onClick={() => handleRoomClick(room)}
+            >
+              {/* Image taking full width of the card */}
+              <Image
+                width="100%"
+                height={"200px"}
+                src={room.images?.[0]}
+                alt={room.roomName}
+                borderRadius="md"
+                objectFit="cover"
+              />
+              <Text fontSize={"lg"} fontWeight={"bold"} my={2}>
+                {room.roomName}
+              </Text>
+              {/* Button container positioned below the image */}
+              <Flex
+                direction="row"
+                alignItems="center"
+                justifyContent="space-evenly"
+                mt={2}
               >
-                Chỉnh sửa
-              </Button>
-              {/* Only show the Add button if the room is not occupied */}
-              {room.is_available !== true && (
-                <Button
-                  leftIcon={<FaPlus />}
-                  size="sm"
-                  colorScheme="blue"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenContract();
-                    handleAddRoom(room);
-                  }}
-                >
-                  Thêm hợp đồng
-                </Button>
-              )}
-              <Button
-                leftIcon={<FaTrash />}
-                size="sm"
-                colorScheme="red"
-                onClick={(e) => {
-                  e.stopPropagation();
+                <Tooltip label="Chỉnh sửa" aria-label="Chỉnh sửa">
+                  <IconButton
+                    icon={<FaEdit />}
+                    size="sm"
+                    colorScheme="teal"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenRoom(room);
+                    }}
+                  />
+                </Tooltip>
+                {room.status === "available" ? (
+                  <>
+                    <Tooltip label="Thêm hợp đồng" aria-label="Thêm hợp đồng">
+                      <IconButton
+                        icon={<FaPlus />}
+                        size="sm"
+                        colorScheme="blue"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenContract();
+                          handleAddRoom(room);
+                        }}
+                      />
+                    </Tooltip>
+                    <Tooltip label="Xóa phòng" aria-label="Xóa">
+                      <IconButton
+                        icon={<FaTrash />}
+                        size="sm"
+                        colorScheme="red"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteRoom(room);
+                        }}
+                      />
+                    </Tooltip>
+                  </>
+                ) : (
+                  <>
+                    <Tooltip label="Tạo hóa đơn" aria-label="Tạo hóa đơn">
+                      <IconButton
+                        icon={<IoReceipt />}
+                        size="sm"
+                        colorScheme="purple"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCreateBill(room);
+                        }}
+                      />
+                    </Tooltip>
+                    <Tooltip label="Cập nhật" aria-label="Cập nhật">
+                      <IconButton
+                        icon={<FaUpload />}
+                        size="sm"
+                        colorScheme="green"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenUpdate();
+                        }}
+                      />
+                    </Tooltip>
 
-                  handleDeleteRoom(room);
-                }}
-              >
-                Xóa phòng
-              </Button>
-              {room.status === "occupied" && (
-                <Button
-                  leftIcon={<FaFileInvoiceDollar />}
-                  size="sm"
-                  colorScheme="purple"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCreateBill(room);
-                  }}
-                >
-                  Tạo hóa đơn
-                </Button>
-              )}
-            </Flex>
-          </Box>
-        ))}
-      </SimpleGrid>
+                    <Badge
+                      position="absolute"
+                      top={1}
+                      left={0}
+                      zIndex="1"
+                      colorScheme={
+                        room.paymentStatus === "paid" ? "green" : "red"
+                      }
+                      bg={room.paymentStatus === "paid" ? "green.500" : "red"}
+                      px={2}
+                      py={1}
+                    >
+                      {room.paymentStatus === "paid"
+                        ? "Đã thanh toán"
+                        : "Chưa thanh toán"}
+                    </Badge>
+                  </>
+                )}
+              </Flex>
+            </Box>
+          ))}
+        </SimpleGrid>
+      )}
       {/* Modal for Adding New Room */}
       <Modal isCentered isOpen={isOpenNewRoom} onClose={onCloseNewRoom}>
         <ModalOverlay />
@@ -738,6 +842,68 @@ const RoomList = () => {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      {/* Modal for update */}
+      <Modal isCentered isOpen={isOpenUpdate} onClose={onCloseUpdate}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Cập nhật số điện và số nước</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <FormControl id="electricity" mb={4}>
+              <FormLabel>Số điện</FormLabel>
+              <Input
+                type="number"
+                placeholder="Nhập số điện"
+                value={update.elecIndex}
+                onChange={handleUpdate}
+              />
+            </FormControl>
+            <FormControl id="water">
+              <FormLabel>Số nước</FormLabel>
+              <Input
+                type="number"
+                placeholder="Nhập số nước"
+                value={update.aquaIndex}
+                onChange={handleUpdate}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Tháng</FormLabel>
+              <Select placeholder="Chọn tháng" mb={4}>
+                {months.map((month, index) => (
+                  <option key={index} value={month}>
+                    {month}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl>
+              <FormLabel>Tháng</FormLabel>
+              <Select placeholder="Chọn năm">
+                {years.map((year, index) => (
+                  <option key={index} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </Select>
+            </FormControl>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={handleUpdate}>
+              Cập nhật
+            </Button>
+            <Button variant="ghost" onClick={onCloseUpdate} ml={3}>
+              Hủy
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </Box>
   );
 };

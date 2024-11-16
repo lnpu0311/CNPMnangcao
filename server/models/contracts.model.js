@@ -44,6 +44,48 @@ const contractsSchema = new mongoose.Schema({
     type:mongoose.Schema.Types.ObjectId,
     ref:"Landlord",
     required:true
-   }
+   },
+   utilities: {
+        electricity: {
+            unitPrice: Number,
+            initialReading: Number,
+            currentReading: Number,
+            lastUpdated: Date
+        },
+        water: {
+            unitPrice: Number,
+            initialReading: Number,
+            currentReading: Number,
+            lastUpdated: Date
+        }
+    },
+    monthlyFees: [{
+        month: Date,
+        electricity: {
+            previousReading: Number,
+            currentReading: Number,
+            units: Number,
+            amount: Number
+        },
+        water: {
+            previousReading: Number,
+            currentReading: Number,
+            units: Number,
+            amount: Number
+        },
+        serviceFee: Number,
+        total: Number,
+        status: {
+            type: String,
+            enum: ['pending', 'paid'],
+            default: 'pending'
+        },
+        paidAt: Date
+    }],
+    status: {
+        type: String,
+        enum: ['active', 'terminated', 'expired'],
+        default: 'active'
+    }
 });
 module.exports = mongoose.model("Contracts", contractsSchema)

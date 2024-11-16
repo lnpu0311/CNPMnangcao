@@ -104,9 +104,7 @@ const createContract = async (req, res) => {
     !contract.rentFee ||
     !contract.electricityFee ||
     !contract.waterFee ||
-    !contract.serviceFee ||
-    !contract.landlordId ||
-    !contract.utilities
+    !contract.landlordId
   ) {
     return res.status(400).json({
       success: false,
@@ -161,25 +159,9 @@ const createContract = async (req, res) => {
       rentFee: contract.rentFee,
       electricityFee: contract.electricityFee,
       waterFee: contract.waterFee,
-      serviceFee: contract.serviceFee,
-      utilities: {
-        electricity: {
-          unitPrice: contract.utilities.electricity.unitPrice,
-          initialReading: 0,
-          currentReading: 0,
-          lastUpdated: new Date(),
-        },
-        water: {
-          unitPrice: contract.utilities.water.unitPrice,
-          initialReading: 0,
-          currentReading: 0,
-          lastUpdated: new Date(),
-        },
-      },
-      monthlyFees: [],
     });
 
-    await newContract.save();
+    const data = await newContract.save();
 
     // Cập nhật trạng thái phòng
     await Room.findByIdAndUpdate(contract.roomId, {

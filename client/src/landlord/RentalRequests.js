@@ -21,13 +21,28 @@ import {
   useToast,
   FormControl,
   FormLabel,
-  Input
+  Input,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  Tag,
+  Link,
+  Table,
+  Thead,
+  Tr,
+  Th,
+  Tbody,
+  ButtonGroup,
+  Td
 } from "@chakra-ui/react";
 import axios from "axios";
 
 const RentalRequest = () => {
   const toast = useToast();
   const [rentalRequests, setRentalRequests] = useState([]);
+  const [acceptedRequests, setAcceptedRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isOpenInfoRoom, setIsOpenInfoRoom] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
@@ -42,6 +57,13 @@ const RentalRequest = () => {
     waterFee: "",
     serviceFee: "",
   });
+  const [accpetedRequest,setAccpetedRequest] = useState([]);
+
+  //State quản lý tab active 
+const [activeTab,setActiveTab] = useState('pending');
+
+  // Thêm state để quản lý loading khi lấy thông tin phòng
+  const [isLoadingRoom, setIsLoadingRoom] = useState(false);
 
   // Wrap fetchRentalRequests trong useCallback
   const fetchRentalRequests = useCallback(async () => {
@@ -57,9 +79,21 @@ const RentalRequest = () => {
       );
 
       if (response.data.success) {
-        setRentalRequests(response.data.data);
+        // Thêm log để kiểm tra cấu trúc dữ liệu
+        console.log('Full rental requests data:', response.data.data);
+        
+        const pending = response.data.data.filter(req => req.status === 'pending');
+        const accepted = response.data.data.filter(req => req.status === 'accepted');
+        
+        // Log chi tiết về cấu trúc địa chỉ
+        console.log('Sample room data:', pending[0]?.roomId);
+        console.log('Sample hostel data:', pending[0]?.roomId?.hostelId);
+
+        setRentalRequests(pending);
+        setAcceptedRequests(accepted);
       }
     } catch (error) {
+      console.error('Error fetching rental requests:', error);
       toast({
         title: "Lỗi",
         description: "Không thể tải danh sách yêu cầu thuê",
@@ -77,9 +111,42 @@ const RentalRequest = () => {
     fetchRentalRequests();
   }, [fetchRentalRequests]);
 
-  const openRoomInfoModal = (request) => {
-    setSelectedRoom(request);
-    setIsOpenInfoRoom(true);
+  
+  const openRoomInfoModal = async (request) => {
+    try {
+      setIsLoadingRoom(true);
+      console.log('Request:', request); // Debug log
+      
+      const roomId = request.roomId._id;
+      console.log('Room ID:', roomId); // Debug log
+      
+      const response = await axios.get(
+        `${process.env.REACT_APP_API}/landlord/hostel/${roomId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+
+      console.log('API Response:', response.data); // Debug log
+
+      if (response.data.success) {
+        setSelectedRoom(response.data.data);
+        setIsOpenInfoRoom(true);
+      }
+    } catch (error) {
+      console.error('Error fetching room details:', error);
+      toast({
+        title: "Lỗi",
+        description: error.response?.data?.message || "Không thể tải thông tin phòng",
+        status: "error",
+        duration: 3000,
+        isClosable: true
+      });
+    } finally {
+      setIsLoadingRoom(false);
+    }
   };
 
   const closeRoomInfoModal = () => {
@@ -246,6 +313,12 @@ const RentalRequest = () => {
       );
 
       if (contractResponse.data.success) {
+        // Log để kiểm tra response
+        console.log('Contract creation response:', contractResponse.data);
+        
+        // Refresh danh sách để lấy dữ liệu mới
+        await fetchRentalRequests();
+        
         toast({
           title: "Thành công",
           description: "Đã tạo hợp đồng thành công",
@@ -254,7 +327,6 @@ const RentalRequest = () => {
           isClosable: true
         });
         closeContractModal();
-        fetchRentalRequests();
       }
     } catch (error) {
       console.error('Contract creation error:', error);
@@ -287,85 +359,119 @@ const RentalRequest = () => {
         Quản Lý Yêu Cầu Thuê Phòng
       </Heading>
 
-      {rentalRequests.length === 0 ? (
-        <Text textAlign="center" fontSize="lg" color="gray.500">
-          Chưa có yêu cầu thuê phòng nào
-        </Text>
-      ) : (
-        <Stack spacing={4}>
-          {rentalRequests.map((request) => (
-            <Flex
-              flexDirection={{ base: "column", md: "row" }}
-              key={request._id}
-              bg="gray.100"
-              borderRadius="md"
-              boxShadow="lg"
-              justify="space-between"
-              align="center"
-              p={4}
-            >
-              <Flex
-                cursor={"pointer"}
-                onClick={() => openRoomInfoModal(request)}
-                align="center"
-                flex="3"
-              >
-                <Avatar name={request.tenantId.name} src="https://bit.ly/broken-link" />
-                <Text fontWeight="bold" ml={4}>
-                  {request.tenantId.name}
-                </Text>
-              </Flex>
+      <Tabs isFitted variant="enclosed" onChange={(index) => setActiveTab(index === 0 ? 'pending' : 'accepted')}>
+        <TabList mb="1em">
+          <Tab>Yêu cầu chờ duyệt</Tab>
+          <Tab>Yêu cầu đã chấp nhận</Tab>
+        </TabList>
 
-              <Flex
-                cursor={"pointer"}
-                onClick={() => openRoomInfoModal(request)}
-                align="center"
-                flex="2"
-              >
-                <Text color="gray.600" mr={2}>
-                  Số điện thoại:
-                </Text>
-                <Text fontWeight="bold" mr={2}>
-                  {request.tenantId.phone}
-                </Text>
-              </Flex>
+        <TabPanels>
+          <TabPanel>
+            {/* Hiển thị danh sách yêu cầu đang chờ */}
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th>Người thuê</Th>
+                  <Th>Thông tin phòng</Th>
+                  <Th>Ngày yêu cầu</Th>
+                  <Th>Thao tác</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {rentalRequests.map((request) => (
+                  <Tr key={request._id}>
+                    <Td>
+                      <VStack align="start">
+                        <Text fontWeight="bold">{request.tenantId.name}</Text>
+                        <Text fontSize="sm">{request.tenantId.numPhone}</Text>
+                        <Text fontSize="sm">{request.tenantId.email}</Text>
+                      </VStack>
+                    </Td>
+                    <Td>
+                      <VStack align="start">
+                        <Button variant="link" onClick={() => openRoomInfoModal(request)}>
+                          {request.roomId.roomName}
+                        </Button>
+                        <Text fontSize="sm" color="gray.600">
+                          Cơ sở: {request.roomId.hostelId?.name || "Chưa có thông tin"}
+                        </Text>
+                        <Text fontSize="sm" color="gray.600">
+                          Địa chỉ: {request.roomId.hostelId?.address || "Chưa có thông tin"}
+                        </Text>
+                      </VStack>
+                    </Td>
+                    <Td>{new Date(request.createdAt).toLocaleDateString('vi-VN')}</Td>
+                    <Td>
+                      <ButtonGroup>
+                        <Button colorScheme="green" onClick={() => handleAccept(request)}>
+                          Chấp nhận
+                        </Button>
+                        <Button colorScheme="red" onClick={() => handleReject(request)}>
+                          Từ chối
+                        </Button>
+                      </ButtonGroup>
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </TabPanel>
 
-              <Flex
-                cursor={"pointer"}
-                onClick={() => openRoomInfoModal(request)}
-                align="center"
-                flex="2"
-              >
-                <Text color="gray.600" mr={2}>
-                  Cơ sở:
-                </Text>
-                <Text fontWeight="bold">{request.roomId.hostelId.name}</Text>
-              </Flex>
-
-              <Flex
-                cursor={"pointer"}
-                onClick={() => openRoomInfoModal(request)}
-                align="center"
-                flex="2"
-              >
-                <Text color="gray.600" mr={2}>
-                  Tên phòng:
-                </Text>
-                <Text fontWeight="bold">{request.roomId.roomName}</Text>
-              </Flex>
-
-              <Flex flex="1" justify="flex-end" gap={2}>
-                <Button onClick={() => handleAccept(request)} colorScheme="green">
-                  Chấp nhận
-                </Button>
-                <Button onClick={() => handleReject(request)} colorScheme="red">
-                  Từ chối
-                </Button>
-              </Flex>
-            </Flex>
-          ))}
-        </Stack>
-      )}
+          <TabPanel>
+            {/* Hiển thị danh sách yêu cầu đã chấp nhận */}
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th>Người thuê</Th>
+                  <Th>Thông tin phòng</Th>
+                  <Th>Ngày chấp nhận</Th>
+                  <Th>Mã hợp đồng</Th>
+                  <Th>Trạng thái</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {acceptedRequests.map((request) => (
+                  <Tr key={request._id}>
+                    <Td>
+                      <VStack align="start">
+                        <Text fontWeight="bold">{request.tenantId.name}</Text>
+                        <Text fontSize="sm">{request.tenantId.phone}</Text>
+                        <Text fontSize="sm">{request.tenantId.email}</Text>
+                      </VStack>
+                    </Td>
+                    <Td>
+                      <VStack align="start">
+                        <Text fontWeight="bold">{request.roomId.roomName}</Text>
+                        <Text fontSize="sm" color="gray.600">
+                          Cơ sở: {request.roomId.hostelId?.name || "Chưa có thông tin"}
+                        </Text>
+                        <Text fontSize="sm" color="gray.600">
+                          Địa chỉ: {request.roomId.hostelId?.address || "Chưa có thông tin"}
+                        </Text>
+                      </VStack>
+                    </Td>
+                    <Td>{new Date(request.updatedAt).toLocaleDateString('vi-VN')}</Td>
+                    <Td>
+                      {request._id ? (
+                        <Link color="blue.500" href={`/contracts/${request._id}`}>
+                          {request._id.substring(0, 8)}...
+                        </Link>
+                      ) : (
+                        <Text color="gray.500">Chưa có mã hợp đồng</Text>
+                      )}
+                    </Td>
+                    <Td>
+                      <Tag colorScheme={request.status === 'accepted' ? 'green' : 'gray'}>
+                        {request.status === 'accepted' ? 'Đã chấp nhận' : 'Chưa xác định'}
+                      </Tag>
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
 
       {/* Modal hiển thị thông tin phòng */}
       <Modal
@@ -384,30 +490,41 @@ const RentalRequest = () => {
           <ModalCloseButton />
 
           <ModalBody>
-            {/* Hình ảnh chính và chi tiết phòng */}
-            <HStack align="start" spacing={4}>
-              <Image
-                src={selectedRoom?.mainImage || "Đang tải..."}
-                alt={selectedRoom?.roomName || "Đang tải..."}
-                borderRadius="md"
-                boxSize="250px"
-                objectFit="cover"
-              />
+            {isLoadingRoom ? (
+              <Box textAlign="center" py={10}>
+                <Spinner size="xl" />
+              </Box>
+            ) : (
+              <HStack align="start" spacing={4}>
+                <Image
+                  src={selectedRoom?.images?.[0] || "/default-room.jpg"}
+                  alt={selectedRoom?.roomName || "Phòng trọ"}
+                  fallbackSrc="/default-room.jpg"
+                  borderRadius="md"
+                  boxSize="250px"
+                  objectFit="cover"
+                />
 
-              {/* Chi tiết phòng */}
-              <VStack align="start" spacing={2} flex="1">
-                <Text fontWeight="bold">Số điện:</Text>
-                <Text>{selectedRoom?.electricity || "Đang tải..."}</Text>
-                <Text fontWeight="bold">Số nước:</Text>
-                <Text>{selectedRoom?.water || "Đang tải..."}</Text>
-                <Text fontWeight="bold">Giá phòng:</Text>
-                <Text>{selectedRoom?.price || "Đang tải..."} VND</Text>
-                <Text fontWeight="bold">Diện tích:</Text>
-                <Text>{selectedRoom?.area || "Đang tải..."} m²</Text>
-                <Text fontWeight="bold">Mô tả:</Text>
-                <Text>{selectedRoom?.description || "Đang tải..."}</Text>
-              </VStack>
-            </HStack>
+                <VStack align="start" spacing={2} flex="1">
+                  <Text fontWeight="bold">Cơ sở:</Text>
+                  <Text>{selectedRoom?.hostelId?.name || "Chưa có thông tin"}</Text>
+                  <Text fontWeight="bold">Địa chỉ:</Text>
+                  <Text>{selectedRoom?.hostelId?.address || "Chưa có thông tin"}</Text>
+                  <Text fontWeight="bold">Giá điện:</Text>
+                  <Text>{selectedRoom?.electricityUnitPrice?.toLocaleString('vi-VN')} VND/số</Text>
+                  <Text fontWeight="bold">Giá nước:</Text>
+                  <Text>{selectedRoom?.waterUnitPrice?.toLocaleString('vi-VN')} VND/khối</Text>
+                  <Text fontWeight="bold">Giá phòng:</Text>
+                  <Text>{selectedRoom?.price?.toLocaleString('vi-VN')} VND</Text>
+                  <Text fontWeight="bold">Tiền cọc:</Text>
+                  <Text>{selectedRoom?.deposit?.toLocaleString('vi-VN')} VND</Text>
+                  <Text fontWeight="bold">Diện tích:</Text>
+                  <Text>{selectedRoom?.area || "Chưa có thông tin"} m²</Text>
+                  <Text fontWeight="bold">Mô tả:</Text>
+                  <Text>{selectedRoom?.description || "Chưa có mô tả"}</Text>
+                </VStack>
+              </HStack>
+            )}
           </ModalBody>
 
           <ModalFooter>

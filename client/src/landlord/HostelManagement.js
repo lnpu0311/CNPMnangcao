@@ -36,7 +36,6 @@ import {
 } from "@chakra-ui/icons";
 import { jwtDecode } from "jwt-decode";
 import vietnamData from "../data/dvhcvn.json";
-import Chat from "../components/Chat";
 import Pagination from '../components/Pagination';
 
 const HostelManagement = () => {
@@ -363,44 +362,7 @@ const HostelManagement = () => {
     );
   };
 
-  const handleChatWithTenant = (tenant) => {
-    if (!currentUser) {
-      toast({
-        title: "Lỗi",
-        description: "Vui lòng đăng nhập lại",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    if (!tenant || !tenant.id) {
-      console.error("Invalid tenant data:", tenant);
-      toast({
-        title: "Lỗi",
-        description: "Không thể bắt đầu chat. Thiếu thông tin người thuê.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    console.log("Starting chat with tenant:", tenant);
-
-    setSelectedTenant({
-      id: tenant.id || tenant._id,
-      name: tenant.name || "Người thuê",
-    });
-    setShowChat(true);
-  };
-
-  const handleCloseChat = () => {
-    setShowChat(false);
-    setSelectedTenant(null);
-  };
-
+  
   const getCurrentPageData = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -542,74 +504,6 @@ const HostelManagement = () => {
           onPageChange={setCurrentPage}
         />
       </Box>
-
-      <Box mt={4}>
-        <Heading size="md" mb={4}>
-          Tin nhắn từ người thuê
-        </Heading>
-        <VStack spacing={3} align="stretch">
-          {unreadMessages &&
-            unreadMessages.map((message) => (
-              <Box
-                key={message._id}
-                p={3}
-                bg="gray.50"
-                borderRadius="md"
-                cursor="pointer"
-                onClick={() =>
-                  handleChatWithTenant({
-                    id: message.senderId._id,
-                    name: message.senderId.name,
-                  })
-                }
-              >
-                <HStack spacing={3}>
-                  <Avatar size="sm" name={message.senderId.name} />
-                  <Box flex={1}>
-                    <Text fontWeight="bold">{message.senderId.name}</Text>
-                    <Text noOfLines={1}>{message.content}</Text>
-                    <Text fontSize="xs" color="gray.500">
-                      {new Date(message.timestamp).toLocaleString()}
-                    </Text>
-                  </Box>
-                  {message.count > 1 && (
-                    <Badge colorScheme="red" borderRadius="full">
-                      {message.count}
-                    </Badge>
-                  )}
-                </HStack>
-              </Box>
-            ))}
-        </VStack>
-      </Box>
-
-      {showChat && currentUser && selectedTenant && (
-        <Box
-          position="fixed"
-          bottom="20px"
-          right="20px"
-          zIndex={1000}
-          maxWidth="400px"
-          width="100%"
-        >
-          <Box
-            position="relative"
-            backgroundColor="white"
-            borderRadius="md"
-            boxShadow="lg"
-          >
-            <Chat
-              currentUserId={currentUser.id}
-              recipientId={selectedTenant.id}
-              recipientName={selectedTenant.name}
-              onClose={() => {
-                setShowChat(false);
-                setSelectedTenant(null);
-              }}
-            />
-          </Box>
-        </Box>
-      )}
     </Box>
   );
 };

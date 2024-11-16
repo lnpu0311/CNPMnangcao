@@ -289,6 +289,10 @@ const TenantRoomList = () => {
   const onOpenBooking = () => setIsOpenBooking(true);
   const onCloseBooking = () => setIsOpenBooking(false);
 
+  const handleCloseChat = () => {
+    setShowChat(false);
+  };
+
   return (
     <Box p={4}>
       <Center mb={4}>
@@ -472,12 +476,12 @@ const TenantRoomList = () => {
                 onClick={() => {
                   if (currentUser) {
                     setIsOpenDetail(false);
-                    onOpenBooking(); 
+                    onOpenBooking();
                   } else {
                     toast({
                       title: "Vui lòng đăng nhập",
                       description: "Bạn cần đăng nhập để đặt lịch xem phòng",
-                      status: "warning", 
+                      status: "warning",
                       duration: 3000,
                       isClosable: true,
                     });
@@ -491,11 +495,13 @@ const TenantRoomList = () => {
         </ModalContent>
       </Modal>
 
-      {showChat && currentUser && selectedRoom && selectedRoom.landlordId && (
+      {showChat && currentUser && selectedRoom && selectedRoom.landlordId && 
+        currentUser.id !== selectedRoom.landlordId && (
         <Chat
           currentUserId={currentUser.id}
           recipientId={selectedRoom.landlordId.toString()}
           recipientName={selectedRoom.landlordName || "Chủ trọ"}
+          onClose={handleCloseChat}
         />
       )}
 

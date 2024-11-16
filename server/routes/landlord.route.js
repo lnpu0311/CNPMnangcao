@@ -9,7 +9,8 @@ const {
   getRoomById,
   createRoom,
   createContract,
-  getTenantList
+  updateUnit,
+  getTenantList,
 } = require("../controllers/landlord.controller");
 const upload = require("../middlewares/uploadImage");
 
@@ -22,10 +23,10 @@ router.post(
   upload.single("image"),
   createHostel
 );
-router.post("/contract/create",authMiddleware(["landlord"]),createContract);
+router.post("/contract/create", authMiddleware(["landlord"]), createContract);
 router.get("/hostel/:roomId", getRoomById);
-//router.get("/hostel/:roomId/update", )
-//router.get("/hostel/:roomId/updateUnit", )
+// router.get("/hostel/:roomId/update", );
+router.post("/hostel/:roomId/updateUnit", updateUnit);
 //router.get("/hostel/:roomId/createReceipt",  )
 
 //Đăng cơ sở (chỉ landlord)

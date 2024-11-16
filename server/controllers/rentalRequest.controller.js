@@ -139,7 +139,7 @@ exports.getLandlordRentalRequests = async (req, res) => {
         select: 'roomName roomTitle price area description electricity water images',
         populate: {
           path: 'hostelId',
-          select: 'name'
+          select: 'name address ward district city'
         }
       });
 

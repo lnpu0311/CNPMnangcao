@@ -383,47 +383,68 @@ const RoomList = () => {
                 justifyContent="space-evenly"
                 mt={2}
               >
-                <IconButton
-                  icon={<FaEdit />}
-                  size="sm"
-                  colorScheme="teal"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenRoom(room);
-                  }}
-                />
-
-                {room.status === "available" ? (
+                <Tooltip label="Chỉnh sửa" aria-label="Chỉnh sửa">
                   <IconButton
-                    icon={<FaPlus />}
+                    icon={<FaEdit />}
                     size="sm"
-                    colorScheme="blue"
+                    colorScheme="teal"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onOpenContract();
-                      handleAddRoom(room);
+                      onOpenRoom(room);
                     }}
                   />
+                </Tooltip>
+                {room.status === "available" ? (
+                  <>
+                    <Tooltip label="Thêm hợp đồng" aria-label="Thêm hợp đồng">
+                      <IconButton
+                        icon={<FaPlus />}
+                        size="sm"
+                        colorScheme="blue"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenContract();
+                          handleAddRoom(room);
+                        }}
+                      />
+                    </Tooltip>
+                    <Tooltip label="Xóa phòng" aria-label="Xóa">
+                      <IconButton
+                        icon={<FaTrash />}
+                        size="sm"
+                        colorScheme="red"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteRoom(room);
+                        }}
+                      />
+                    </Tooltip>
+                  </>
                 ) : (
                   <>
-                    <IconButton
-                      icon={<IoReceipt />}
-                      size="sm"
-                      colorScheme="purple"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCreateBill(room);
-                      }}
-                    />
-                    <IconButton
-                      icon={<FaUpload />}
-                      size="sm"
-                      colorScheme="green"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onOpenUpdate();
-                      }}
-                    />
+                    <Tooltip label="Tạo hóa đơn" aria-label="Tạo hóa đơn">
+                      <IconButton
+                        icon={<IoReceipt />}
+                        size="sm"
+                        colorScheme="purple"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCreateBill(room);
+                        }}
+                      />
+                    </Tooltip>
+                    <Tooltip label="Cập nhật" aria-label="Cập nhật">
+                      <IconButton
+                        icon={<FaUpload />}
+                        size="sm"
+                        colorScheme="green"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenUpdate();
+                        }}
+                      />
+                    </Tooltip>
+
                     <Badge
                       position="absolute"
                       top={1}
@@ -442,18 +463,6 @@ const RoomList = () => {
                     </Badge>
                   </>
                 )}
-
-                <Tooltip label="Xóa phòng" aria-label="Xóa">
-                  <IconButton
-                    icon={<FaTrash />}
-                    size="sm"
-                    colorScheme="red"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteRoom(room);
-                    }}
-                  />
-                </Tooltip>
               </Flex>
             </Box>
           ))}

@@ -26,6 +26,7 @@ import {
   Stack,
   IconButton,
   useToast,
+  Tooltip,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -337,19 +338,17 @@ const HostelManagement = () => {
             {/* Buttons Column */}
             <Box width={{ base: "100%", md: "20%" }}>
               <Flex justifyContent="flex-end">
-                <IconButton
-                  icon={<EditIcon />}
-                  colorScheme="blue"
-                  mr={2}
-                ></IconButton>
+                <Tooltip label="Chỉnh sửa cơ sở">
+                  <IconButton icon={<EditIcon />} colorScheme="blue" mr={2} />
+                </Tooltip>
                 {(facility.roomCount === 0 || !facility.roomCount) && (
-                  <IconButton
-                    onClick={() => handleDeleteFacility(facility.id)}
-                    colorScheme="red"
-                    icon={<DeleteIcon />}
-                  >
-                    Xóa cơ sở
-                  </IconButton>
+                  <Tooltip label="Xóa cơ sở">
+                    <IconButton
+                      onClick={() => handleDeleteFacility(facility.id)}
+                      colorScheme="red"
+                      icon={<DeleteIcon />}
+                    />
+                  </Tooltip>
                 )}
               </Flex>
             </Box>
@@ -396,7 +395,22 @@ const HostelManagement = () => {
     setShowChat(false);
     setSelectedTenant(null);
   };
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 5;
 
+  // Số trang
+  const pageCount = Math.ceil(facilities.length / itemsPerPage);
+
+  // Các cơ sở trên trang hiện tại
+  const currentItems = facilities.slice(
+    currentPage * itemsPerPage,
+    (currentPage + 1) * itemsPerPage
+  );
+
+  // Hàm thay đổi trang
+  const handlePageChange = (pageIndex) => {
+    setCurrentPage(pageIndex);
+  };
   return (
     <Box>
       <Heading

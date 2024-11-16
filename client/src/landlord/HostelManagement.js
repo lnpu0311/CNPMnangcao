@@ -38,7 +38,7 @@ import {
 import { jwtDecode } from "jwt-decode";
 import vietnamData from "../data/dvhcvn.json";
 import Chat from "../components/Chat";
-import Pagination from '../components/Pagination';
+import Pagination from "../components/Pagination";
 
 const HostelManagement = () => {
   const [token, setToken] = useState(localStorage.getItem("token"));
@@ -60,10 +60,9 @@ const HostelManagement = () => {
     image: null,
   });
   const toast = useToast();
-  const [currentPage,setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
-  
-  
+
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
@@ -399,12 +398,9 @@ const HostelManagement = () => {
     setShowChat(false);
     setSelectedTenant(null);
   };
-  const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 5;
 
   // Số trang
   const pageCount = Math.ceil(facilities.length / itemsPerPage);
-
 
   // Các cơ sở trên trang hiện tại
   const currentItems = facilities.slice(
@@ -416,7 +412,7 @@ const HostelManagement = () => {
   const handlePageChange = (pageIndex) => {
     setCurrentPage(pageIndex);
   };
-=======
+
   const getCurrentPageData = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;

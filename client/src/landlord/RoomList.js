@@ -37,6 +37,7 @@ import { FaArrowLeft, FaEdit, FaPlus, FaTrash, FaUpload } from "react-icons/fa";
 import { IoReceipt } from "react-icons/io5";
 import data from "../data/monthyear.json";
 import axios from "axios";
+import Pagination from '../components/Pagination';
 const RoomList = () => {
   const [hostel, setHostel] = useState();
   const [rooms, setRooms] = useState([]);
@@ -51,6 +52,17 @@ const RoomList = () => {
   const { facilityId } = useParams();
   const [months, setMonths] = useState([]);
   const [years, setYears] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemPerPage] = useState(12);
+
+  //Tính toán số trang 
+  const totalPages = Math.ceil(rooms.length/itemPerPage);
+  //Lấy dữ liệu cho trang hiện tại 
+  const getCurrentPageData=() =>{
+    const startIndex = (currentPage-1) * itemPerPage;
+    const endIndex = startIndex + itemPerPage;
+    return rooms.slice(startIndex,endIndex);
+  }
 
   useEffect(() => {
     // Lấy dữ liệu từ file data.json và cập nhật vào state
@@ -349,7 +361,7 @@ const RoomList = () => {
         </Center>
       ) : (
         <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={6}>
-          {rooms.map((room) => (
+          {getCurrentPageData().map((room) => (
             <Box
               border={"1px solid"}
               borderColor={"gray.200"}
@@ -887,6 +899,11 @@ const RoomList = () => {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </Box>
   );
 };

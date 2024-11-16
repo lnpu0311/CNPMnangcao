@@ -426,7 +426,7 @@ export const InfoModal = ({
     </ModalContent>
   </Modal>
 );
-// Modal xem thông tin phòng
+// Modal chỉnh sửa phòng
 export const EditModal = ({
   isOpen,
   onClose,
@@ -501,11 +501,11 @@ export const EditModal = ({
       </ModalBody>
 
       <ModalFooter>
-        <Button onClick={onClose} colorScheme="gray" mr={3}>
-          Đóng
-        </Button>{" "}
-        <Button colorScheme="blue" onClick={handleEditRoom}>
+        <Button colorScheme="blue" onClick={handleEditRoom} mr={3}>
           Lưu thay đổi
+        </Button>{" "}
+        <Button onClick={onClose} colorScheme="gray">
+          Đóng
         </Button>
       </ModalFooter>
     </ModalContent>

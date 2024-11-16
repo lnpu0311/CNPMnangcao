@@ -37,6 +37,7 @@ import {
 } from "@chakra-ui/icons";
 import { jwtDecode } from "jwt-decode";
 import vietnamData from "../data/dvhcvn.json";
+
 import Pagination from '../components/Pagination';
 
 const HostelManagement = () => {
@@ -59,10 +60,9 @@ const HostelManagement = () => {
     image: null,
   });
   const toast = useToast();
-  const [currentPage,setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
-  
-  
+
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
@@ -361,7 +361,7 @@ const HostelManagement = () => {
     );
   };
 
-  
+
   const getCurrentPageData = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;

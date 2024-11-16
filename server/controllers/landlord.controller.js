@@ -139,7 +139,7 @@ const createContract = async (req, res) => {
 
     // Kiểm tra phòng đã có hợp đồng chưa
     const existingContract = await Contract.findOne({
-      roomId: contract.roomId
+      roomId: contract.roomId,
     });
 
     if (existingContract) {
@@ -170,42 +170,25 @@ const createContract = async (req, res) => {
       tenantId: contract.tenantId,
       contractId: newContract._id,
     });
-      serviceFee: contract.serviceFee,
-      utilities: {
-        electricity: {
-          unitPrice: contract.utilities.electricity.unitPrice,
-          initialReading: 0,
-          currentReading: 0,
-          lastUpdated: new Date()
-        },
-        water: {
-          unitPrice: contract.utilities.water.unitPrice,
-          initialReading: 0,
-          currentReading: 0,
-          lastUpdated: new Date()
-        }
-      },
-      monthlyFees: []
-    });
 
     await newContract.save();
-    
+
     // Cập nhật trạng thái phòng với { new: true } để trả về document đã update
     const updatedRoom = await Room.findByIdAndUpdate(
       contract.roomId,
       {
         $set: {
-          status: 'occupied',
-          tenantId: contract.tenantId
-        }
+          status: "occupied",
+          tenantId: contract.tenantId,
+        },
       },
       { new: true }
     );
 
-    console.log('Updated room:', updatedRoom); // Thêm log để kiểm tra
+    console.log("Updated room:", updatedRoom); // Thêm log để kiểm tra
 
     if (!updatedRoom) {
-      throw new Error('Không thể cập nhật thông tin phòng');
+      throw new Error("Không thể cập nhật thông tin phòng");
     }
 
     // Cập nhật rental request
@@ -230,12 +213,12 @@ const createContract = async (req, res) => {
     }
 
     res.status(200).json({
-      success: true, 
+      success: true,
       data: {
         contract: newContract,
-        room: updatedRoom
+        room: updatedRoom,
       },
-      message: "Tạo hợp đồng thành công"
+      message: "Tạo hợp đồng thành công",
     });
   } catch (error) {
     console.error("Create contract error:", error);
@@ -266,15 +249,13 @@ const getHostelByLandLordId = async (req, res) => {
 const getHostelById = async (req, res) => {
   const { hostelId } = req.params;
   try {
-    
-    const hostel = await Hostel.findById(hostelId).populate("rooms"); 
+    const hostel = await Hostel.findById(hostelId).populate("rooms");
     if (!hostel) {
       return res
         .status(400)
         .json({ success: false, message: "Hostel not found" });
     }
 
-   
     res.status(200).json({ success: true, data: hostel });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -286,13 +267,13 @@ const getRoomById = async (req, res) => {
 
   try {
     const room = await Room.findById(roomId)
-      .populate('hostelId')
-      .populate('tenantId');
-      
+      .populate("hostelId")
+      .populate("tenantId");
+
     if (!room) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Không tìm thấy phòng" 
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy phòng",
       });
     }
 
@@ -308,28 +289,32 @@ const getRoomById = async (req, res) => {
       deposit: room.deposit,
       description: room.description,
       status: room.status,
-      hostel: room.hostelId ? {
-        name: room.hostelId.name,
-        address: room.hostelId.address
-      } : null,
-      tenant: room.tenantId ? {
-        name: room.tenantId.name,
-        phone: room.tenantId.phone,
-        email: room.tenantId.email
-      } : null
+      hostel: room.hostelId
+        ? {
+            name: room.hostelId.name,
+            address: room.hostelId.address,
+          }
+        : null,
+      tenant: room.tenantId
+        ? {
+            name: room.tenantId.name,
+            phone: room.tenantId.phone,
+            email: room.tenantId.email,
+          }
+        : null,
     };
 
-    console.log('Room data:', roomData); // Debug log
+    console.log("Room data:", roomData); // Debug log
 
-    res.status(200).json({ 
-      success: true, 
-      data: roomData 
+    res.status(200).json({
+      success: true,
+      data: roomData,
     });
   } catch (error) {
-    console.error('Error in getRoomById:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Lỗi server: " + error.message 
+    console.error("Error in getRoomById:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi server: " + error.message,
     });
   }
 };
@@ -337,77 +322,190 @@ const getRoomById = async (req, res) => {
 const getTenantList = async (req, res) => {
   try {
     const landlordId = req.user.id;
-    console.log('LandlordId from token:', landlordId);
-
+    console.log("LandlordId from token:", landlordId);
 
     const hostels = await Hostel.find({ landlordId });
-    console.log('Hostels found:', hostels.length);
-    
+    console.log("Hostels found:", hostels.length);
+
     if (hostels.length === 0) {
       return res.status(200).json({
         success: true,
         data: [],
-        message: "Không tìm thấy cơ sở nào"
+        message: "Không tìm thấy cơ sở nào",
       });
     }
 
-      const contracts = await Contract.find({
+    const contracts = await Contract.find({
       landlordId: landlordId,
-      endDate: { $gte: new Date() } 
+      endDate: { $gte: new Date() },
     })
-    .populate({
-      path: 'tenantId',
-      model: 'User',
-      select: 'name email phone'
-    })
-    .populate({
-      path: 'roomId',
-      model: 'Room',
-      select: 'roomName hostelId',
-      populate: {
-        path: 'hostelId',
-        model: 'Hostel',
-        select: 'name'
-      }
-    });
+      .populate({
+        path: "tenantId",
+        model: "User",
+        select: "name email phone",
+      })
+      .populate({
+        path: "roomId",
+        model: "Room",
+        select: "roomName hostelId",
+        populate: {
+          path: "hostelId",
+          model: "Hostel",
+          select: "name",
+        },
+      });
 
-    console.log('Valid contracts found:', contracts.length);
+    console.log("Valid contracts found:", contracts.length);
 
     // Format dữ liệu trả về
-    const tenants = contracts.map(contract => {
-      if (!contract.roomId?.hostelId || !contract.tenantId) {
-        console.warn('Missing data for contract:', contract._id);
-        return null;
-      }
+    const tenants = contracts
+      .map((contract) => {
+        if (!contract.roomId?.hostelId || !contract.tenantId) {
+          console.warn("Missing data for contract:", contract._id);
+          return null;
+        }
 
-      return {
-        _id: contract._id,
-        name: contract.tenantId.name,
-        email: contract.tenantId.email,
-        phone: contract.tenantId.phone,
-        facility: contract.roomId.hostelId.name,
-        room: contract.roomId.roomName,
-        startDate: contract.startDate,
-        endDate: contract.endDate
-      };
-    }).filter(Boolean);
+        return {
+          _id: contract._id,
+          name: contract.tenantId.name,
+          email: contract.tenantId.email,
+          phone: contract.tenantId.phone,
+          facility: contract.roomId.hostelId.name,
+          room: contract.roomId.roomName,
+          startDate: contract.startDate,
+          endDate: contract.endDate,
+        };
+      })
+      .filter(Boolean);
 
-    console.log('Final tenants list:', tenants);
+    console.log("Final tenants list:", tenants);
 
     res.status(200).json({
       success: true,
-      data: tenants
+      data: tenants,
     });
-
   } catch (error) {
-    console.error('Error getting tenant list:', error);
+    console.error("Error getting tenant list:", error);
     res.status(500).json({
       success: false,
-      message: "Không thể lấy danh sách khách thuê: " + error.message
+      message: "Không thể lấy danh sách khách thuê: " + error.message,
     });
   }
 };
-
+const updateUnit = async (req, res) => {
+  const unit = req.body;
+  const { roomId } = req.params;
+  console.log(roomId);
+  if (!unit.elecIndex || !unit.aquaIndex || !unit.month || !unit.year) {
+    res
+      .status(400)
+      .json({ success: false, message: "Vui lòng nhập đầy đủ thông tin" });
+  }
+  try {
+    const room = await Room.findById(roomId);
+    if (!room) {
+      res.status(400).json({ success: false, message: "Không có phòng này" });
+    }
+    const oldUnit = await UnitRoom.findOne({
+      roomId: roomId,
+      month: unit.month,
+      year: unit.year,
+    });
+    console.log(oldUnit);
+    if (oldUnit) {
+      const data = await UnitRoom.findOneAndUpdate(
+        { _id: oldUnit.id },
+        {
+          elecIndex: unit.elecIndex,
+          aquaIndex: unit.aquaIndex,
+        }
+      );
+      return res.status(200).json({ success: true, data: data });
+    }
+    const newUnit = new UnitRoom({
+      elecIndex: unit.elecIndex,
+      aquaIndex: unit.aquaIndex,
+      month: unit.month,
+      year: unit.year,
+      roomId: roomId,
+    });
+    const data = await newUnit.save();
+    res.status(200).json({ success: true, data: data });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+const createBill = async (req, res) => {
+  const { roomId, tenantId, rentFee, serviceFee, dueDate } = req.body;
+  try {
+    // Tìm hai bản ghi UnitRoom gần nhất cho phòng
+    const unitRecords = await UnitRoom.find({ roomId: roomId })
+      .sort({ year: -1, month: -1 })
+      .limit(2);
+    if (unitRecords.length < 2) {
+      return res.status(400).json({
+        success: false,
+        message: "Không đủ dữ liệu điện nước để tính toán hóa đơn",
+      });
+    }
+    // Tách dữ liệu điện và nước từ hai bản ghi gần nhất
+    const [newRecord, oldRecord] = unitRecords;
+    const elecIndexDifference = newRecord.elecIndex - oldRecord.elecIndex;
+    const aquaIndexDifference = newRecord.aquaIndex - oldRecord.aquaIndex;
+    // Tính chi phí điện
+    const calculateElectricityFee = (kWh) => {
+      let fee = 0;
+      if (kWh <= 50) {
+        fee = kWh * 1678;
+      } else if (kWh <= 100) {
+        fee = 50 * 1678 + (kWh - 50) * 1734;
+      } else if (kWh <= 200) {
+        fee = 50 * 1678 + 50 * 1734 + (kWh - 100) * 2014;
+      } else if (kWh <= 300) {
+        fee = 50 * 1678 + 50 * 1734 + 100 * 2014 + (kWh - 200) * 2536;
+      } else {
+        fee =
+          50 * 1678 + 50 * 1734 + 100 * 2014 + 100 * 2536 + (kWh - 300) * 2834;
+      }
+      return fee;
+    };
+    // Tính chi phí nước
+    const calculateWaterFee = (m3) => {
+      let fee = 0;
+      if (m3 <= 10) {
+        fee = m3 * 5973;
+      } else if (m3 <= 20) {
+        fee = 10 * 5973 + (m3 - 10) * 7052;
+      } else if (m3 <= 30) {
+        fee = 10 * 5973 + 10 * 7052 + (m3 - 20) * 8669;
+      } else {
+        fee = 10 * 5973 + 10 * 7052 + 10 * 8669 + (m3 - 30) * 15929;
+      }
+      return fee;
+    };
+    // Tính toán chi phí điện và nước
+    const electricityFee = calculateElectricityFee(elecIndexDifference);
+    const waterFee = calculateWaterFee(aquaIndexDifference);
+    // Tính tổng chi phí
+    const totalAmount = rentFee + serviceFee + electricityFee + waterFee;
+    // Tạo hóa đơn mới
+    const newBill = new Bill({
+      roomId,
+      tenantId,
+      rentFee,
+      electricityFee,
+      waterFee,
+      serviceFee,
+      totalAmount,
+      dueDate,
+    });
+    // Lưu hóa đơn vào cơ sở dữ liệu
+    const savedBill = await newBill.save();
+    res.status(201).json({ success: true, data: savedBill });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 module.exports = {
   getHostelByLandLordId,
   createHostel,
@@ -415,5 +513,6 @@ module.exports = {
   getRoomById,
   createRoom,
   createContract,
-  getTenantList
+  getTenantList,
+  updateUnit,
 };

@@ -252,18 +252,55 @@ const getHostelById = async (req, res) => {
 };
 
 const getRoomById = async (req, res) => {
-  const { id } = req.params;
+  const { roomId } = req.params;
 
   try {
-    const room = await Room.findById(id);
+    const room = await Room.findById(roomId)
+      .populate('hostelId')
+      .populate('tenantId');
+      
     if (!room) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Room not found" });
+      return res.status(404).json({ 
+        success: false, 
+        message: "Không tìm thấy phòng" 
+      });
     }
-    res.status(200).json({ success: true, data: room });
+
+    // Format dữ liệu trả về
+    const roomData = {
+      _id: room._id,
+      roomName: room.roomName,
+      roomTitle: room.roomTitle,
+      mainImage: room.images[0], // Lấy ảnh đầu tiên làm ảnh chính
+      images: room.images,
+      area: room.area,
+      price: room.price,
+      deposit: room.deposit,
+      description: room.description,
+      status: room.status,
+      hostel: room.hostelId ? {
+        name: room.hostelId.name,
+        address: room.hostelId.address
+      } : null,
+      tenant: room.tenantId ? {
+        name: room.tenantId.name,
+        phone: room.tenantId.phone,
+        email: room.tenantId.email
+      } : null
+    };
+
+    console.log('Room data:', roomData); // Debug log
+
+    res.status(200).json({ 
+      success: true, 
+      data: roomData 
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error('Error in getRoomById:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Lỗi server: " + error.message 
+    });
   }
 };
 

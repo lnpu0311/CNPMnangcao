@@ -1,5 +1,7 @@
-import { Box, ChakraProvider } from "@chakra-ui/react";
+import { Box, ChakraProvider, useToast } from "@chakra-ui/react";
 import { Route, Routes, Navigate } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import socket from './services/socket';
 import theme from "./theme";
 import AuthForm from "./pages/AuthForm";
 import LandlordHome from "./landlord/Home";
@@ -23,7 +25,86 @@ import SearchResults from "./pages/SearchResults";
 import MessageManagement from "./landlord/MessageManagement";
 import TenantBookingManagement from "./tenant/TenantBookingManagement";
 import BookingManagement from "./landlord/BookingManagement";
+import { jwtDecode } from 'jwt-decode';
+
 function App() {
+  const toast = useToast();
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    // Xin quyền notification
+    if ("Notification" in window) {
+      Notification.requestPermission();
+    }
+
+    // Lấy thông tin user từ token
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setCurrentUser(decoded);
+        
+        // Kết nối socket
+        socket.auth = { token };
+        socket.connect();
+      } catch (error) {
+        console.error('Token decode error:', error);
+      }
+    }
+
+    return () => {
+      if (socket.connected) {
+        socket.disconnect();
+      }
+    };
+  }, []);
+
+  // Xử lý khi user thay đổi tab - chỉ mark read khi có currentUser
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && socket.connected && currentUser) {
+        // Không emit mark_messages_read ở đây nữa
+        console.log('Tab became visible');
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [currentUser]);
+
+  // Socket event listeners
+  useEffect(() => {
+    if (!socket.connected || !currentUser) return;
+
+    socket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+      toast({
+        title: "Lỗi kết nối",
+        description: "Không thể kết nối đến server chat",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    });
+
+    socket.on('receive_message', (message) => {
+      if (document.hidden && Notification.permission === "granted") {
+        new Notification("Tin nhắn mới", {
+          body: `${message.senderName}: ${message.content}`,
+          icon: "/path/to/your/icon.png"
+        });
+      }
+    });
+
+    return () => {
+      socket.off('connect_error');
+      socket.off('receive_message');
+    };
+  }, [currentUser, toast]);
+
   return (
     <ChakraProvider theme={theme}>
       <Box minH={"100vh"}>
@@ -86,6 +167,7 @@ function App() {
             <Route path="payments" element={<TenantPayments />} />
             <Route path="profile-page" element={<ProfilePage />} />
             <Route path="bookings" element={<TenantBookingManagement />} />
+            <Route path="room-detail" element={<RoomDetail />} />
           </Route>
 
           <Route path="/search-results" element={<SearchResults />} />

@@ -134,4 +134,29 @@ router.delete('/delete-conversation', authMiddleware(['tenant', 'landlord']), as
   }
 });
 
+// Get all messages
+router.get('/all', authMiddleware(['landlord', 'tenant']), async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const messages = await Message.find({
+      $or: [
+        { recipientId: userId },
+        { senderId: userId }
+      ]
+    })
+    .populate('senderId', 'name')
+    .populate('recipientId', 'name')
+    .sort({ timestamp: -1 });
+
+    res.json({ 
+      success: true, 
+      data: messages
+    });
+  } catch (error) {
+    console.error('Error getting all messages:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 module.exports = router; 

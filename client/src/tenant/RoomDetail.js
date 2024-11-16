@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation  } from "react-router-dom";
 import {
   Box,
   Container,
@@ -16,20 +16,25 @@ import {
   Button,
   useToast,
   Flex,
+  Center,
+  Sp,
+  Spinner
 } from "@chakra-ui/react";
 import { MdCheckCircle } from "react-icons/md";
 import Chat from "../components/Chat";
 import { jwtDecode } from "jwt-decode";
-import BookingModal from "./BookingModal"; // Tách BookingModal thành component riêng
+import axios from "axios";
+// import BookingModal from "./BookingModal"; // Tách BookingModal thành component riêng
 
 const RoomDetail = () => {
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const toast = useToast();
-  const [room, setRoom] = useState(null);
+
+  const [room, setRoom] = useState(location.state?.roomData || null);
   const [currentUser, setCurrentUser] = useState(null);
   const [showChat, setShowChat] = useState(false);
-  const [isOpenBooking, setIsOpenBooking] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -71,10 +76,10 @@ const RoomDetail = () => {
       }
     };
 
-    if (id) {
+    if (id && !location.state?.roomData) {
       fetchRoomDetail();
     }
-  }, [id]);
+  }, [id, location.state]);
 
   if (!room) {
     return <Center><Spinner size="xl" /></Center>;
@@ -172,7 +177,10 @@ const RoomDetail = () => {
                   size="lg"
                   onClick={() => {
                     if (currentUser) {
-                      setIsOpenBooking(true);
+                      // Chuyển hướng đến trang đặt lịch
+                      navigate(`/tenant/booking/${id}`, {
+                        state: { roomData: room }
+                      });
                     } else {
                       toast({
                         title: "Vui lòng đăng nhập",
@@ -202,14 +210,7 @@ const RoomDetail = () => {
         />
       )}
 
-      {isOpenBooking && (
-        <BookingModal
-          isOpen={isOpenBooking}
-          onClose={() => setIsOpenBooking(false)}
-          room={room}
-          currentUser={currentUser}
-        />
-      )}
+      
     </Container>
   );
 };

@@ -167,6 +167,7 @@ function App() {
             <Route path="payments" element={<TenantPayments />} />
             <Route path="profile-page" element={<ProfilePage />} />
             <Route path="bookings" element={<TenantBookingManagement />} />
+            <Route path="room-detail" element={<RoomDetail />} />
           </Route>
 
           <Route path="/search-results" element={<SearchResults />} />

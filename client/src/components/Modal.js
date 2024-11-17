@@ -20,6 +20,7 @@ import {
   VStack,
   Box,
   Avatar,
+  GridItem,
 } from "@chakra-ui/react";
 
 // Modal thêm phòng mới
@@ -113,9 +114,7 @@ export const NewRoomModal = ({
         <Button colorScheme="green" mr={3} onClick={handleCreateRoom}>
           Tạo phòng
         </Button>
-        <Button colorScheme="red" onClick={onClose}>
-          Hủy
-        </Button>
+        <Button onClick={onClose}>Hủy</Button>
       </ModalFooter>
     </ModalContent>
   </Modal>
@@ -188,7 +187,7 @@ export const BillModal = ({
             <FormLabel>Tiền điện</FormLabel>
             <Input
               type="number"
-              name="electricityBill"
+              name="elecBill"
               value={bill.elecBill}
               onChange={(e) => handleInputChange(e, setBill)}
               placeholder="Nhập tiền điện"
@@ -209,11 +208,25 @@ export const BillModal = ({
             <Input
               type="number"
               name="otherFees"
-              value={bill.serviceFee}
+              value={bill.otherFees}
               onChange={(e) => handleInputChange(e, setBill)}
               placeholder="Nhập phí khác (nếu có)"
             />
           </FormControl>
+
+          {bill.otherFees && (
+            <FormControl>
+              <FormLabel>Nội dung phí khác</FormLabel>
+              <Input
+                type="text"
+                name="otherFeesDescription"
+                value={bill.otherFeesDescription || ""}
+                onChange={(e) => handleInputChange(e, setBill)}
+                placeholder="Nhập nội dung của phí khác"
+              />
+            </FormControl>
+          )}
+
           <FormControl isRequired>
             <FormLabel>Tổng tiền</FormLabel>
             <Input
@@ -249,95 +262,90 @@ export const ContractModal = ({
   <Modal isCentered isOpen={isOpen} onClose={onClose}>
     <ModalOverlay />
     <ModalContent>
-      <ModalHeader textAlign={"center"}>Hợp đồng mới</ModalHeader>
+      <ModalHeader textAlign={"center"}>Tạo Hợp Đồng Thuê Phòng</ModalHeader>
       <ModalCloseButton />
       <ModalBody>
-        <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+        <VStack spacing={4}>
           <FormControl isRequired>
-            <FormLabel>Ngày tạo</FormLabel>
+            <FormLabel>Ngày bắt đầu</FormLabel>
             <Input
-              name="startDate"
               type="date"
+              name="startDate"
               value={contractDetails.startDate}
               onChange={(e) => handleInputChange(e, setContractDetails)}
             />
           </FormControl>
+
           <FormControl isRequired>
-            <FormLabel>Ngày hết hạn</FormLabel>
+            <FormLabel>Ngày kết thúc</FormLabel>
             <Input
-              name="endDate"
               type="date"
+              name="endDate"
               value={contractDetails.endDate}
               onChange={(e) => handleInputChange(e, setContractDetails)}
             />
           </FormControl>
+
           <FormControl isRequired>
-            <FormLabel>Tiền cọc</FormLabel>
+            <FormLabel>Tiền đặt cọc (VNĐ)</FormLabel>
             <Input
-              name="deposit"
               type="number"
-              value={contractDetails.deposit}
+              name="depositFee"
+              placeholder="Nhập số tiền cọc"
+              value={contractDetails.depositFee}
               onChange={(e) => handleInputChange(e, setContractDetails)}
-              placeholder="Nhập tiền cọc"
             />
           </FormControl>
+
           <FormControl isRequired>
-            <FormLabel>Tiền thuê phòng</FormLabel>
+            <FormLabel>Tiền thuê hàng tháng (VNĐ)</FormLabel>
             <Input
-              name="rent"
               type="number"
-              value={contractDetails.rent}
+              name="rentFee"
+              placeholder="Nhập số tiền thuê"
+              value={contractDetails.rentFee}
               onChange={(e) => handleInputChange(e, setContractDetails)}
-              placeholder="Nhập tiền thuê phòng"
             />
           </FormControl>
+
           <FormControl isRequired>
-            <FormLabel>Số tiền điện</FormLabel>
+            <FormLabel>Giá điện (đồng/kWh)</FormLabel>
             <Input
-              name="electricityBill"
               type="number"
-              value={contractDetails.elecBill}
+              name="electricityFee"
+              placeholder="Nhập số tiền điện"
+              value={contractDetails.electricityFee}
               onChange={(e) => handleInputChange(e, setContractDetails)}
-              placeholder="Nhập tiền điện"
             />
           </FormControl>
+
           <FormControl isRequired>
-            <FormLabel>Số tiền nước</FormLabel>
+            <FormLabel>Giá nước (đồng/m³)</FormLabel>
             <Input
-              name="waterBill"
               type="number"
-              value={contractDetails.waterBill}
+              name="waterFee"
+              placeholder="Nhập số tiền nước"
+              value={contractDetails.waterFee}
               onChange={(e) => handleInputChange(e, setContractDetails)}
-              placeholder="Nhập tiền nước"
             />
           </FormControl>
           <FormControl isRequired>
-            <FormLabel>Tên bên thuê</FormLabel>
+            <FormLabel>Email người thuê</FormLabel>
             <Input
-              name="tenantName"
-              value={contractDetails.tenantName}
+              name="tenantEmail"
+              value={contractDetails.tenantEmail}
               onChange={(e) => handleInputChange(e, setContractDetails)}
-              placeholder="Nhập tên bên thuê"
+              placeholder="Nhập email người thuê"
             />
           </FormControl>
-          <FormControl isRequired>
-            <FormLabel>Tên bên cho thuê </FormLabel>
-            <Input
-              name="landlordName"
-              value={contractDetails.landlordName}
-              onChange={(e) => handleInputChange(e, setContractDetails)}
-              placeholder="Nhập tên bên cho thuê"
-            />
-          </FormControl>
-        </Grid>
+        </VStack>
       </ModalBody>
+
       <ModalFooter>
         <Button colorScheme="green" mr={3} onClick={handleCreateContract}>
           Tạo hợp đồng
         </Button>
-        <Button onClick={onClose} variant="ghost">
-          Hủy
-        </Button>
+        <Button onClick={onClose}>Hủy</Button>
       </ModalFooter>
     </ModalContent>
   </Modal>
@@ -426,7 +434,7 @@ export const InfoModal = ({
     </ModalContent>
   </Modal>
 );
-// Modal xem thông tin phòng
+// Modal chỉnh sửa phòng
 export const EditModal = ({
   isOpen,
   onClose,
@@ -501,11 +509,11 @@ export const EditModal = ({
       </ModalBody>
 
       <ModalFooter>
-        <Button onClick={onClose} colorScheme="gray" mr={3}>
-          Đóng
-        </Button>{" "}
-        <Button colorScheme="blue" onClick={handleEditRoom}>
+        <Button colorScheme="blue" onClick={handleEditRoom} mr={3}>
           Lưu thay đổi
+        </Button>{" "}
+        <Button onClick={onClose} colorScheme="gray">
+          Đóng
         </Button>
       </ModalFooter>
     </ModalContent>

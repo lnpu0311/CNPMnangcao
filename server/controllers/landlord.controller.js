@@ -396,20 +396,22 @@ const updateUnit = async (req, res) => {
   const unit = req.body;
   const { roomId } = req.params;
   console.log(roomId);
-  if (!unit.elecIndex || !unit.aquaIndex || !unit.month || !unit.year) {
+  if (!unit.elecIndex || !unit.aquaIndex) {
     res
       .status(400)
       .json({ success: false, message: "Vui lòng nhập đầy đủ thông tin" });
   }
   try {
     const room = await Room.findById(roomId);
+    const currentDate = new Date();
+
     if (!room) {
       res.status(400).json({ success: false, message: "Không có phòng này" });
     }
     const oldUnit = await UnitRoom.findOne({
       roomId: roomId,
-      month: unit.month,
-      year: unit.year,
+      month: currentDate.getMonth() + 1,
+      year: currentDate.getFullYear(),
     });
     console.log(oldUnit);
     if (oldUnit) {
@@ -425,8 +427,8 @@ const updateUnit = async (req, res) => {
     const newUnit = new UnitRoom({
       elecIndex: unit.elecIndex,
       aquaIndex: unit.aquaIndex,
-      month: unit.month,
-      year: unit.year,
+      month: currentDate.getMonth() + 1,
+      year: currentDate.getFullYear(),
       roomId: roomId,
     });
     const data = await newUnit.save();

@@ -38,6 +38,7 @@ import {
   Td
 } from "@chakra-ui/react";
 import axios from "axios";
+import { useLocation } from 'react-router-dom';
 
 const RentalRequest = () => {
   const toast = useToast();
@@ -64,6 +65,22 @@ const [activeTab,setActiveTab] = useState('pending');
 
   // Thêm state để quản lý loading khi lấy thông tin phòng
   const [isLoadingRoom, setIsLoadingRoom] = useState(false);
+
+  // Thêm state cho bookings
+  const [bookings, setBookings] = useState([]);
+
+  // Thêm state để quản lý tab index
+  const [tabIndex, setTabIndex] = useState(0);
+  const location = useLocation(); // Import useLocation từ react-router-dom
+
+  // Đọc query parameter khi component mount
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab) {
+      setTabIndex(parseInt(tab));
+    }
+  }, [location.search]);
 
   // Wrap fetchRentalRequests trong useCallback
   const fetchRentalRequests = useCallback(async () => {
@@ -111,7 +128,44 @@ const [activeTab,setActiveTab] = useState('pending');
     fetchRentalRequests();
   }, [fetchRentalRequests]);
 
-  
+  // Thêm fetchBookings function
+  const fetchBookings = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API}/booking/landlord`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+
+      if (response.data.success) {
+        // Thêm log để kiểm tra cấu trúc dữ liệu booking
+        console.log('Bookings data:', response.data.data);
+        console.log('Sample booking room data:', response.data.data[0]?.roomId);
+        console.log('Sample booking hostel data:', response.data.data[0]?.roomId?.hostelId);
+        
+        setBookings(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể tải danh sách đặt lịch xem phòng",
+        status: "error",
+        duration: 3000,
+        isClosable: true
+      });
+    }
+  }, [toast]);
+
+  // Cập nhật useEffect để fetch cả bookings
+  useEffect(() => {
+    fetchRentalRequests();
+    fetchBookings();
+  }, [fetchRentalRequests, fetchBookings]);
+
   const openRoomInfoModal = async (request) => {
     try {
       setIsLoadingRoom(true);
@@ -340,6 +394,40 @@ const [activeTab,setActiveTab] = useState('pending');
     }
   };
 
+  // Thêm hàm xử lý booking
+  const handleBookingAction = async (bookingId, status) => {
+    try {
+      const response = await axios.put(
+        `${process.env.REACT_APP_API}/booking/${bookingId}/status`,
+        { status },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+
+      if (response.data.success) {
+        toast({
+          title: "Thành công",
+          description: `Đã ${status === 'accepted' ? 'chấp nhận' : 'từ chối'} lịch xem phòng`,
+          status: "success",
+          duration: 3000,
+          isClosable: true
+        });
+        fetchBookings();
+      }
+    } catch (error) {
+      toast({
+        title: "Lỗi",
+        description: error.response?.data?.message || "Không thể cập nhật trạng thái",
+        status: "error",
+        duration: 3000,
+        isClosable: true
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <Box textAlign="center" py={10}>
@@ -356,18 +444,109 @@ const [activeTab,setActiveTab] = useState('pending');
         size="lg"
         mb={{ base: 4, md: 12 }}
       >
-        Quản Lý Yêu Cầu Thuê Phòng
+        Quản Lý Đặt Lịch & Yêu Cầu Thuê Phòng
       </Heading>
 
-      <Tabs isFitted variant="enclosed" onChange={(index) => setActiveTab(index === 0 ? 'pending' : 'accepted')}>
+      <Tabs 
+        isFitted 
+        variant="enclosed" 
+        index={tabIndex}
+        onChange={(index) => {
+          setTabIndex(index);
+          // Cập nhật URL khi tab thay đổi
+          const newUrl = `${window.location.pathname}?tab=${index}`;
+          window.history.pushState({}, '', newUrl);
+        }}
+      >
         <TabList mb="1em">
+          <Tab>Lịch xem phòng</Tab>
           <Tab>Yêu cầu chờ duyệt</Tab>
           <Tab>Yêu cầu đã chấp nhận</Tab>
         </TabList>
 
         <TabPanels>
           <TabPanel>
-            {/* Hiển thị danh sách yêu cầu đang chờ */}
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th>Người đặt lịch</Th>
+                  <Th>Thông tin phòng</Th>
+                  <Th>Ngày xem</Th>
+                  <Th>Ngày dự phòng</Th>
+                  <Th>Trạng thái</Th>
+                  <Th>Thao tác</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {bookings.map((booking) => (
+                  <Tr key={booking._id}>
+                    <Td>
+                      <VStack align="start">
+                        <Text fontWeight="bold">{booking.tenantId?.name}</Text>
+                        <Text fontSize="sm">{booking.tenantId?.numPhone}</Text>
+                        <Text fontSize="sm">{booking.tenantId?.email}</Text>
+                      </VStack>
+                    </Td>
+                    <Td>
+                      <VStack align="start">
+                        <Button variant="link" onClick={() => openRoomInfoModal(booking)}>
+                          {booking.roomId?.roomName || "N/A"}
+                        </Button>
+                        <Text fontSize="sm" color="gray.600">
+                          Cơ sở: {booking.roomId?.hostelId?.name || "Chưa có thông tin"}
+                        </Text>
+                        <Text fontSize="sm" color="gray.600">
+                          Địa chỉ: {`${booking.roomId?.hostelId?.address || ""}, 
+                                    ${booking.roomId?.hostelId?.ward || ""}, 
+                                    ${booking.roomId?.hostelId?.district || ""}, 
+                                    ${booking.roomId?.hostelId?.city || ""}`}
+                        </Text>
+                      </VStack>
+                    </Td>
+                    <Td>{new Date(booking.proposedDate).toLocaleDateString('vi-VN')}</Td>
+                    <Td>
+                      {booking.alternativeDate 
+                        ? new Date(booking.alternativeDate).toLocaleDateString('vi-VN')
+                        : 'Không có'}
+                    </Td>
+                    <Td>
+                      <Tag
+                        colorScheme={
+                          booking.status === 'pending' ? 'yellow' :
+                          booking.status === 'accepted' ? 'green' : 'red'
+                        }
+                      >
+                        {booking.status === 'pending' ? 'Chờ duyệt' :
+                         booking.status === 'accepted' ? 'Đã chấp nhận' : 'Đã từ chối'}
+                      </Tag>
+                    </Td>
+                    <Td>
+                      {booking.status === 'pending' && (
+                        <ButtonGroup>
+                          <Button
+                            colorScheme="green"
+                            size="sm"
+                            onClick={() => handleBookingAction(booking._id, 'accepted')}
+                          >
+                            Chấp nhận
+                          </Button>
+                          <Button
+                            colorScheme="red"
+                            size="sm"
+                            onClick={() => handleBookingAction(booking._id, 'rejected')}
+                          >
+                            Từ chối
+                          </Button>
+                        </ButtonGroup>
+                      )}
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </TabPanel>
+
+          <TabPanel>
             <Table variant="simple">
               <Thead>
                 <Tr>
@@ -418,7 +597,6 @@ const [activeTab,setActiveTab] = useState('pending');
           </TabPanel>
 
           <TabPanel>
-            {/* Hiển thị danh sách yêu cầu đã chấp nhận */}
             <Table variant="simple">
               <Thead>
                 <Tr>

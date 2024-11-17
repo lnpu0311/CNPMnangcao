@@ -35,10 +35,10 @@ import {
   Th,
   Tbody,
   ButtonGroup,
-  Td
+  Td,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 
 const RentalRequest = () => {
   const toast = useToast();
@@ -49,6 +49,11 @@ const RentalRequest = () => {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [isOpenContract, setIsOpenContract] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [isOpenUpdate, setIsOpenUpdate] = useState(false); // State quản lý modal cập nhật số điện nước
+
+  // Hàm đóng/mở modal cập nhật số điện nước
+  const openUpdateModal = () => setIsOpenUpdate(true);
+  const closeUpdateModal = () => setIsOpenUpdate(false);
   const [contractDetails, setContractDetails] = useState({
     startDate: "",
     endDate: "",
@@ -56,12 +61,10 @@ const RentalRequest = () => {
     rentFee: "",
     electricityFee: "",
     waterFee: "",
-    serviceFee: "",
   });
-  const [accpetedRequest,setAccpetedRequest] = useState([]);
 
-  //State quản lý tab active 
-const [activeTab,setActiveTab] = useState('pending');
+  //State quản lý tab active
+  const [activeTab, setActiveTab] = useState("pending");
 
   // Thêm state để quản lý loading khi lấy thông tin phòng
   const [isLoadingRoom, setIsLoadingRoom] = useState(false);
@@ -71,12 +74,12 @@ const [activeTab,setActiveTab] = useState('pending');
 
   // Thêm state để quản lý tab index
   const [tabIndex, setTabIndex] = useState(0);
-  const location = useLocation(); // Import useLocation từ react-router-dom
+  const location = useLocation();
 
   // Đọc query parameter khi component mount
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const tab = params.get('tab');
+    const tab = params.get("tab");
     if (tab) {
       setTabIndex(parseInt(tab));
     }
@@ -90,39 +93,42 @@ const [activeTab,setActiveTab] = useState('pending');
         `${process.env.REACT_APP_API}/rental-request/landlord`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
 
       if (response.data.success) {
         // Thêm log để kiểm tra cấu trúc dữ liệu
-        console.log('Full rental requests data:', response.data.data);
-        
-        const pending = response.data.data.filter(req => req.status === 'pending');
-        const accepted = response.data.data.filter(req => req.status === 'accepted');
-        
+        console.log("Full rental requests data:", response.data.data);
+
+        const pending = response.data.data.filter(
+          (req) => req.status === "pending"
+        );
+        const accepted = response.data.data.filter(
+          (req) => req.status === "accepted"
+        );
+
         // Log chi tiết về cấu trúc địa chỉ
-        console.log('Sample room data:', pending[0]?.roomId);
-        console.log('Sample hostel data:', pending[0]?.roomId?.hostelId);
+        console.log("Sample room data:", pending[0]?.roomId);
+        console.log("Sample hostel data:", pending[0]?.roomId?.hostelId);
 
         setRentalRequests(pending);
         setAcceptedRequests(accepted);
       }
     } catch (error) {
-      console.error('Error fetching rental requests:', error);
+      console.error("Error fetching rental requests:", error);
       toast({
         title: "Lỗi",
         description: "Không thể tải danh sách yêu cầu thuê",
         status: "error",
         duration: 3000,
-        isClosable: true
+        isClosable: true,
       });
     } finally {
       setIsLoading(false);
     }
-  }, [toast]); // Thêm toast vào dependencies của useCallback
-
+  }, [toast]);
   // Thêm fetchRentalRequests vào dependency array của useEffect
   useEffect(() => {
     fetchRentalRequests();
@@ -135,27 +141,30 @@ const [activeTab,setActiveTab] = useState('pending');
         `${process.env.REACT_APP_API}/booking/landlord`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
 
       if (response.data.success) {
         // Thêm log để kiểm tra cấu trúc dữ liệu booking
-        console.log('Bookings data:', response.data.data);
-        console.log('Sample booking room data:', response.data.data[0]?.roomId);
-        console.log('Sample booking hostel data:', response.data.data[0]?.roomId?.hostelId);
-        
+        console.log("Bookings data:", response.data.data);
+        console.log("Sample booking room data:", response.data.data[0]?.roomId);
+        console.log(
+          "Sample booking hostel data:",
+          response.data.data[0]?.roomId?.hostelId
+        );
+
         setBookings(response.data.data);
       }
     } catch (error) {
-      console.error('Error fetching bookings:', error);
+      console.error("Error fetching bookings:", error);
       toast({
         title: "Lỗi",
         description: "Không thể tải danh sách đặt lịch xem phòng",
         status: "error",
         duration: 3000,
-        isClosable: true
+        isClosable: true,
       });
     }
   }, [toast]);
@@ -169,34 +178,35 @@ const [activeTab,setActiveTab] = useState('pending');
   const openRoomInfoModal = async (request) => {
     try {
       setIsLoadingRoom(true);
-      console.log('Request:', request); // Debug log
-      
+      console.log("Request:", request); // Debug log
+
       const roomId = request.roomId._id;
-      console.log('Room ID:', roomId); // Debug log
-      
+      console.log("Room ID:", roomId); // Debug log
+
       const response = await axios.get(
         `${process.env.REACT_APP_API}/landlord/hostel/${roomId}`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
 
-      console.log('API Response:', response.data); // Debug log
+      console.log("API Response:", response.data); // Debug log
 
       if (response.data.success) {
         setSelectedRoom(response.data.data);
         setIsOpenInfoRoom(true);
       }
     } catch (error) {
-      console.error('Error fetching room details:', error);
+      console.error("Error fetching room details:", error);
       toast({
         title: "Lỗi",
-        description: error.response?.data?.message || "Không thể tải thông tin phòng",
+        description:
+          error.response?.data?.message || "Không thể tải thông tin phòng",
         status: "error",
         duration: 3000,
-        isClosable: true
+        isClosable: true,
       });
     } finally {
       setIsLoadingRoom(false);
@@ -214,10 +224,11 @@ const [activeTab,setActiveTab] = useState('pending');
     } catch (error) {
       toast({
         title: "Lỗi",
-        description: error.response?.data?.message || "Không thể chấp nhận yêu cầu",
+        description:
+          error.response?.data?.message || "Không thể chấp nhận yêu cầu",
         status: "error",
         duration: 3000,
-        isClosable: true
+        isClosable: true,
       });
     }
   };
@@ -226,14 +237,14 @@ const [activeTab,setActiveTab] = useState('pending');
     try {
       const response = await axios.put(
         `${process.env.REACT_APP_API}/rental-request/${request._id}/status`,
-        { 
-          status: 'rejected',
-          rejectReason: "Không đáp ứng yêu cầu" // Có thể thêm modal để nhập lý do
+        {
+          status: "rejected",
+          rejectReason: "Không đáp ứng yêu cầu", // Có thể thêm modal để nhập lý do
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
 
@@ -243,31 +254,32 @@ const [activeTab,setActiveTab] = useState('pending');
           description: "Đã từ chối yêu cầu thuê phòng",
           status: "success",
           duration: 3000,
-          isClosable: true
+          isClosable: true,
         });
         // Refresh danh sách
         fetchRentalRequests();
       }
     } catch (error) {
       toast({
-        title: "Lỗi", 
-        description: error.response?.data?.message || "Không thể từ chối yêu cầu",
+        title: "Lỗi",
+        description:
+          error.response?.data?.message || "Không thể từ chối yêu cầu",
         status: "error",
         duration: 3000,
-        isClosable: true
+        isClosable: true,
       });
     }
   };
 
   const openContractModal = (request) => {
-    console.log('Request in openContractModal:', request);
+    console.log("Request in openContractModal:", request);
     if (!request.landlordId) {
       toast({
         title: "Lỗi",
         description: "Không tìm thấy thông tin chủ trọ",
         status: "error",
         duration: 3000,
-        isClosable: true
+        isClosable: true,
       });
       return;
     }
@@ -285,37 +297,40 @@ const [activeTab,setActiveTab] = useState('pending');
       rentFee: "",
       electricityFee: "",
       waterFee: "",
-      serviceFee: "",
     });
   };
 
   const handleContractDetailsChange = (e) => {
     const { name, value } = e.target;
-    setContractDetails(prev => ({
+    setContractDetails((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleCreateContract = async () => {
     try {
       // Kiểm tra các trường bắt buộc
-      if (!contractDetails.startDate || !contractDetails.endDate || 
-          !contractDetails.depositFee || !contractDetails.rentFee || 
-          !contractDetails.electricityFee || !contractDetails.waterFee || 
-          !contractDetails.serviceFee) {
+      if (
+        !contractDetails.startDate ||
+        !contractDetails.endDate ||
+        !contractDetails.depositFee ||
+        !contractDetails.rentFee ||
+        !contractDetails.electricityFee ||
+        !contractDetails.waterFee
+      ) {
         toast({
           title: "Lỗi",
           description: "Vui lòng điền đầy đủ thông tin hợp đồng",
           status: "error",
           duration: 3000,
-          isClosable: true
+          isClosable: true,
         });
         return;
       }
 
       // Log để kiểm tra selectedRequest
-      console.log('Selected Request:', selectedRequest);
+      console.log("Selected Request:", selectedRequest);
 
       // Kiểm tra landlordId
       if (!selectedRequest.landlordId) {
@@ -324,7 +339,7 @@ const [activeTab,setActiveTab] = useState('pending');
           description: "Không tìm thấy thông tin chủ trọ",
           status: "error",
           duration: 3000,
-          isClosable: true
+          isClosable: true,
         });
         return;
       }
@@ -342,54 +357,55 @@ const [activeTab,setActiveTab] = useState('pending');
           rentFee: Number(contractDetails.rentFee),
           electricityFee: Number(contractDetails.electricityFee),
           waterFee: Number(contractDetails.waterFee),
-          serviceFee: Number(contractDetails.serviceFee),
+
           utilities: {
             electricity: {
               unitPrice: Number(contractDetails.electricityFee),
               initialReading: 0,
               currentReading: 0,
-              lastUpdated: new Date()
+              lastUpdated: new Date(),
             },
             water: {
               unitPrice: Number(contractDetails.waterFee),
               initialReading: 0,
               currentReading: 0,
-              lastUpdated: new Date()
-            }
+              lastUpdated: new Date(),
+            },
           },
-          monthlyFees: []
+          monthlyFees: [],
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
 
       if (contractResponse.data.success) {
         // Log để kiểm tra response
-        console.log('Contract creation response:', contractResponse.data);
-        
+        console.log("Contract creation response:", contractResponse.data);
+
         // Refresh danh sách để lấy dữ liệu mới
         await fetchRentalRequests();
-        
+
         toast({
           title: "Thành công",
           description: "Đã tạo hợp đồng thành công",
           status: "success",
           duration: 3000,
-          isClosable: true
+          isClosable: true,
         });
         closeContractModal();
+        openUpdateModal();
       }
     } catch (error) {
-      console.error('Contract creation error:', error);
+      console.error("Contract creation error:", error);
       toast({
         title: "Lỗi",
         description: error.response?.data?.message || "Không thể tạo hợp đồng",
         status: "error",
         duration: 3000,
-        isClosable: true
+        isClosable: true,
       });
     }
   };
@@ -402,28 +418,31 @@ const [activeTab,setActiveTab] = useState('pending');
         { status },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
       );
 
       if (response.data.success) {
         toast({
           title: "Thành công",
-          description: `Đã ${status === 'accepted' ? 'chấp nhận' : 'từ chối'} lịch xem phòng`,
+          description: `Đã ${
+            status === "accepted" ? "chấp nhận" : "từ chối"
+          } lịch xem phòng`,
           status: "success",
           duration: 3000,
-          isClosable: true
+          isClosable: true,
         });
         fetchBookings();
       }
     } catch (error) {
       toast({
         title: "Lỗi",
-        description: error.response?.data?.message || "Không thể cập nhật trạng thái",
+        description:
+          error.response?.data?.message || "Không thể cập nhật trạng thái",
         status: "error",
         duration: 3000,
-        isClosable: true
+        isClosable: true,
       });
     }
   };
@@ -447,15 +466,15 @@ const [activeTab,setActiveTab] = useState('pending');
         Quản Lý Đặt Lịch & Yêu Cầu Thuê Phòng
       </Heading>
 
-      <Tabs 
-        isFitted 
-        variant="enclosed" 
+      <Tabs
+        isFitted
+        variant="enclosed"
         index={tabIndex}
         onChange={(index) => {
           setTabIndex(index);
           // Cập nhật URL khi tab thay đổi
           const newUrl = `${window.location.pathname}?tab=${index}`;
-          window.history.pushState({}, '', newUrl);
+          window.history.pushState({}, "", newUrl);
         }}
       >
         <TabList mb="1em">
@@ -489,51 +508,75 @@ const [activeTab,setActiveTab] = useState('pending');
                     </Td>
                     <Td>
                       <VStack align="start">
-                        <Button variant="link" onClick={() => openRoomInfoModal(booking)}>
+                        <Button
+                          variant="link"
+                          onClick={() => openRoomInfoModal(booking)}
+                        >
                           {booking.roomId?.roomName || "N/A"}
                         </Button>
                         <Text fontSize="sm" color="gray.600">
-                          Cơ sở: {booking.roomId?.hostelId?.name || "Chưa có thông tin"}
+                          Cơ sở:{" "}
+                          {booking.roomId?.hostelId?.name ||
+                            "Chưa có thông tin"}
                         </Text>
                         <Text fontSize="sm" color="gray.600">
-                          Địa chỉ: {`${booking.roomId?.hostelId?.address || ""}, 
+                          Địa chỉ:{" "}
+                          {`${booking.roomId?.hostelId?.address || ""}, 
                                     ${booking.roomId?.hostelId?.ward || ""}, 
-                                    ${booking.roomId?.hostelId?.district || ""}, 
+                                    ${
+                                      booking.roomId?.hostelId?.district || ""
+                                    }, 
                                     ${booking.roomId?.hostelId?.city || ""}`}
                         </Text>
                       </VStack>
                     </Td>
-                    <Td>{new Date(booking.proposedDate).toLocaleDateString('vi-VN')}</Td>
                     <Td>
-                      {booking.alternativeDate 
-                        ? new Date(booking.alternativeDate).toLocaleDateString('vi-VN')
-                        : 'Không có'}
+                      {new Date(booking.proposedDate).toLocaleDateString(
+                        "vi-VN"
+                      )}
+                    </Td>
+                    <Td>
+                      {booking.alternativeDate
+                        ? new Date(booking.alternativeDate).toLocaleDateString(
+                            "vi-VN"
+                          )
+                        : "Không có"}
                     </Td>
                     <Td>
                       <Tag
                         colorScheme={
-                          booking.status === 'pending' ? 'yellow' :
-                          booking.status === 'accepted' ? 'green' : 'red'
+                          booking.status === "pending"
+                            ? "yellow"
+                            : booking.status === "accepted"
+                            ? "green"
+                            : "red"
                         }
                       >
-                        {booking.status === 'pending' ? 'Chờ duyệt' :
-                         booking.status === 'accepted' ? 'Đã chấp nhận' : 'Đã từ chối'}
+                        {booking.status === "pending"
+                          ? "Chờ duyệt"
+                          : booking.status === "accepted"
+                          ? "Đã chấp nhận"
+                          : "Đã từ chối"}
                       </Tag>
                     </Td>
                     <Td>
-                      {booking.status === 'pending' && (
+                      {booking.status === "pending" && (
                         <ButtonGroup>
                           <Button
                             colorScheme="green"
                             size="sm"
-                            onClick={() => handleBookingAction(booking._id, 'accepted')}
+                            onClick={() =>
+                              handleBookingAction(booking._id, "accepted")
+                            }
                           >
                             Chấp nhận
                           </Button>
                           <Button
                             colorScheme="red"
                             size="sm"
-                            onClick={() => handleBookingAction(booking._id, 'rejected')}
+                            onClick={() =>
+                              handleBookingAction(booking._id, "rejected")
+                            }
                           >
                             Từ chối
                           </Button>
@@ -568,24 +611,38 @@ const [activeTab,setActiveTab] = useState('pending');
                     </Td>
                     <Td>
                       <VStack align="start">
-                        <Button variant="link" onClick={() => openRoomInfoModal(request)}>
+                        <Button
+                          variant="link"
+                          onClick={() => openRoomInfoModal(request)}
+                        >
                           {request.roomId.roomName}
                         </Button>
                         <Text fontSize="sm" color="gray.600">
-                          Cơ sở: {request.roomId.hostelId?.name || "Chưa có thông tin"}
+                          Cơ sở:{" "}
+                          {request.roomId.hostelId?.name || "Chưa có thông tin"}
                         </Text>
                         <Text fontSize="sm" color="gray.600">
-                          Địa chỉ: {request.roomId.hostelId?.address || "Chưa có thông tin"}
+                          Địa chỉ:{" "}
+                          {request.roomId.hostelId?.address ||
+                            "Chưa có thông tin"}
                         </Text>
                       </VStack>
                     </Td>
-                    <Td>{new Date(request.createdAt).toLocaleDateString('vi-VN')}</Td>
+                    <Td>
+                      {new Date(request.createdAt).toLocaleDateString("vi-VN")}
+                    </Td>
                     <Td>
                       <ButtonGroup>
-                        <Button colorScheme="green" onClick={() => handleAccept(request)}>
+                        <Button
+                          colorScheme="green"
+                          onClick={() => handleAccept(request)}
+                        >
                           Chấp nhận
                         </Button>
-                        <Button colorScheme="red" onClick={() => handleReject(request)}>
+                        <Button
+                          colorScheme="red"
+                          onClick={() => handleReject(request)}
+                        >
                           Từ chối
                         </Button>
                       </ButtonGroup>
@@ -621,17 +678,25 @@ const [activeTab,setActiveTab] = useState('pending');
                       <VStack align="start">
                         <Text fontWeight="bold">{request.roomId.roomName}</Text>
                         <Text fontSize="sm" color="gray.600">
-                          Cơ sở: {request.roomId.hostelId?.name || "Chưa có thông tin"}
+                          Cơ sở:{" "}
+                          {request.roomId.hostelId?.name || "Chưa có thông tin"}
                         </Text>
                         <Text fontSize="sm" color="gray.600">
-                          Địa chỉ: {request.roomId.hostelId?.address || "Chưa có thông tin"}
+                          Địa chỉ:{" "}
+                          {request.roomId.hostelId?.address ||
+                            "Chưa có thông tin"}
                         </Text>
                       </VStack>
                     </Td>
-                    <Td>{new Date(request.updatedAt).toLocaleDateString('vi-VN')}</Td>
+                    <Td>
+                      {new Date(request.updatedAt).toLocaleDateString("vi-VN")}
+                    </Td>
                     <Td>
                       {request._id ? (
-                        <Link color="blue.500" href={`/contracts/${request._id}`}>
+                        <Link
+                          color="blue.500"
+                          href={`/contracts/${request._id}`}
+                        >
                           {request._id.substring(0, 8)}...
                         </Link>
                       ) : (
@@ -639,8 +704,14 @@ const [activeTab,setActiveTab] = useState('pending');
                       )}
                     </Td>
                     <Td>
-                      <Tag colorScheme={request.status === 'accepted' ? 'green' : 'gray'}>
-                        {request.status === 'accepted' ? 'Đã chấp nhận' : 'Chưa xác định'}
+                      <Tag
+                        colorScheme={
+                          request.status === "accepted" ? "green" : "gray"
+                        }
+                      >
+                        {request.status === "accepted"
+                          ? "Đã chấp nhận"
+                          : "Chưa xác định"}
                       </Tag>
                     </Td>
                   </Tr>
@@ -685,17 +756,33 @@ const [activeTab,setActiveTab] = useState('pending');
 
                 <VStack align="start" spacing={2} flex="1">
                   <Text fontWeight="bold">Cơ sở:</Text>
-                  <Text>{selectedRoom?.hostelId?.name || "Chưa có thông tin"}</Text>
+                  <Text>
+                    {selectedRoom?.hostelId?.name || "Chưa có thông tin"}
+                  </Text>
                   <Text fontWeight="bold">Địa chỉ:</Text>
-                  <Text>{selectedRoom?.hostelId?.address || "Chưa có thông tin"}</Text>
+                  <Text>
+                    {selectedRoom?.hostelId?.address || "Chưa có thông tin"}
+                  </Text>
                   <Text fontWeight="bold">Giá điện:</Text>
-                  <Text>{selectedRoom?.electricityUnitPrice?.toLocaleString('vi-VN')} VND/số</Text>
+                  <Text>
+                    {selectedRoom?.electricityUnitPrice?.toLocaleString(
+                      "vi-VN"
+                    )}{" "}
+                    VND/số
+                  </Text>
                   <Text fontWeight="bold">Giá nước:</Text>
-                  <Text>{selectedRoom?.waterUnitPrice?.toLocaleString('vi-VN')} VND/khối</Text>
+                  <Text>
+                    {selectedRoom?.waterUnitPrice?.toLocaleString("vi-VN")}{" "}
+                    VND/khối
+                  </Text>
                   <Text fontWeight="bold">Giá phòng:</Text>
-                  <Text>{selectedRoom?.price?.toLocaleString('vi-VN')} VND</Text>
+                  <Text>
+                    {selectedRoom?.price?.toLocaleString("vi-VN")} VND
+                  </Text>
                   <Text fontWeight="bold">Tiền cọc:</Text>
-                  <Text>{selectedRoom?.deposit?.toLocaleString('vi-VN')} VND</Text>
+                  <Text>
+                    {selectedRoom?.deposit?.toLocaleString("vi-VN")} VND
+                  </Text>
                   <Text fontWeight="bold">Diện tích:</Text>
                   <Text>{selectedRoom?.area || "Chưa có thông tin"} m²</Text>
                   <Text fontWeight="bold">Mô tả:</Text>
@@ -717,7 +804,9 @@ const [activeTab,setActiveTab] = useState('pending');
       <Modal isOpen={isOpenContract} onClose={closeContractModal} size="xl">
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Tạo Hợp Đồng Thuê Phòng</ModalHeader>
+          <ModalHeader textAlign={"center"}>
+            Tạo Hợp Đồng Thuê Phòng
+          </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <VStack spacing={4}>
@@ -780,16 +869,6 @@ const [activeTab,setActiveTab] = useState('pending');
                   onChange={handleContractDetailsChange}
                 />
               </FormControl>
-
-              <FormControl isRequired>
-                <FormLabel>Phí dịch vụ (VNĐ)</FormLabel>
-                <Input
-                  type="number"
-                  name="serviceFee"
-                  value={contractDetails.serviceFee}
-                  onChange={handleContractDetailsChange}
-                />
-              </FormControl>
             </VStack>
           </ModalBody>
 
@@ -798,6 +877,31 @@ const [activeTab,setActiveTab] = useState('pending');
               Tạo hợp đồng
             </Button>
             <Button onClick={closeContractModal}>Hủy</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      <Modal isOpen={isOpenUpdate} onClose={closeUpdateModal} size="md">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Cập Nhật Số Điện Nước</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={4}>
+              <FormControl>
+                <FormLabel>Chỉ số điện</FormLabel>
+                <Input placeholder="Nhập chỉ số điện" type="number" />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Chỉ số nước</FormLabel>
+                <Input placeholder="Nhập chỉ số nước" type="number" />
+              </FormControl>
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={closeUpdateModal}>
+              Lưu
+            </Button>
+            <Button onClick={closeUpdateModal}>Hủy</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

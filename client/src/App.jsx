@@ -24,7 +24,6 @@ import AdminDashboard from "./admin/AdminDashboard";
 import SearchResults from "./pages/SearchResults";
 import MessageManagement from "./landlord/MessageManagement";
 import TenantBookingManagement from "./tenant/TenantBookingManagement";
-import BookingManagement from "./landlord/BookingManagement";
 import RoomDetail from "./tenant/RoomDetail";
 import { jwtDecode } from "jwt-decode";
 
@@ -150,7 +149,6 @@ function App() {
             <Route path="room-list/:facilityId" element={<RoomList />} />
             <Route path="profile-page" element={<ProfilePage />} />
             <Route path="messages" element={<MessageManagement />} />
-            <Route path="booking-management" element={<BookingManagement />} />
           </Route>
 
           {/* Tenant routes */}

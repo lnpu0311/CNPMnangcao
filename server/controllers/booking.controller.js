@@ -106,8 +106,15 @@ exports.getLandlordBooking = async (req, res) => {
   try {
     const landlordId = req.user.id;
     const bookings = await Booking.find({ landlordId })
-      .populate('roomId')
-      .populate('tenantId', 'name email phone')
+      .populate({
+        path: 'roomId',
+        select: 'roomName roomTitle hostelId area description price',
+        populate: {
+          path: 'hostelId',
+          select: 'name address city district ward'
+        }
+      })
+      .populate('tenantId', 'name email numPhone')
       .sort({ createdAt: -1 });
 
     res.status(200).json({

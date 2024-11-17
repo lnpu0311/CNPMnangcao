@@ -29,7 +29,9 @@ function HomeDashboard() {
     const user = jwtDecode(token);
     setUserData({ name: user.name });
   }, []);
-
+  const navigateToRentalRequests = (tabIndex) => {
+    navigate(`/landlord/rental-request?tab=${tabIndex}`);
+  };
   const hostel = [
     "Facility 1 - Address",
     "Facility 2 - Address",
@@ -62,20 +64,20 @@ function HomeDashboard() {
             Quản lý cơ sở
           </Button>
           <Button
-            leftIcon={<CheckCircleIcon />}
-            colorScheme="teal"
-            variant="outline"
-            onClick={() => navigate("/landlord/rental-request")}
-          >
-            Danh sách yêu cầu
-          </Button>
-          <Button
             leftIcon={<CalendarIcon />}
             colorScheme="purple"
             variant="outline"
-            onClick={() => navigate("/landlord/booking-management")}
+            onClick={() => navigateToRentalRequests(0)}
           >
             Quản lý đặt lịch
+          </Button>
+          <Button
+            leftIcon={<CheckCircleIcon />}
+            colorScheme="teal"
+            variant="outline"
+            onClick={() => navigateToRentalRequests(1)}
+          >
+            Danh sách yêu cầu
           </Button>
         </Flex>
       </VStack>
@@ -98,7 +100,11 @@ function HomeDashboard() {
         <Text fontSize="lg" fontWeight="bold" mb={3}>
           Danh sách các yêu cầu thuê phòng
         </Text>
-        <VStack align="start" spacing={2}>
+        <VStack align="start" spacing={2} 
+          onClick={() => navigateToRentalRequests(1)}
+          cursor="pointer"
+          _hover={{ bg: "gray.50" }}
+        >
           {bookingRequests.map((request, index) => (
             <Flex key={index} align="center" gap={2}>
               <CheckCircleIcon color="green.500" />

@@ -141,8 +141,8 @@ export const UpdateModal = ({
           <Input
             type="number"
             placeholder="Nhập số điện"
-            name="electricityIndex"
-            value={update.electricityIndex}
+            name="elecIndex"
+            value={update.elecIndex}
             onChange={(e) => handleInputChange(e, setUpdate)}
           />
         </FormControl>

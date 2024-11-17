@@ -468,10 +468,10 @@ const RoomList = () => {
       });
       return;
     }
-
+    console.log(selectedRoom._id);
     try {
-      const response = await axios.put(
-        `${process.env.REACT_APP_API}/landlord/room/${selectedRoom.id}/update`,
+      const response = await axios.post(
+        `${process.env.REACT_APP_API}/landlord/hostel/${selectedRoom._id}/updateUnit`,
         {
           elecIndex: update.elecIndex,
           aquaIndex: update.aquaIndex,
@@ -706,6 +706,7 @@ const RoomList = () => {
                         size="sm"
                         colorScheme="green"
                         onClick={(e) => {
+                          setSelectedRoom(room);
                           e.stopPropagation();
                           toggleModal("update", true);
                         }}

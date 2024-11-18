@@ -192,9 +192,9 @@ const RoomList = () => {
     data.append("roomTitle", newRoom.roomTitle);
     data.append("roomName", newRoom.roomName);
     data.append("area", newRoom.area);
-    data.append("price", newRoom.price);
+    data.append("price", parseNumber(newRoom.price));
     data.append("description", newRoom.description);
-    data.append("deposit", newRoom.deposit);
+    data.append("deposit", parseNumber(newRoom.deposit));
     newRoom.images.forEach((image) => {
       data.append("images", image);
     });
@@ -276,9 +276,9 @@ const RoomList = () => {
     data.append("roomTitle", newRoom.roomTitle);
     data.append("roomName", newRoom.roomName);
     data.append("area", newRoom.area);
-    data.append("price", newRoom.price);
+    data.append("price", parseNumber(newRoom.price));
     data.append("description", newRoom.description);
-    data.append("deposit", newRoom.deposit);
+    data.append("deposit", parseNumber(newRoom.deposit));
     newRoom.images.forEach((image) => {
       data.append("images", image);
     });
@@ -457,10 +457,23 @@ const RoomList = () => {
 
   const handleInputChange = (event, setStateFunction) => {
     const { name, value } = event.target;
+
     setStateFunction((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: numericFields.includes(name) ? formatNumber(value) : value,
     }));
+  };
+  // Định dạng số với dấu chấm
+  const formatNumber = (val) => {
+    // Kiểm tra nếu val không tồn tại hoặc không phải là một chuỗi hoặc số
+    if (val === undefined || val === null || isNaN(Number(val))) return "";
+    const numericValue = val.toString().replace(/[^0-9]/g, ""); // Chuyển sang chuỗi và loại bỏ ký tự không phải số
+    return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Thêm dấu chấm
+  };
+  const numericFields = ["deposit", "price"];
+  //  loại bỏ dấu chấm và chuyển chuỗi về số
+  const parseNumber = (formattedValue) => {
+    return Number(formattedValue.replace(/\./g, ""));
   };
 
   const handleUpdate = async () => {
@@ -839,6 +852,8 @@ const RoomList = () => {
         onClose={() => toggleModal("infoRoom", false)}
         selectedImage={selectedImage}
         selectedRoom={selectedRoom}
+        setSelectedImage={setSelectedImage}
+        formatNumber={formatNumber}
       />
       <EditModal
         isOpen={modalState.editRoom}

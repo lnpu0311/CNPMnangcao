@@ -249,12 +249,27 @@ const getHostelByLandLordId = async (req, res) => {
 const getHostelById = async (req, res) => {
   const { hostelId } = req.params;
   try {
-    const hostel = await Hostel.findById(hostelId).populate("rooms");
+    // Fetch the hostel and populate rooms
+    const hostel = await Hostel.findById(hostelId).populate("rooms").lean();
     if (!hostel) {
       return res
         .status(400)
         .json({ success: false, message: "Hostel not found" });
     }
+
+    // Fetch latest UnitRoom data for each room
+    const roomsWithUnitData = await Promise.all(
+      hostel.rooms.map(async (room) => {
+        const latestUnitRoom = await UnitRoom.findOne({ roomId: room._id })
+          .sort({ year: -1, month: -1 }) // Sort to get the latest entry
+          .lean();
+
+        return { ...room, latestUnitRoom }; // Combine room data with the latest UnitRoom data
+      })
+    );
+
+    // Update hostel data with rooms that include UnitRoom info
+    hostel.rooms = roomsWithUnitData;
 
     res.status(200).json({ success: true, data: hostel });
   } catch (error) {

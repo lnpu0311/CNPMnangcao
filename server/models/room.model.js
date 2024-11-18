@@ -30,7 +30,25 @@ const roomSchema = new mongoose.Schema({
     default: null,
   },
   amenities: [{ type: String }],
-  lastUpdated: { type: Date, default: Date.now }
+  lastUpdated: { type: Date, default: Date.now },
+  electricityUnitPrice: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+  waterUnitPrice: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+  initialElectricityReading: {
+    type: Number,
+    default: 0
+  },
+  initialWaterReading: {
+    type: Number,
+    default: 0
+  }
 });
 
 roomSchema.pre('save', function(next) {

@@ -5,12 +5,14 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const PORT = process.env.PORT || 5000;
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
 
 const Message = require("./models/message.model");
 const bookingRoutes = require("./routes/booking.route");
-const rentalRequestRoutes = require('./routes/rentalRequest.route');
+const rentalRequestRoutes = require("./routes/rentalRequest.route");
 const morgan = require("morgan");
 const cors = require("cors");
+const setupSocket = require("./socket");
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -36,66 +38,177 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("combined"));
 
-// Khởi tạo Socket.IO
+// Khởi tạo Socket.IO với CORS config
 const io = new Server(server, {
   cors: {
     origin: ["http://localhost:3000", "https://hostel-community.vercel.app"],
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT"],
     credentials: true,
   },
+  path: "/socket.io",
 });
 
-app.get("/", (req, res) => {
-  res.send("<h1> Deploy successfully </h1>");
+// Socket Authentication Middleware
+io.use(async (socket, next) => {
+  try {
+    const token = socket.handshake.auth.token;
+    if (!token) {
+      return next(new Error("Authentication error"));
+    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.userId = decoded.id;
+    next();
+  } catch (err) {
+    next(new Error("Authentication error"));
+  }
 });
 
-// Socket connection handling
+// Quản lý kết nối socket của users
 const userSockets = new Map();
 
 io.on("connection", (socket) => {
-  socket.on("login", (userId) => {
-    userSockets.set(userId, socket.id);
-    console.log("User logged in:", userId);
-  });
+  console.log("User connected:", socket.userId);
+  userSockets.set(socket.userId, socket.id);
 
+  // Xử lý gửi tin nhắn
   socket.on("send_message", async (data) => {
     try {
-      const { senderId, recipientId, content } = data;
-
-      if (!senderId || !recipientId || !content) {
-        throw new Error("Missing required fields");
+      // Validate input data
+      if (!data || !data.recipientId || !data.content) {
+        throw new Error("Missing required message data");
       }
 
+      const { recipientId, content } = data;
+
       const message = new Message({
-        senderId: senderId.toString(),
-        recipientId: recipientId.toString(),
+        senderId: socket.userId,
+        recipientId,
         content,
         timestamp: new Date(),
         read: false,
       });
-      await message.save();
 
+      const savedMessage = await message.save();
+      console.log("Message saved:", savedMessage);
+
+      // Gửi tin nhắn đến người nhận nếu online
       const recipientSocketId = userSockets.get(recipientId);
       if (recipientSocketId) {
-        io.to(recipientSocketId).emit("receive_message", message);
+        io.to(recipientSocketId).emit("receive_message", {
+          ...savedMessage.toObject(),
+          senderName: socket.userId, // Thêm tên người gửi nếu cần
+        });
       }
 
-      socket.emit("message_sent", { success: true, data: message });
+      // Gửi xác nhận về người gửi
+      socket.emit("message_sent", {
+        success: true,
+        data: savedMessage,
+      });
     } catch (error) {
       console.error("Error sending message:", error);
-      socket.emit("message_sent", { success: false, error: error.message });
+      socket.emit("message_sent", {
+        success: false,
+        error: error.message,
+      });
+    }
+  });
+
+  // Xử lý đánh dấu tin nhắn đã đọc
+  socket.on("mark_messages_read", async (data) => {
+    try {
+      console.log("Received mark_messages_read data:", data);
+
+      // Validate input data
+      if (!data || !data.senderId || !data.recipientId) {
+        console.log("Invalid mark_messages_read data:", data);
+        return;
+      }
+
+      const { senderId, recipientId } = data;
+
+      console.log("Marking messages as read:", {
+        recipientId: recipientId,
+        senderId: senderId,
+      });
+
+      // Sửa lại query để match đúng tin nhắn cần đánh dấu
+      const result = await Message.updateMany(
+        {
+          senderId: senderId, // Từ người gửi
+          recipientId: recipientId, // Đến người nhận
+          read: false, // Chỉ update những tin chưa đọc
+        },
+        {
+          $set: { read: true },
+        }
+      );
+
+      console.log("Messages marked as read result:", result);
+
+      if (result.modifiedCount > 0) {
+        // Thông báo cho người gửi biết tin nhắn đã được đọc
+        const senderSocketId = userSockets.get(senderId);
+        if (senderSocketId) {
+          io.to(senderSocketId).emit("messages_read_by_recipient", {
+            readerId: recipientId,
+            timestamp: new Date(),
+          });
+        }
+
+        // Emit event để cập nhật UI
+        socket.emit("messages_marked_read", {
+          senderId,
+          recipientId,
+          count: result.modifiedCount,
+        });
+      }
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+      socket.emit("mark_messages_error", {
+        error: error.message,
+      });
+    }
+  });
+
+  // Xử lý typing status
+  socket.on("typing_start", ({ recipientId }) => {
+    if (!recipientId) return;
+
+    const recipientSocketId = userSockets.get(recipientId);
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit("typing_status", {
+        userId: socket.userId,
+        isTyping: true,
+      });
+    }
+  });
+
+  socket.on("typing_end", ({ recipientId }) => {
+    if (!recipientId) return;
+
+    const recipientSocketId = userSockets.get(recipientId);
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit("typing_status", {
+        userId: socket.userId,
+        isTyping: false,
+      });
     }
   });
 
   socket.on("disconnect", () => {
-    for (const [userId, socketId] of userSockets.entries()) {
-      if (socketId === socket.id) {
-        userSockets.delete(userId);
-        break;
-      }
-    }
+    console.log("User disconnected:", socket.userId);
+    userSockets.delete(socket.userId);
+
+    // Thông báo cho tất cả users về trạng thái offline
+    io.emit("user_status", {
+      userId: socket.userId,
+      status: "offline",
+      timestamp: new Date(),
+    });
   });
 });
+
 // Kết nối với database
 const connectDB = require("./configs/db.js");
 connectDB();
@@ -107,7 +220,6 @@ const userRoute = require("./routes/user.route.js");
 const authRoutes = require("./routes/auth.route");
 const landlordRoute = require("./routes/landlord.route");
 const messageRoute = require("./routes/message.route");
-
 
 // Api
 app.use("/api/room", roomRoute);

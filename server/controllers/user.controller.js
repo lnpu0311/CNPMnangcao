@@ -5,6 +5,7 @@ const sendverificationCode = require("../middlewares/sendEmail");
 const { use } = require("../configs/email.config");
 const Hostel = require("../models/hostel.model");
 const Room = require("../models/room.model");
+const Contracts = require("../models/contracts.model");
 //Lấy toàn bộ User
 const getUser = async (req, res) => {
   try {
@@ -303,6 +304,78 @@ const searchAccommodation = async (req, res) => {
     });
   }
 };
+
+
+const getTenantContracts = async (req, res) => {
+  try {
+    const tenantId = req.user.id;
+    console.log('Fetching contracts for tenant:', tenantId);
+
+    const contracts = await Contracts.find({ tenantId })
+      .populate({
+        path: 'roomId',
+        select: 'roomName roomTitle hostelId',
+        populate: {
+          path: 'hostelId',
+          select: 'name address ward district city'
+        }
+      })
+      .populate({
+        path: 'landlordId',
+        model: 'User',
+        select: 'name email numPhone'
+      })
+      .sort({ createdAt: -1 });
+
+    console.log('Found contracts:', contracts);
+
+    const formattedContracts = contracts.map(contract => {
+      const currentDate = new Date();
+      const endDate = new Date(contract.endDate);
+      const startDate = new Date(contract.startDate);
+      
+      let status;
+      if (currentDate > endDate) {
+        status = 'expired';
+      } else if (currentDate >= startDate && currentDate <= endDate) {
+        status = 'active';
+      } else {
+        status = 'pending';
+      }
+
+      const hostelInfo = contract.roomId?.hostelId || {};
+      
+      return {
+        _id: contract._id,
+        roomName: contract.roomId?.roomName || 'N/A',
+        address: `${hostelInfo.address || ''}, ${hostelInfo.ward || ''}, ${hostelInfo.district || ''}, ${hostelInfo.city || ''}`.trim(),
+        landlordName: contract.landlordId?.name || 'N/A',
+        landlordPhone: contract.landlordId?.numPhone || 'N/A',
+        rentFee: contract.rentFee,
+        depositFee: contract.depositFee,
+        electricityFee: contract.electricityFee,
+        waterFee: contract.waterFee,
+        serviceFee: contract.serviceFee,
+        startDate: contract.startDate,
+        endDate: contract.endDate,
+        status
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      data: formattedContracts
+    });
+
+  } catch (error) {
+    console.error('Get tenant contracts error:', error);
+    res.status(500).json({
+      success: false,
+      message: "Không thể lấy danh sách hợp đồng: " + error.message
+    });
+  }
+};
+
 module.exports = {
   getUser,
   getUserByRole,
@@ -313,4 +386,5 @@ module.exports = {
   searchAccommodation,
   getAllRooms,
   getUserById,
+  getTenantContracts,
 };

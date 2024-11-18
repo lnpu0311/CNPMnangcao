@@ -140,22 +140,23 @@ function TenantHome() {
 
   // Cập nhật menu items cho Tenant
   const menuItems = [
-    { name: "Trang chủ", path: "/tenant", icon: <IoHomeSharp /> },
+    // { name: "Trang chủ", path: "/tenant", icon: <IoHomeSharp /> },
+    // {
+    //   name: "Danh sách phòng",
+    //   path: "room-list",
+    //   icon: <FaBuilding />,
+    // },
     {
-      name: "Danh sách phòng",
-      path: "room-list",
-      icon: <FaBuilding />,
+      name: "Thông tin hợp đồng",
+      path: "contract",
+      icon: <FaFileInvoiceDollar />,
     },
     {
       name: "Lịch sử đặt phòng",
       path: "bookings",
       icon: <FaCalendarCheck />,
     },
-    {
-      name: "Thông tin hợp đồng",
-      path: "contract",
-      icon: <FaFileInvoiceDollar />,
-    },
+    
     {
       name: "Lịch sử thanh toán",
       path: "payments",
@@ -163,11 +164,11 @@ function TenantHome() {
     },
   ];
 
-  const settingsItem = {
-    name: "Cài đặt",
-    path: "settings",
-    icon: <FaCog />,
-  };
+  // const settingsItem = {
+  //   name: "Cài đặt",
+  //   path: "settings",
+  //   icon: <FaCog />,
+  // };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -192,7 +193,7 @@ function TenantHome() {
     >
       {/* header */}
       <GridItem
-        h="70px"
+        h="100px"
         as="header"
         p={4}
         bg={"gray.200"}
@@ -246,7 +247,7 @@ function TenantHome() {
       </HStack> */}
 
         {/* Searchbar */}
-        <MotionBox
+        {/* <MotionBox
           variants={searchVariants}
           initial="initial"
           animate={isScrolled ? "scrolled" : "initial"}
@@ -268,10 +269,10 @@ function TenantHome() {
           <Button bg="brand.500" size="sm">
             Tìm
           </Button>
-        </MotionBox>
+        </MotionBox> */}
 
         {/* Right Section */}
-        <Flex alignItems="center" gap={4}>
+        <Flex alignItems="center" gap={8}>
           <Box position="relative">
             <IconButton
               color="brand.1"
@@ -279,6 +280,7 @@ function TenantHome() {
               icon={<BellIcon />}
               variant="ghost"
               _hover={{ bg: "gray.300" }}
+              
             />
             {hasNewNotification && (
               <Badge
@@ -288,7 +290,7 @@ function TenantHome() {
                 top="-2px"
                 right="-2px"
                 borderRadius="full"
-                boxSize="12px"
+                boxSize="15px"
                 border="2px solid white"
               />
             )}
@@ -315,9 +317,9 @@ function TenantHome() {
               <MenuDivider />
 
               {/* Cài đặt và thông tin cá nhân */}
-              <MenuItem icon={<FaCog />} as={RouterLink} to={settingsItem.path}>
+              {/* <MenuItem icon={<FaCog />} as={RouterLink} to={settingsItem.path}>
                 {settingsItem.name}
-              </MenuItem>
+              </MenuItem> */}
 
               <MenuItem icon={<EditIcon />} onClick={handleEditProfile}>
                 Chỉnh sửa thông tin cá nhân
@@ -350,12 +352,12 @@ function TenantHome() {
             <DrawerBody pt={10}>
               <VStack spacing={4} align="stretch">
                 {/* Mobile Search */}
-                <InputGroup>
+                {/* <InputGroup>
                   <Input placeholder="Tìm kiếm phòng..." />
                   <InputRightElement>
                     <IconButton icon={<SearchIcon />} variant="ghost" />
                   </InputRightElement>
-                </InputGroup>
+                </InputGroup> */}
 
                 {/* Mobile Menu Items */}
                 {menuItems.map((item) => (
@@ -382,7 +384,7 @@ function TenantHome() {
                 <Divider />
 
                 {/* Mobile Settings */}
-                <Button
+                {/* <Button
                   leftIcon={<FaCog />}
                   variant="ghost"
                   w="100%"
@@ -392,7 +394,7 @@ function TenantHome() {
                   onClick={onClose}
                 >
                   {settingsItem.name}
-                </Button>
+                </Button> */}
 
                 {/* Mobile Theme Toggle */}
               </VStack>

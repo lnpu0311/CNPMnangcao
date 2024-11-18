@@ -804,7 +804,13 @@ const RentalRequest = () => {
       <Modal isOpen={isOpenContract} onClose={closeContractModal} size="xl">
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader textAlign={"center"}>
+          <ModalHeader
+            textTransform={"capitalize"}
+            fontSize={"2xl"}
+            fontWeight={"bold"}
+            textColor={"brand.700"}
+            textAlign={"center"}
+          >
             Tạo Hợp Đồng Thuê Phòng
           </ModalHeader>
           <ModalCloseButton />
@@ -873,14 +879,20 @@ const RentalRequest = () => {
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleCreateContract}>
+            <Button colorScheme="green" mr={3} onClick={handleCreateContract}>
               Tạo hợp đồng
             </Button>
             <Button onClick={closeContractModal}>Hủy</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
-      <Modal isOpen={isOpenUpdate} onClose={closeUpdateModal} size="md">
+      {/* modal cập nhật số điện nước */}
+      <Modal
+        isCentered
+        isOpen={isOpenUpdate}
+        onClose={closeUpdateModal}
+        size="md"
+      >
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Cập Nhật Số Điện Nước</ModalHeader>

@@ -21,6 +21,7 @@ import {
   Box,
   Avatar,
   GridItem,
+  Heading,
 } from "@chakra-ui/react";
 
 // Modal thêm phòng mới
@@ -132,7 +133,15 @@ export const UpdateModal = ({
   <Modal isCentered isOpen={isOpen} onClose={onClose}>
     <ModalOverlay />
     <ModalContent>
-      <ModalHeader>Cập nhật số điện và số nước</ModalHeader>
+      <ModalHeader
+        textTransform={"capitalize"}
+        fontSize={"2xl"}
+        fontWeight={"bold"}
+        textColor={"brand.700"}
+        textAlign={"center"}
+      >
+        Cập nhật số điện và Số Nước
+      </ModalHeader>
       <ModalCloseButton />
       <ModalBody>
         <FormControl mb={4}>
@@ -179,7 +188,15 @@ export const BillModal = ({
   <Modal isCentered isOpen={isOpen} onClose={onClose}>
     <ModalOverlay />
     <ModalContent>
-      <ModalHeader textAlign="center">Tạo hóa đơn mới</ModalHeader>
+      <ModalHeader
+        textTransform={"capitalize"}
+        fontSize={"2xl"}
+        fontWeight={"bold"}
+        textColor={"brand.700"}
+        textAlign={"center"}
+      >
+        hóa đơn mới
+      </ModalHeader>
       <ModalCloseButton />
       <ModalBody>
         <Grid templateColumns="repeat(2, 1fr)" gap={4}>
@@ -262,7 +279,15 @@ export const ContractModal = ({
   <Modal isCentered isOpen={isOpen} onClose={onClose}>
     <ModalOverlay />
     <ModalContent>
-      <ModalHeader textAlign={"center"}>Tạo Hợp Đồng Thuê Phòng</ModalHeader>
+      <ModalHeader
+        textTransform={"capitalize"}
+        fontSize={"2xl"}
+        fontWeight={"bold"}
+        textColor={"brand.700"}
+        textAlign={"center"}
+      >
+        Hợp Đồng Thuê Phòng
+      </ModalHeader>
       <ModalCloseButton />
       <ModalBody>
         <VStack spacing={4}>
@@ -358,13 +383,17 @@ export const InfoModal = ({
   selectedImage,
   setSelectedImage,
 }) => (
-  <Modal isCentered isOpen={isOpen} onClose={onClose}>
+  <Modal size={"2xl"} isCentered isOpen={isOpen} onClose={onClose}>
     <ModalOverlay />
     <ModalContent>
-      <ModalHeader>
-        <Text fontSize="2xl" fontWeight="bold" align={"center"}>
-          {selectedRoom?.roomName || "Đang tải..."}
-        </Text>
+      <ModalHeader
+        fontSize={"2xl"}
+        fontWeight={"bold"}
+        textColor={"brand.700"}
+        textAlign={"center"}
+        textTransform={"capitalize"}
+      >
+        thông tin {selectedRoom?.roomName || "Đang tải..."}
       </ModalHeader>
       <ModalCloseButton />
 
@@ -375,28 +404,28 @@ export const InfoModal = ({
             src={selectedImage || "Đang tải..."}
             alt={selectedRoom?.roomName || "Đang tải..."}
             borderRadius="md"
-            boxSize="250px"
+            boxSize="300px"
             objectFit="cover"
           />
 
           {/* Room Details */}
 
           <VStack align={"start"} spacing={2} flex="1">
-            <Text fontWeight="bold">Số điện:</Text>{" "}
+            <Heading size="md">Số điện:</Heading>
             <Text> {selectedRoom?.electricity || "Đang tải..."}</Text>
-            <Text fontWeight="bold">Số nước:</Text>{" "}
+            <Heading size="md">Số nước:</Heading>
             <Text>{selectedRoom?.water || "Đang tải..."}</Text>
-            <Text fontWeight="bold">Giá phòng:</Text>{" "}
+            <Heading size="md">Giá phòng:</Heading>
             <Text>{selectedRoom?.price || "Đang tải..."} VND</Text>
-            <Text fontWeight="bold">Diện tích:</Text>{" "}
+            <Heading size="md">Diện tích:</Heading>
             <Text>{selectedRoom?.area || "Đang tải..."} m²</Text>
-            <Text fontWeight="bold">Mô tả:</Text>{" "}
+            <Heading size="md">Mô tả:</Heading>
             <Text>{selectedRoom?.description || "Đang tải..."}</Text>
           </VStack>
         </HStack>
 
         {/* Thumbnail Images */}
-        <HStack mt={4} spacing={2}>
+        <HStack mt={3} spacing={3}>
           {selectedRoom?.images.map((image, index) => (
             <Image
               key={index}
@@ -410,17 +439,16 @@ export const InfoModal = ({
             />
           )) || "Đang tải"}
         </HStack>
-
+        <Heading my={3} size="md">
+          Thông tin khách thuê:
+        </Heading>
         {/* Tenant Information */}
-        <Box mt={6} borderWidth="1px" borderRadius="md" p={4}>
-          <Text fontWeight="bold" mb={2}>
-            Khách thuê:
-          </Text>
+        <Box bgColor={"brand.100"} borderWidth="1px" borderRadius="md" p={4}>
           <HStack spacing={3}>
-            {/* <Avatar src={newRoom.tenantAvatar} /> */}
+            {/* <Avatar src={selectedRoom.tenantAvatar} /> */}
             <VStack align="start" spacing={0}>
-              {/* <Text>Tên khách thuê: {newRoom.tenantName}</Text>
-              <Text>Số điện thoại: {newRoom.tenantPhone}</Text> */}
+              {/* <Text>Tên khách thuê: {selectedRoom.tenantName}</Text>
+              <Text>Số điện thoại: {selectedRoom.tenantPhone}</Text> */}
             </VStack>
           </HStack>
         </Box>
@@ -446,18 +474,18 @@ export const EditModal = ({
     <ModalOverlay />
     <ModalContent>
       <ModalHeader>
-        <Input
-          w={"80%"}
-          value={selectedRoom?.roomName || ""}
-          onChange={(e) => handleInputChange("roomName", e.target.value)}
-          fontSize="2xl"
-          fontWeight="bold"
-          align={"center"}
-          placeholder="Tên phòng"
-        />
+        <ModalHeader
+          textTransform={"capitalize"}
+          fontSize={"2xl"}
+          fontWeight={"bold"}
+          textColor={"brand.700"}
+          textAlign={"center"}
+        >
+          chỉnh sửa thông tin {selectedRoom?.roomName || "Đang tải..."}
+        </ModalHeader>
       </ModalHeader>
-      <ModalCloseButton />
 
+      <ModalCloseButton />
       <ModalBody>
         {/* Main Image and Details */}
         <HStack align="start" spacing={4}>
@@ -469,24 +497,34 @@ export const EditModal = ({
             objectFit="cover"
           />
           <VStack align={"start"} spacing={2} flex="1">
-            <Text fontWeight="bold">Giá phòng:</Text>
+            <Heading size="md">Tên phòng:</Heading>
+            <Input
+              value={selectedRoom?.roomName || ""}
+              onChange={(e) =>
+                handleInputChange("roomName", e, handleInputChange)
+              }
+              placeholder="Tên phòng"
+            />
+            <Heading size="md">Giá phòng:</Heading>
             <Input
               type="number"
               value={selectedRoom?.price || ""}
-              onChange={(e) => handleInputChange("price", e.target.value)}
+              onChange={(e) => handleInputChange("price", e, handleInputChange)}
               placeholder="Giá phòng (VND)"
             />
-            <Text fontWeight="bold">Diện tích:</Text>
+            <Heading size="md">Diện tích:</Heading>
             <Input
               type="number"
               value={selectedRoom?.area || ""}
-              onChange={(e) => handleInputChange("area", e.target.value)}
+              onChange={(e) => handleInputChange("area", e, handleInputChange)}
               placeholder="Diện tích (m²)"
             />
-            <Text fontWeight="bold">Mô tả:</Text>
+            <Heading size="md">Mô tả:</Heading>
             <Textarea
               value={selectedRoom?.description || ""}
-              onChange={(e) => handleInputChange("description", e.target.value)}
+              onChange={(e) =>
+                handleInputChange("description", e, handleInputChange)
+              }
               placeholder="Mô tả phòng"
             />
           </VStack>
@@ -507,7 +545,6 @@ export const EditModal = ({
           ))}
         </HStack>
       </ModalBody>
-
       <ModalFooter>
         <Button colorScheme="blue" onClick={handleEditRoom} mr={3}>
           Lưu thay đổi

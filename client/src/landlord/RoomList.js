@@ -150,19 +150,19 @@ const RoomList = () => {
   const [contractDetails, setContractDetails] = useState({
     startDate: "",
     endDate: "",
-    deposit: "",
-    rent: "",
-    elecFee: "",
+    depositFee: "",
+    rentFee: "",
+    electricityFee: "",
     waterFee: "",
-    tenantName: "",
-    landlordName: "",
+    tenantEmail: "",
   });
 
   const [bill, setBill] = useState({
     rent: "",
     elecBill: "",
     waterBill: "",
-    serviceFee: "",
+    otherFees: "",
+    otherFeesDescription: "",
     total: "",
     isPaid: false,
     paidAt: "",
@@ -385,10 +385,16 @@ const RoomList = () => {
   };
 
   const handleCreateBill = async () => {
-    if (!bill.tenantName || !bill.total) {
+    if (
+      !bill.elecBill ||
+      !bill.waterBill ||
+      (bill.otherFees && !bill.otherFeesDescription)
+    ) {
       toast({
         title: "Thông tin chưa đầy đủ.",
-        description: "Vui lòng điền đầy đủ thông tin hóa đơn.",
+        description: bill.otherFees
+          ? "Vui lòng điền nội dung cho phí khác."
+          : "Vui lòng điền đầy đủ thông tin.",
         status: "warning",
         duration: 5000,
         isClosable: true,
@@ -546,31 +552,89 @@ const RoomList = () => {
 
   const handleCreateContract = async () => {
     try {
-      const response = await axios.post(
-        "https://localhost:5000/api/landlord/contract/create",
-        contractDetails,
+      // Kiểm tra các trường bắt buộc
+      if (
+        !contractDetails.startDate ||
+        !contractDetails.endDate ||
+        !contractDetails.depositFee ||
+        !contractDetails.rentFee ||
+        !contractDetails.electricityFee ||
+        !contractDetails.waterFee ||
+        !contractDetails.tenantEmail
+      ) {
+        toast({
+          title: "Lỗi",
+          description: "Vui lòng điền đầy đủ thông tin hợp đồng",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
+
+      // Log để kiểm tra selectedRoom
+      console.log("Selected Room:", selectedRoom);
+
+      // Tạo hợp đồng
+      const contractResponse = await axios.post(
+        `${process.env.REACT_APP_API}/landlord/contract/create`,
+        {
+          roomId: selectedRoom.roomId._id,
+          tenantId: selectedRoom.tenantId._id,
+          landlordId: selectedRoom.landlordId,
+          startDate: new Date(contractDetails.startDate),
+          endDate: new Date(contractDetails.endDate),
+          depositFee: Number(contractDetails.depositFee),
+          rentFee: Number(contractDetails.rentFee),
+          electricityFee: Number(contractDetails.electricityFee),
+          waterFee: Number(contractDetails.waterFee),
+          tenantEmail: String(contractDetails.tenantEmail),
+
+          utilities: {
+            electricity: {
+              unitPrice: Number(contractDetails.electricityFee),
+              initialReading: 0,
+              currentReading: 0,
+              lastUpdated: new Date(),
+            },
+            water: {
+              unitPrice: Number(contractDetails.waterFee),
+              initialReading: 0,
+              currentReading: 0,
+              lastUpdated: new Date(),
+            },
+          },
+          monthlyFees: [],
+        },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
-      if (response.data.success) {
-        alert("Tạo hợp đồng thành công");
-        setContractDetails({
-          startDate: "",
-          endDate: "",
-          deposit: "",
-          rent: "",
-          elecFee: "",
-          waterFee: "",
-          tenantName: "",
-          landlordName: "",
+
+      if (contractResponse.data.success) {
+        // Log để kiểm tra response
+        console.log("Contract creation response:", contractResponse.data);
+
+        toast({
+          title: "Thành công",
+          description: "Đã tạo hợp đồng thành công",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
         });
+        onclose();
       }
     } catch (error) {
-      console.error("Lỗi khi tạo hợp đồng", error);
-      alert("Không thể tạo hợp đồng : " + error.response.data.message);
+      console.error("Contract creation error:", error);
+      toast({
+        title: "Lỗi",
+        description: error.response?.data?.message || "Không thể tạo hợp đồng",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
 

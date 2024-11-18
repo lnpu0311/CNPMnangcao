@@ -22,6 +22,7 @@ import {
   Avatar,
   GridItem,
   Heading,
+  InputGroup,
 } from "@chakra-ui/react";
 
 // Modal thêm phòng mới
@@ -34,82 +35,90 @@ export const NewRoomModal = ({
   handleImageChange,
   handleInputChange,
 }) => (
-  <Modal isCentered isOpen={isOpen} onClose={onClose}>
+  <Modal isCentered isOpen={isOpen} onClose={onClose} size={"xl"}>
     <ModalOverlay />
     <ModalContent>
-      <ModalHeader textAlign="center">Thêm phòng mới</ModalHeader>
+      <ModalHeader
+        fontSize={"2xl"}
+        fontWeight={"bold"}
+        textColor={"brand.700"}
+        textAlign={"center"}
+        textTransform={"capitalize"}
+      >
+        Thêm phòng mới
+      </ModalHeader>
       <ModalCloseButton />
       <ModalBody>
+        <FormControl mb={2} isRequired>
+          <FormLabel>Tiêu đề bài đăng</FormLabel>
+          <Input
+            name="roomTitle"
+            value={newRoom.roomTitle}
+            onChange={(e) => handleInputChange(e, setNewRoom)}
+            placeholder="Nhập tiêu đề bài đăng"
+          />
+        </FormControl>
+        <FormControl mb={2} isRequired>
+          <FormLabel>Tên phòng</FormLabel>
+          <Input
+            name="roomName"
+            value={newRoom.roomName}
+            onChange={(e) => handleInputChange(e, setNewRoom)}
+            placeholder="Nhập tên phòng"
+          />
+        </FormControl>
+        <FormControl mb={2} isRequired>
+          <FormLabel>Diện tích (m²)</FormLabel>
+          <Input
+            type="number"
+            name="area"
+            value={newRoom.area}
+            onChange={(e) => handleInputChange(e, setNewRoom)}
+            placeholder="Nhập diện tích phòng"
+          />
+        </FormControl>
         <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-          <FormControl mb={2} isRequired>
-            <FormLabel>Tiêu đề bài đăng</FormLabel>
-            <Input
-              name="roomTitle"
-              value={newRoom.roomTitle}
-              onChange={(e) => handleInputChange(e, setNewRoom)}
-              placeholder="Nhập tiêu đề bài đăng"
-            />
-          </FormControl>
-          <FormControl mb={2} isRequired>
-            <FormLabel>Tên phòng</FormLabel>
-            <Input
-              name="roomName"
-              value={newRoom.roomName}
-              onChange={(e) => handleInputChange(e, setNewRoom)}
-              placeholder="Nhập tên phòng"
-            />
-          </FormControl>
-          <FormControl mb={2} isRequired>
-            <FormLabel>Diện tích (m²)</FormLabel>
-            <Input
-              type="number"
-              name="area"
-              value={newRoom.area}
-              onChange={(e) => handleInputChange(e, setNewRoom)}
-              placeholder="Nhập diện tích phòng"
-            />
-          </FormControl>
           <FormControl mb={2} isRequired>
             <FormLabel>Số tiền cọc (VND)</FormLabel>
             <Input
-              type="number"
+              type="text"
               name="deposit"
               value={newRoom.deposit}
               onChange={(e) => handleInputChange(e, setNewRoom)}
-              placeholder="Nhập giá tiền cọc"
+              placeholder="Nhập số tiền cọc"
             />
           </FormControl>
           <FormControl mb={2} isRequired>
             <FormLabel>Giá phòng (VND)</FormLabel>
             <Input
-              type="number"
+              type="text"
               name="price"
               value={newRoom.price}
               onChange={(e) => handleInputChange(e, setNewRoom)}
               placeholder="Nhập giá phòng"
             />
           </FormControl>
-          <FormControl mb={2} isRequired gridColumn="span 2">
-            <FormLabel>Mô tả chi tiết</FormLabel>
-            <Textarea
-              name="description"
-              value={newRoom.description}
-              onChange={(e) => handleInputChange(e, setNewRoom)}
-              placeholder="Nhập mô tả phòng"
-            />
-          </FormControl>
-          <FormControl mb={2} isRequired gridColumn="span 2">
-            <FormLabel>Thêm hình ảnh</FormLabel>
-            <Input
-              type="file"
-              name="images"
-              onChange={handleImageChange}
-              multiple
-              accept="image/*"
-            />
-            <Text mt={2}>Bạn có thể tải lên tối đa 5 hình ảnh</Text>
-          </FormControl>
         </Grid>
+        <FormControl mb={2} isRequired gridColumn="span 2">
+          <FormLabel>Mô tả chi tiết</FormLabel>
+          <Textarea
+            name="description"
+            value={newRoom.description}
+            onChange={(e) => handleInputChange(e, setNewRoom)}
+            placeholder="Nhập mô tả phòng"
+          />
+        </FormControl>
+        <FormControl mb={2} isRequired gridColumn="span 2">
+          <FormLabel>Thêm hình ảnh</FormLabel>
+          <Input
+            type="file"
+            name="images"
+            onChange={handleImageChange}
+            multiple
+            accept="image/*"
+          />
+          <Text mt={2}>Bạn có thể tải lên tối đa 5 hình ảnh</Text>
+        </FormControl>
       </ModalBody>
       <ModalFooter>
         <Button colorScheme="green" mr={3} onClick={handleCreateRoom}>
@@ -382,6 +391,7 @@ export const InfoModal = ({
   selectedRoom,
   selectedImage,
   setSelectedImage,
+  formatNumber,
 }) => (
   <Modal size={"2xl"} isCentered isOpen={isOpen} onClose={onClose}>
     <ModalOverlay />
@@ -416,7 +426,9 @@ export const InfoModal = ({
             <Heading size="md">Số nước:</Heading>
             <Text>{selectedRoom?.water || "Đang tải..."}</Text>
             <Heading size="md">Giá phòng:</Heading>
-            <Text>{selectedRoom?.price || "Đang tải..."} VND</Text>
+            <Text>
+              {formatNumber(selectedRoom?.price) || "Đang tải..."} VND
+            </Text>
             <Heading size="md">Diện tích:</Heading>
             <Text>{selectedRoom?.area || "Đang tải..."} m²</Text>
             <Heading size="md">Mô tả:</Heading>

@@ -12,8 +12,11 @@ import {
   Text,
   Button,
   Heading,
-  useToast
+  useToast,
+  Flex
 } from '@chakra-ui/react';
+import {  FaArrowLeft } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const TenantBookingManagement = () => {
   const [bookings, setBookings] = useState([]);
@@ -80,10 +83,25 @@ const TenantBookingManagement = () => {
       });
     }
   };
+  const handleGoBack = () => {
+    navigate(-1);
+  };
 
+  const navigate = useNavigate();
   return (
     <Box p={5}>
-      <Heading size="lg" mb={6}>Danh sách lịch xem phòng của bạn</Heading>
+      <Flex alignItems="center" justifyContent="space-between" mb={4}>
+        <Button
+          onClick={handleGoBack}
+          colorScheme="teal"
+          leftIcon={<FaArrowLeft />}
+        >
+          Quay lại
+        </Button> 
+      </Flex>
+      <Text fontSize="2xl" fontWeight="bold" textAlign="center" flex="1" mx={4}>
+          Danh sách lịch xem phòng của bạn
+        </Text>
       
       <Table variant="simple">
         <Thead>

@@ -30,8 +30,21 @@ import {
   Grid,
   GridItem,
   Select,
+  Container,
+  IconButton,
+  Drawer,
+  DrawerBody,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  useDisclosure,
+  TagCloseButton,
+  HStack
 } from "@chakra-ui/react";
-import { MdCheckCircle } from "react-icons/md";
+import { FiFilter } from "react-icons/fi";
+import {  FaArrowLeft } from "react-icons/fa";
+import { MdCheckCircle, } from "react-icons/md";
 import Chat from "../components/Chat";
 import { jwtDecode } from "jwt-decode";
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
@@ -46,6 +59,7 @@ const TenantRoomList = () => {
   const toast = useToast();
   const [isOpenBooking, setIsOpenBooking] = useState(false);
   const navigate = useNavigate();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -56,17 +70,126 @@ const TenantRoomList = () => {
   const [maxPrice, setMaxPrice] = useState("");
   const [priceRange, setPriceRange] = useState("");
 
+  const FilterForm = () => (
+    <VStack 
+  spacing={2}
+  align="center"
+  bg="white"
+  p={6}
+  borderRadius="xl"
+  boxShadow="md"
+  border="2px solid"
+  borderColor="gray.200"
+  position="fixed"  // Sử dụng position fixed
+  top="34%"  
+  zIndex="8"
+  mt={4}  // Thêm margin-top để tạo khoảng cách với phần tử phía trên
+  mb={4}  // Thêm margin-bottom nếu cần tạo khoảng cách với phần tử phía dưới
+>
+      <Text fontSize="xl" fontWeight="bold" mb={2}>
+        Lọc để tìm kiếm
+      </Text>
+      
+      <HStack width="100%">
+      <Input
+        placeholder="Tìm kiếm chi tiết..."
+        value={searchTerm}
+        onChange={handleSearchChange}
+        bg="white"
+        _hover={{ borderColor: "blue.500" }}
+      />
+      </HStack>
+      <Select 
+        value={filterCity} // Hiển thị giá trị đã chọn
+        onChange={handleCityChange}
+        bg="white"
+        _hover={{ borderColor: "blue.500" }}
+      >
+        {!filterCity && <option value="">Chọn thành phố</option>} {/* Hiển thị option "Chọn thành phố" nếu chưa chọn */}
+        {Array.from(new Set(rooms.map(room => room.address.split(', ')[3])))
+          .filter(city => city) // Lọc bỏ giá trị null/undefined
+          .sort() // Sắp xếp theo alphabet
+          .map(city => (
+            <option key={city} value={city}>{city}</option>
+        ))}
+      </Select>
+      
+      <Select 
+        value={filterDistrict} // Hiển thị giá trị đã chọn
+        onChange={handleDistrictChange}
+        bg="white"
+        _hover={{ borderColor: "blue.500" }}
+        isDisabled={!filterCity} // Disable nếu chưa chọn thành phố
+      >
+        {!filterDistrict && <option value="">Chọn quận</option>} {/* Hiển thị option "Chọn quận" nếu chưa chọn */}
+        {Array.from(new Set(rooms
+          .filter(room => !filterCity || room.address.includes(filterCity)) // Lọc theo thành phố đã chọn
+          .map(room => room.address.split(', ')[2])))
+          .filter(district => district) // Lọc bỏ giá trị null/undefined
+          .sort() // Sắp xếp theo alphabet
+          .map(district => (
+            <option key={district} value={district}>{district}</option>
+        ))}
+      </Select>
+      
+      <Select 
+        value={priceRange} // Hiển thị giá trị đã chọn
+        onChange={handlePriceRangeChange}
+        bg="white"
+        _hover={{ borderColor: "blue.500" }}
+      >
+        {!priceRange && <option value="">Chọn khoảng giá</option>} {/* Hiển thị option "Chọn khoảng giá" nếu chưa chọn */}
+        <option value="500000-1000000">500.000đ - 1.000.000đ</option>
+        <option value="1000000-3000000">1.000.000đ - 3.000.000đ</option>
+        <option value="3000000-6000000">3.000.000đ - 6.000.000đ</option>
+        <option value="6000000-9000000">6.000.000đ - 9.000.000đ</option>
+        <option value="9000000-12000000">9.000.000đ - 12.000.000đ</option>
+        <option value="12000000-20000000">12.000.000đ - 20.000.000đ</option>
+      </Select>
+  
+      {/* Nút reset filter */}
+      {(searchTerm || filterCity || filterDistrict || priceRange) && (
+        <Button
+          colorScheme="red"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setSearchTerm("");
+            setFilterCity("");
+            setFilterDistrict("");
+            setPriceRange("");
+          }}
+        >
+          Xóa bộ lọc
+        </Button>
+      )}
+    </VStack>
+  );
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
   };
 
   const handleCityChange = (e) => {
-    setFilterCity(e.target.value);
+    const newCity = e.target.value;
+    setFilterCity(newCity);
+    
+    // Reset quận và khoảng giá khi đổi thành phố
+    setFilterDistrict("");
+    setPriceRange("");
   };
 
   const handleDistrictChange = (e) => {
-    setFilterDistrict(e.target.value);
+    const newDistrict = e.target.value;
+    setFilterDistrict(newDistrict);
+    
+    // Reset khoảng giá khi đổi quận
+    setPriceRange("");
+  };
+
+  const handlePriceRangeChange = (e) => {
+    const newPriceRange = e.target.value;
+    setPriceRange(newPriceRange);
   };
 
   const handleAddressChange = (e) => {
@@ -81,9 +204,7 @@ const TenantRoomList = () => {
     setMaxPrice(e.target.value);
   };
 
-  const handlePriceRangeChange = (e) => {
-    setPriceRange(e.target.value);
-  };
+  
 
   const filteredRooms = rooms.filter((room) => {
     const price = room.price || 0;
@@ -118,6 +239,8 @@ const TenantRoomList = () => {
       default:
         break;
     }
+
+    
 
     return (
       room.roomTitle.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -376,126 +499,210 @@ const TenantRoomList = () => {
   const handleCloseChat = () => {
     setShowChat(false);
   };
+  const handleGoBack = () => {
+    navigate(-1);
+  };
 
   return (
-    <Box p={4}>
-      <Center mb={4}>
-        <Heading fontSize="2xl" fontWeight="bold">
-          Danh sách phòng trọ
-        </Heading>
-      </Center>
-
+    <Container maxW="container.xl" py={4}>
+    <Flex alignItems="center" justifyContent="space-between" mb={4}>
+        <Button
+          onClick={handleGoBack}
+          colorScheme="teal"
+          leftIcon={<FaArrowLeft />}
+        >
+          Quay lại
+        </Button>
+        <Text fontSize="3xl" fontWeight="bold" textAlign="center" flex="1" mx={4}>
+          Danh sách phòng
+        </Text>
+      </Flex>
+        
       
-      <Grid templateColumns={{ base: "1fr", md: "1fr 3fr" }} gap={6}>
-        <form>
-          <VStack 
-            spacing={4}
-            mb={4}
-            align="stretch"
-            position="sticky"
-            top="15%"
-            h="fit-content"
-          >
-            <Input
-              placeholder="Địa chỉ chi tiết..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
-            <Select placeholder="Chọn thành phố" onChange={handleCityChange}>
-              {Array.from(new Set(rooms.map(room => room.address.split(', ')[3]))).map(city => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </Select>
-            <Select placeholder="Chọn quận" onChange={handleDistrictChange}>
-              {Array.from(new Set(rooms.map(room => room.address.split(', ')[2]))).map(district => (
-                <option key={district} value={district}>{district}</option>
-              ))}
-            </Select>
-            <Select placeholder="Chọn khoảng giá" onChange={handlePriceRangeChange}>
-              <option value="500000-1000000">500.000 - 1.000.000</option>
-              <option value="1000000-3000000">1.000.000 - 3.000.000</option>
-              <option value="3000000-6000000">3.000.000 - 6.000.000</option>
-              <option value="6000000-9000000">6.000.000 - 9.000.000</option>
-              <option value="9000000-12000000">9.000.000 - 12.000.000</option>
-              <option value="12000000-20000000">12.000.000 - 20.000.000</option>
-            </Select>
-          </VStack>
-        </form>
+        {/* Filter Button và Active Filters */}
+        <Flex 
+          mb={4} 
+          gap={2} 
+          alignItems="center"
+          flexWrap="wrap"
+        >
+          <IconButton
+            icon={<FiFilter />}
+            onClick={onOpen}
+            colorScheme="blue"
+            aria-label="Open filters"
+            display={{ base: "flex", md: "none" }}
+          />
+          
+          {/* Hiển thị các filter đã chọn */}
+          {(searchTerm || filterCity || filterDistrict || priceRange) && (
+            <Flex gap={2} flexWrap="wrap">
+              {searchTerm && (
+                <Tag colorScheme="blue" size="md">
+                  Địa chỉ chi tiết: {searchTerm}
+                  <TagCloseButton onClick={() => setSearchTerm("")} />
+                </Tag>
+              )}
+              {filterCity && (
+                <Tag colorScheme="green" size="md">
+                  {filterCity}
+                  <TagCloseButton onClick={() => setFilterCity("")} />
+                </Tag>
+              )}
+              {filterDistrict && (
+                <Tag colorScheme="purple" size="md">
+                  {filterDistrict}
+                  <TagCloseButton onClick={() => setFilterDistrict("")} />
+                </Tag>
+              )}
+              {priceRange && (
+                <Tag colorScheme="orange" size="md">
+                  {priceRange.split('-').map(price => 
+                    Number(price).toLocaleString('vi-VN')
+                  ).join(' - ')} đ
+                  <TagCloseButton onClick={() => setPriceRange("")} />
+                </Tag>
+              )}
+            </Flex>
+          )}
+        </Flex>
+        {/* Filter Drawer cho mobile */}
+        <Drawer 
+          isOpen={isOpen} 
+          placement="left" 
+          onClose={onClose}
+          size="xs"
+        >
+          <DrawerOverlay />
+          <DrawerContent>
+            <DrawerCloseButton />
+            <DrawerHeader borderBottomWidth="1px">Bộ lọc tìm kiếm</DrawerHeader>
+            <DrawerBody>
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                onClose();
+              }}>
+                <FilterForm />
+                <Button 
+                  mt={4} 
+                  colorScheme="blue" 
+                  w="100%" 
+                  onClick={onClose}
+                >
+                  Áp dụng
+                </Button>
+              </form>
+            </DrawerBody>
+          </DrawerContent>
+        </Drawer>
+        <Grid templateColumns={{ base: "1fr", md: "1fr 3fr" }} gap={6}>
+           {/* Form filter cho desktop */}
+        <Box display={{ base: "none", md: "block" }}>
+          <form>
+            <FilterForm />
+          </form>
+        </Box>
 
-        {isLoading ? (
-          <Center>
-            <Spinner size="xl" />
-          </Center>
-        ) : filteredRooms.length === 0 ? (
-          <Center>
-            <Text>Không có phòng nào</Text>
-          </Center>
-        ) : (
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-            {filteredRooms.map((room) => (
-              <Box
-                key={room.id}
-                borderWidth="1px"
-                borderRadius="lg"
-                overflow="hidden"
-                boxShadow="md"
-                bg="white"
-                onClick={() => handleRoomClick(room)}
-                cursor="pointer"
-                _hover={{ transform: "scale(1.02)", transition: "all 0.2s" }}
-              >
-                <Image
-                  src={room.image}
-                  alt={room.roomName}
-                  w="100%"
-                  h="200px"
-                  objectFit="cover"
-                  fallbackSrc="https://via.placeholder.com/200"
-                />
-                <VStack p={4} align="stretch" spacing={2}>
-                  <Text fontWeight="bold" fontSize="lg">
-                    {room.roomTitle}
-                  </Text>
-                  <Flex alignItems="flex-start">
-                    <Text fontWeight="bold" width="70px" flexShrink={0}>
-                      Địa chỉ:
-                    </Text>
-                    <Text color="gray.600" fontSize="sm">
-                      {room.address}
-                    </Text>
-                  </Flex>
-                  <Flex justifyContent="space-between" alignItems="center">
-                    <Text fontWeight="bold">Tình trạng:</Text>
-                    <Tag
-                      colorScheme={room.status === "Còn trống" ? "green" : "red"}
+          {isLoading ? (
+            <Center>
+              <Spinner size="xl" />
+            </Center>
+          ) : filteredRooms.length === 0 ? (
+            <Center>
+              <Text>Không có phòng nào</Text>
+            </Center>
+          ) : (
+          <Box className='mb-20'>
+            <Box className='container mx-auto'>
+            <SimpleGrid 
+              columns={{ base: 1, md: 2, lg: 3 }} 
+              spacing={{ base: 4, lg: 4 }}
+            >
+              {filteredRooms.map((room) => (
+                <Box
+                  key={room.id}
+                  borderWidth="1px"
+                  borderRadius="lg"
+                  overflow="hidden"
+                  boxShadow="md"
+                  bg="white"
+                  height="100%"
+                  display="flex"
+                  flexDirection="column"
+                  onClick={() => handleRoomClick(room)}
+                  cursor="pointer"
+                  _hover={{ transform: "scale(1.02)", transition: "all 0.2s" }}
+                  p={2}
+                >
+                  <Image
+                    src={room.image}
+                    alt={room.roomName}
+                    w="100%"
+                    h="200px"
+                    objectFit="cover"
+                    fallbackSrc="https://via.placeholder.com/200"
+                  />
+                  <VStack p={4} align="stretch" spacing={2} flex="1">
+                    <Text 
+                      fontWeight="bold" 
+                      fontSize="lg"
+                      noOfLines={1}  // Giới hạn tiêu đề 1 dòng
                     >
-                      {room.status}
-                    </Tag>
-                  </Flex>
-                  <Flex justifyContent="space-between">
-                    <Text fontWeight="bold">Giá:</Text>
-                    <Text>
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(room.price)}
+                      {room.roomTitle}
                     </Text>
-                  </Flex>
-                </VStack>
-              </Box>
-            ))}
-          </SimpleGrid>
-        )}
-      </Grid>
+                    <Flex alignItems="flex-start">
+                      <Text fontWeight="bold" width="70px" flexShrink={0}>
+                        Địa chỉ:
+                      </Text>
+                      <Text 
+                        color="gray.600" 
+                        fontSize="sm"  
+                        noOfLines={2}  // Giới hạn địa chỉ 2 dòng
+                      >
+                        {room.address}
+                      </Text>
+                    </Flex>
+                    <Flex justifyContent="space-between" alignItems="center">
+                      <Text fontWeight="bold">Tình trạng:</Text>
+                      <Tag
+                        colorScheme={room.status === "Còn trống" ? "green" : "red"}
+                      >
+                        {room.status}
+                      </Tag>
+                    </Flex>
+                    <Flex justifyContent="space-between">
+                      <Text fontWeight="bold">Giá:</Text>
+                      <Text>
+                        {new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(room.price)}
+                      </Text>
+                    </Flex>
+                  </VStack>
+                </Box>
+              ))}
+            </SimpleGrid>
+            </Box>
+          </Box>
+          )}
+        </Grid>
+      
 
 
       <Modal
         isOpen={isOpenDetail}
         onClose={() => setIsOpenDetail(false)}
-        size="xl"
+        size={{ base: "full", md: "xl" }}  // Responsive size
+        isCentered  // Căn giữa modal
       >
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent
+          mx={{ base: "4", md: "auto" }}  
+          my={{ base: "4", md: "auto" }}  
+          maxH={{ base: "100vh", md: "90vh" }}  
+          overflow="auto"  // Cho phép scroll nếu nội dung dài
+         >
           <ModalHeader>Chi tiết phòng</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
@@ -513,8 +720,9 @@ const TenantRoomList = () => {
                   colorScheme="yellow"
                   width="100%"
                   onClick={() => {
-                    setIsOpenDetail(false);
-                    navigate(`/tenant/rooms/${selectedRoom.id}`);
+                    navigate(`/tenant/room-detail/${selectedRoom.id}`, { // Sử dụng đường dẫn mới
+                      state: { roomData: selectedRoom },
+                    });
                   }}
                 >
                   Xem chi tiết
@@ -636,7 +844,7 @@ const TenantRoomList = () => {
           currentUser={currentUser}
         />
       )}
-    </Box>
+      </Container>
   );
 };
 

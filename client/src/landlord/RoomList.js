@@ -839,6 +839,7 @@ const RoomList = () => {
         onClose={() => toggleModal("infoRoom", false)}
         selectedImage={selectedImage}
         selectedRoom={selectedRoom}
+        setSelectedImage={setSelectedImage}
       />
       <EditModal
         isOpen={modalState.editRoom}

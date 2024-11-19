@@ -2,6 +2,8 @@ const {paypalClient} = require("../configs/paypal");
 const checkoutNodeJssdk = require("@paypal/checkout-server-sdk");
 const Bill = require('../models/bill.model');
 const {vnpayConfig,createPaymentUrl, verifyReturnUrl} = require('../configs/vnpay');
+const moment = require('moment');
+const crypto = require('crypto');
 
 // Hàm tạo thanh toán tiền thuê
 exports.createRentPayment = async (req, res) => {
@@ -182,61 +184,180 @@ exports.createVNPayPayment = async (req, res) => {
 
 // Thêm hàm xử lý callback từ VNPAY
 exports.vnpayCallback = async (req, res) => {
-    const vnp_Params = req.query;
-    console.log('Raw VNPAY Params:', vnp_Params);
-    
     try {
-        // Kiểm tra các tham số bắt buộc
-        const requiredParams = ['vnp_TxnRef', 'vnp_ResponseCode', 'vnp_TransactionNo', 'vnp_SecureHash'];
-        const missingParams = requiredParams.filter(param => !vnp_Params[param]);
-        
-        if (missingParams.length > 0) {
-            console.error('Missing required params:', missingParams);
-            return res.redirect(`${process.env.CLIENT_URL}/tenant/bills?payment=failed&error=missing_params`);
-        }
+        const vnp_Params = req.query;
+        console.log('Received VNPAY callback params:', vnp_Params);
 
         // Verify signature
         const isValidSignature = verifyReturnUrl(vnp_Params);
-        console.log('Signature verification result:', isValidSignature);
         
         if (!isValidSignature) {
-            console.error('Invalid VNPAY signature');
-            await Bill.findByIdAndUpdate(vnp_Params.vnp_TxnRef, {
-                status: 'PENDING',
-                paymentMethod: null
+            return res.json({
+                success: false,
+                message: 'Invalid signature'
             });
-            return res.redirect(`${process.env.CLIENT_URL}/tenant/bills?payment=failed&error=invalid_signature`);
         }
 
-        // Xử lý thanh toán khi chữ ký hợp lệ
-        const bill = await Bill.findById(vnp_Params.vnp_TxnRef);
+        const billId = vnp_Params.vnp_TxnRef;
+        const responseCode = vnp_Params.vnp_ResponseCode;
+
+        // Kiểm tra bill tồn tại
+        const bill = await Bill.findById(billId);
         if (!bill) {
-            return res.redirect(`${process.env.CLIENT_URL}/tenant/bills?payment=failed&error=bill_not_found`);
+            return res.json({
+                success: false,
+                message: 'Bill not found'
+            });
         }
 
-        if (vnp_Params.vnp_ResponseCode === '00') {
-            // Kiểm tra trùng lặp giao dịch
-            if (bill.vnpayTransactionId === vnp_Params.vnp_TransactionNo) {
-                return res.redirect(`${process.env.CLIENT_URL}/tenant/bills?payment=duplicate`);
-            }
-
-            await Bill.findByIdAndUpdate(vnp_Params.vnp_TxnRef, {
+        if (responseCode === '00') {
+            // Cập nhật trạng thái bill
+            await Bill.findByIdAndUpdate(billId, {
                 status: 'PAID',
                 paymentMethod: 'VNPAY',
                 paymentDate: new Date(),
                 vnpayTransactionId: vnp_Params.vnp_TransactionNo
-            });
+            }, { new: true });
 
-            return res.redirect(`${process.env.CLIENT_URL}/tenant/bills?payment=success`);
+            return res.redirect(`${process.env.CLIENT_URL}/tenant/bills/payment-result?payment=success`);
         } else {
-            await Bill.findByIdAndUpdate(vnp_Params.vnp_TxnRef, {
+            await Bill.findByIdAndUpdate(billId, {
                 status: 'PENDING',
                 paymentMethod: null
             });
-            return res.redirect(`${process.env.CLIENT_URL}/tenant/bills?payment=failed&code=${vnp_Params.vnp_ResponseCode}`);
+
+            return res.json({
+                success: false,
+                message: 'Payment failed',
+                code: responseCode
+            });
         }
     } catch (error) {
         console.error('VNPAY callback error:', error);
-        return res.redirect(`${process.env.CLIENT_URL}/tenant/bills?payment=failed&error=server_error`);
+        return res.json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+exports.createPaymentUrl = (orderId, amount, orderInfo, locale='vn') => {
+    // Format amount to integer
+    const validAmount = Math.floor(Math.abs(amount)) * 100;
+    
+    const createDate = moment().format('YYYYMMDDHHmmss');
+    
+    const vnp_Params = {
+        vnp_Version: '2.1.0',
+        vnp_Command: 'pay',
+        vnp_TmnCode: exports.vnpayConfig.tmnCode,
+        vnp_Locale: locale,
+        vnp_CurrCode: 'VND',
+        vnp_TxnRef: orderId.toString(),
+        vnp_OrderInfo: orderInfo,
+        vnp_OrderType: 'billpayment',
+        vnp_Amount: validAmount,
+        vnp_ReturnUrl: exports.vnpayConfig.returnUrl,
+        vnp_IpAddr: '127.0.0.1',
+        vnp_CreateDate: createDate,
+        vnp_SecureHashType: 'SHA512'
+    };
+
+    // Sort params alphabetically
+    const sortedParams = {};
+    Object.keys(vnp_Params).sort().forEach((key) => {
+        if (vnp_Params[key] !== '' && vnp_Params[key] !== null && vnp_Params[key] !== undefined) {
+            sortedParams[key] = vnp_Params[key];
+        }
+    });
+
+    // Create raw signature string (không encode URL, chỉ encode tiếng Việt)
+    const signData = Object.entries(sortedParams)
+        .map(([key, value]) => {
+            // Encode toàn bộ giá trị, bao gồm cả khoảng trắng và ký tự đặc biệt
+            const encodedValue = encodeURIComponent(value).replace(/%20/g, '+');
+            return `${key}=${encodedValue}`;
+        })
+        .join('&');
+
+    // Create hash
+    const hmac = crypto.createHmac('sha512', exports.vnpayConfig.hashSecret);
+    const signed = hmac.update(signData, 'utf-8').digest('hex');
+
+    // Add hash to params
+    const finalParams = {...sortedParams, vnp_SecureHash: signed};
+
+    // Create final URL with proper encoding
+    const queryString = Object.entries(finalParams)
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+
+    const paymentUrl = `${exports.vnpayConfig.url}?${queryString}`;
+
+    // Log for debugging
+    console.log('Creating payment URL with params:', {
+        orderId,
+        amount,
+        orderInfo,
+        locale
+    });
+    console.log('VNPAY Config:', {
+        tmnCode: exports.vnpayConfig.tmnCode,
+        hashSecret: exports.vnpayConfig.hashSecret,
+        url: exports.vnpayConfig.url,
+        returnUrl: exports.vnpayConfig.returnUrl
+    });
+    console.log('Sorted params before signing:', sortedParams);
+    console.log('Sign data:', signData);
+    console.log('Generated hash:', signed);
+    console.log('Final payment URL:', paymentUrl);
+
+    return paymentUrl;
+};
+
+exports.verifyReturnUrl = (vnp_Params) => {
+    try {
+        const secureHash = vnp_Params['vnp_SecureHash'];
+        
+        // Tạo một object mới không bao gồm vnp_SecureHash
+        const verifyParams = {...vnp_Params};
+        delete verifyParams['vnp_SecureHash'];
+        delete verifyParams['vnp_SecureHashType'];
+
+        // Sắp xếp các tham số theo thứ tự alphabet
+        const sortedParams = {};
+        Object.keys(verifyParams)
+            .sort()
+            .forEach(key => {
+                if (verifyParams[key] !== '' && verifyParams[key] !== null && verifyParams[key] !== undefined) {
+                    sortedParams[key] = verifyParams[key];
+                }
+            });
+
+        // Tạo chuỗi ký với encoding đúng
+        const signData = Object.entries(sortedParams)
+            .map(([key, value]) => {
+                // Đảm bảo giá trị là string và encode đúng cách
+                const encodedValue = encodeURIComponent(String(value)).replace(/%20/g, '+');
+                return `${key}=${encodedValue}`;
+            })
+            .join('&');
+
+        // Tạo HMAC SHA512
+        const hmac = crypto.createHmac('sha512', exports.vnpayConfig.hashSecret);
+        const signed = hmac.update(signData, 'utf-8').digest('hex');
+
+        // So sánh chữ ký
+        console.log('Verify process:', {
+            receivedHash: secureHash,
+            calculatedHash: signed,
+            signData: signData,
+            sortedParams: sortedParams
+        });
+
+        return secureHash === signed;
+    } catch (error) {
+        console.error('Error verifying signature:', error);
+        return false;
     }
 };

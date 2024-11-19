@@ -58,69 +58,89 @@ const BillDetail = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    fetchBillDetails();
+    // Chỉ fetch bill details khi không phải là payment-result
+    if (billId !== 'payment-result') {
+        fetchBillDetails();
+    }
   }, [billId]);
 
   useEffect(() => {
     const checkPaymentResult = async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const paymentStatus = urlParams.get('payment');
-      const errorCode = urlParams.get('error') || urlParams.get('code');
-      
-      if (paymentStatus) {
-        const lastBillId = localStorage.getItem('lastPaymentBillId');
-        const lastTimestamp = localStorage.getItem('lastPaymentTimestamp');
-        
-        // Xóa thông tin thanh toán
-        localStorage.removeItem('lastPaymentBillId');
-        localStorage.removeItem('lastPaymentTimestamp');
-        
-        // Kiểm tra thời gian
-        if (lastTimestamp && Date.now() - parseInt(lastTimestamp) > 600000) {
-          return; // Bỏ qua nếu đã quá 10 phút
-        }
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentStatus = urlParams.get('payment');
+        const errorCode = urlParams.get('error') || urlParams.get('code');
+        const billId = urlParams.get('billId');
 
-        if (paymentStatus === 'success') {
-          toast({
-            title: "Thanh toán thành công",
-            status: "success",
-            duration: 3000,
-            isClosable: true
-          });
-          await fetchBillDetails(); // Refresh bill data
-        } else if (paymentStatus === 'failed') {
-          toast({
-            title: "Thanh toán thất bại",
-            description: getErrorMessage(errorCode),
-            status: "error",
-            duration: 3000,
-            isClosable: true
-          });
+        if (paymentStatus) {
+            if (paymentStatus === 'success') {
+                // Nếu có billId, fetch lại thông tin bill mới nhất
+                if (billId) {
+                    try {
+                        const response = await axios.get(
+                            `${process.env.REACT_APP_API}/bills/${billId}`,
+                            {
+                                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                            }
+                        );
+                        setBill(response.data.data);
+                    } catch (error) {
+                        console.error('Error fetching updated bill:', error);
+                    }
+                }
+
+                toast({
+                    title: "Thanh toán thành công",
+                    description: "Hóa đơn đã được thanh toán thành công",
+                    status: "success",
+                    duration: 3000,
+                    isClosable: true,
+                    position: "top"
+                });
+
+                // Chuyển về trang danh sách hóa đơn sau 2 giây
+                setTimeout(() => {
+                    navigate('/tenant/bills', { replace: true });
+                }, 2000);
+            } else if (paymentStatus === 'failed') {
+                toast({
+                    title: "Thanh toán thất bại",
+                    description: getErrorMessage(errorCode),
+                    status: "error",
+                    duration: 3000,
+                    isClosable: true,
+                    position: "top"
+                });
+                navigate('/tenant/bills', { replace: true });
+            }
         }
-      }
     };
 
     checkPaymentResult();
-  }, []);
+  }, [navigate, toast]);
 
   const fetchBillDetails = async () => {
     try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API}/bills/${billId}`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        // Kiểm tra nếu billId là 'payment-result' thì bỏ qua
+        if (billId === 'payment-result') {
+            return;
         }
-      );
-      setBill(response.data.data);
+
+        const response = await axios.get(
+            `${process.env.REACT_APP_API}/bills/${billId}`,
+            {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            }
+        );
+        setBill(response.data.data);
     } catch (error) {
-      console.error('Error fetching bill:', error);
-      toast({
-        title: "Lỗi",
-        description: "Không thể tải thông tin hóa đơn",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
+        console.error('Error fetching bill:', error);
+        toast({
+            title: "Lỗi",
+            description: "Không thể tải thông tin hóa đơn",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+        });
     }
   };
 
@@ -144,38 +164,27 @@ const BillDetail = () => {
     try {
         setIsProcessing(true);
         
-        // Thêm timeout cho toàn bộ quá trình
-        const timeoutDuration = 30000; // 30 giây
-        const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error('Timeout')), timeoutDuration);
-        });
-
-        const paymentPromise = axios.post(
+        const response = await axios.post(
             `${process.env.REACT_APP_API}/payment/vnpay/create`,
             { billId: bill._id },
             {
                 headers: { 
                     Authorization: `Bearer ${localStorage.getItem('token')}` 
-                }
+                },
+                timeout: 30000 // 30 seconds timeout
             }
         );
-
-        const response = await Promise.race([paymentPromise, timeoutPromise]);
 
         if (response.data.success) {
             localStorage.setItem('lastPaymentBillId', bill._id);
             localStorage.setItem('lastPaymentTimestamp', Date.now().toString());
-            
-            // Thêm timeout cho chuyển hướng
-            setTimeout(() => {
-                window.location.href = response.data.paymentUrl;
-            }, 100);
+            window.location.href = response.data.paymentUrl;
         }
     } catch (error) {
         console.error('VNPAY payment error:', error);
         toast({
             title: "Lỗi thanh toán",
-            description: error.message === 'Timeout' 
+            description: error.code === 'ECONNABORTED' 
                 ? "Yêu cầu thanh toán đã hết thời gian" 
                 : (error.response?.data?.message || "Không thể tạo thanh toán VNPAY"),
             status: "error",
@@ -184,6 +193,49 @@ const BillDetail = () => {
         });
     } finally {
         setIsProcessing(false);
+    }
+  };
+
+  const handleVNPayCallback = async (params) => {
+    try {
+        const response = await axios.post(
+            `${process.env.REACT_APP_API}/payment/vnpay/callback`,
+            params,
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            }
+        );
+
+        if (response.data.success) {
+            await fetchBillDetails();
+            toast({
+                title: "Thanh toán thành công",
+                status: "success",
+                duration: 3000,
+                isClosable: true
+            });
+        } else {
+            toast({
+                title: "Thanh toán thất bại",
+                description: response.data.message,
+                status: "error",
+                duration: 3000,
+                isClosable: true
+            });
+        }
+        navigate('/tenant/bills', { replace: true });
+    } catch (error) {
+        console.error('VNPAY callback error:', error);
+        toast({
+            title: "Lỗi xử lý thanh toán",
+            description: error.response?.data?.message || "Vui lòng liên hệ admin",
+            status: "error",
+            duration: 3000,
+            isClosable: true
+        });
+        navigate('/tenant/bills', { replace: true });
     }
   };
 

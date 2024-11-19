@@ -14,13 +14,43 @@ import {
 } from '@chakra-ui/react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@chakra-ui/react';
+import { useLocation } from 'react-router-dom';
 
 const BillList = () => {
   const [bills, setBills] = useState([]);
   const navigate = useNavigate();
+  const toast = useToast();
+  const location = useLocation();
 
   useEffect(() => {
     fetchBills();
+  }, []);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    const errorCode = urlParams.get('error') || urlParams.get('code');
+    
+    if (paymentStatus === 'success') {
+        toast({
+            title: "Thanh toán thành công",
+            description: "Hóa đơn đã được thanh toán thành công",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+            position: "top"
+        });
+    } else if (paymentStatus === 'failed') {
+        toast({
+            title: "Thanh toán thất bại", 
+            description: getErrorMessage(errorCode),
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+            position: "top"
+        });
+    }
   }, []);
 
   const fetchBills = async () => {
@@ -51,6 +81,17 @@ const BillList = () => {
       style: 'currency',
       currency: 'VND'
     }).format(amount);
+  };
+
+  const getErrorMessage = (errorCode) => {
+    switch (errorCode) {
+      case 'invalid_signature':
+        return 'Chữ ký không hợp lệ';
+      case 'bill_not_found':
+        return 'Không tìm thấy hóa đơn';
+      default:
+        return 'Có lỗi xảy ra khi thanh toán';
+    }
   };
 
   return (

@@ -1,120 +1,109 @@
 const crypto = require('crypto');
-const qs = require('qs');
-
-console.log('VNPAY Config:', {
-    tmnCode: process.env.VNPAY_TMCODE,
-    hashSecret: process.env.VNPAY_HASHSECRET,
-    url: process.env.VNPAY_URL,
-    returnUrl: process.env.VNP_RETURN_URL
-});
-
-if (!process.env.VNPAY_HASHSECRET) {
-    throw new Error('VNPAY_HASHSECRET is not configured in environment variables');
-}
-
-console.log('Hash Secret:', process.env.VNPAY_HASHSECRET);
+const moment = require('moment');
 
 exports.vnpayConfig = {
-    tmnCode:process.env.VNPAY_TMCODE,
-    hashSecret:process.env.VNPAY_HASHSECRET,
-    url:process.env.VNPAY_URL,
-    returnUrl: process.env.VNP_RETURN_URL,
+    tmnCode: process.env.VNPAY_TMCODE ,
+    hashSecret: process.env.VNPAY_HASHSECRET ,
+    url: process.env.VNPAY_URL,
+    returnUrl: process.env.VNP_RETURN_URL 
 };
-exports.createPaymentUrl = (orderId,amount,orderInfo,locale='vn')=>{
-    // Validate input parameters
-    if (!orderId || !amount || !orderInfo) {
-        throw new Error('Missing required parameters');
-    }
 
-    // Ensure amount is positive and is an integer
-    const validAmount = Math.floor(Math.abs(amount));
-    
-    const date = new Date();
-    
-    // Format date theo chuẩn yyyyMMddHHmmss
-    const createDate = date.getFullYear().toString() +
-        ("0" + (date.getMonth() + 1)).slice(-2) +
-        ("0" + date.getDate()).slice(-2) +
-        ("0" + date.getHours()).slice(-2) +
-        ("0" + date.getMinutes()).slice(-2) +
-        ("0" + date.getSeconds()).slice(-2);
+exports.createPaymentUrl = (orderId, amount, orderInfo, locale='vn') => {
+    try {
+        // Format date
+        const date = new Date();
+        const createDate = moment(date).format('YYYYMMDDHHmmss');
 
-    const vnp_Params = {
-        vnp_Version:'2.1.0',
-        vnp_Command:'pay',
-        vnp_TmnCode : exports.vnpayConfig.tmnCode,
-        vnp_Locale:locale,
-        vnp_CurrCode:'VND',
-        vnp_TxnRef:orderId.toString(),
-        vnp_OrderInfo:orderInfo,
-        vnp_OrderType:'billpayment',
-        vnp_Amount:validAmount *100,
-        vnp_ReturnUrl:exports.vnpayConfig.returnUrl,
-        vnp_IpAddr: '127.0.0.1',
-        vnp_CreateDate: createDate,
-        vnp_BankCode: '',
-        vnp_SecureHashType: 'SHA512'
-    };
+        // Ensure amount is positive integer
+        const validAmount = Math.floor(Math.abs(amount)) * 100;
 
-    // Sắp xếp các tham số theo alphabet và loại bỏ các giá trị rỗng
-    const sortedParams = Object.keys(vnp_Params)
-        .filter(key => vnp_Params[key] !== '' && vnp_Params[key] !== null && vnp_Params[key] !== undefined)
-        .sort()
-        .reduce((acc, key) => ({
-            ...acc,
-            [key]: vnp_Params[key]
-        }), {});
+        // Create raw params
+        const vnp_Params = {
+            vnp_Version: '2.1.0',
+            vnp_Command: 'pay',
+            vnp_TmnCode: exports.vnpayConfig.tmnCode,
+            vnp_Locale: locale,
+            vnp_CurrCode: 'VND',
+            vnp_TxnRef: orderId,
+            vnp_OrderInfo: orderInfo,
+            vnp_OrderType: 'billpayment',
+            vnp_Amount: validAmount,
+            vnp_ReturnUrl: exports.vnpayConfig.returnUrl,
+            vnp_IpAddr: '127.0.0.1',
+            vnp_CreateDate: createDate
+        };
 
-    // Tạo chuỗi ký KHÔNG mã hóa URL
-    const signData = Object.entries(sortedParams)
-        .map(([key, value]) => `${key}=${value}`)
-        .join('&');
+        // Sort params
+        const sortedParams = {};
+        Object.keys(vnp_Params)
+            .sort()
+            .forEach(key => {
+                if (vnp_Params[key] !== '' && vnp_Params[key] !== null && vnp_Params[key] !== undefined) {
+                    sortedParams[key] = String(vnp_Params[key]);
+                }
+            });
 
-    // Tạo chữ ký
-    const hmac = crypto.createHmac('sha512', exports.vnpayConfig.hashSecret);
-    const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
-
-    // Thêm chữ ký vào params
-    sortedParams['vnp_SecureHash'] = signed;
-
-    // Tạo URL thanh toán với các tham số đã được mã hóa
-    const paymentUrl = `${exports.vnpayConfig.url}?` + 
-        Object.entries(sortedParams)
-            .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        // Create sign data with proper encoding
+        const signData = Object.entries(sortedParams)
+            .map(([key, value]) => {
+                const encodedValue = encodeURIComponent(value).replace(/%20/g, '+');
+                return `${key}=${encodedValue}`;
+            })
             .join('&');
 
-    return paymentUrl;
+        // Create hash
+        const hmac = crypto.createHmac('sha512', exports.vnpayConfig.hashSecret);
+        const signed = hmac.update(signData, 'utf-8').digest('hex');
+
+        // Add hash to params
+        const finalParams = {...sortedParams, vnp_SecureHash: signed};
+
+        // Create final URL
+        const paymentUrl = `${exports.vnpayConfig.url}?` + 
+            Object.entries(finalParams)
+                .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+                .join('&');
+
+        return paymentUrl;
+    } catch (error) {
+        console.error('Error creating payment URL:', error);
+        throw error;
+    }
 };
 
 exports.verifyReturnUrl = (vnp_Params) => {
-    const secureHash = vnp_Params['vnp_SecureHash'];
-    
-    // Tạo bản sao của params để không ảnh hưởng đến object gốc
-    const verifyParams = { ...vnp_Params };
-    
-    // Xóa các trường không cần thiết
-    delete verifyParams['vnp_SecureHash'];
-    delete verifyParams['vnp_SecureHashType'];
-    
-    // Sắp xếp các tham số theo thứ tự alphabet
-    const sortedParams = Object.keys(verifyParams)
-        .sort()
-        .reduce((acc, key) => {
-            if (verifyParams[key] !== undefined && verifyParams[key] !== '') {
-                acc[key] = verifyParams[key];
-            }
-            return acc;
-        }, {});
-    
-    // Tạo chuỗi ký từ các tham số đã sắp xếp
-    const signData = Object.entries(sortedParams)
-        .map(([key, value]) => `${key}=${value}`)
-        .join('&');
-    
-    // Tạo chữ ký mới
-    const hmac = crypto.createHmac('sha512', exports.vnpayConfig.hashSecret);
-    const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
-    
-    // So sánh chữ ký
-    return secureHash === signed;
+    try {
+        const secureHash = vnp_Params['vnp_SecureHash'];
+        
+        // Create verify params
+        const verifyParams = {...vnp_Params};
+        delete verifyParams['vnp_SecureHash'];
+        delete verifyParams['vnp_SecureHashType'];
+
+        // Sort params
+        const sortedParams = {};
+        Object.keys(verifyParams)
+            .sort()
+            .forEach(key => {
+                if (verifyParams[key] !== '' && verifyParams[key] !== null && verifyParams[key] !== undefined) {
+                    sortedParams[key] = verifyParams[key];
+                }
+            });
+
+        // Create sign data
+        const signData = Object.entries(sortedParams)
+            .map(([key, value]) => `${key}=${value}`)
+            .join('&');
+
+        // Create hash
+        const hmac = crypto.createHmac('sha512', exports.vnpayConfig.hashSecret);
+        const signed = hmac.update(signData, 'utf-8').digest('hex');
+
+        // Compare hashes
+        return secureHash === signed;
+
+    } catch (error) {
+        console.error('Error verifying return URL:', error);
+        return false;
+    }
 };

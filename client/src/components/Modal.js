@@ -417,17 +417,31 @@ export const InfoModal = ({
           {/* Room Details */}
 
           <VStack align={"start"} spacing={2} flex="1">
-            <Heading size="md">Số điện:</Heading>
-            <Text> {selectedRoom?.electricity || "Đang tải..."}</Text>
-            <Heading size="md">Số nước:</Heading>
-            <Text>{selectedRoom?.water || "Đang tải..."}</Text>
-            <Heading size="md">Giá phòng:</Heading>
+            <Heading size="md">
+              Năm {selectedRoom?.latestUnitRoom?.year}
+            </Heading>
+            <Box>
+              <Heading size="sm">
+                Số điện tháng {selectedRoom?.latestUnitRoom?.month} :
+              </Heading>
+              <Text>
+                {" "}
+                {selectedRoom?.latestUnitRoom?.elecIndex || "Đang tải..."} kWh
+              </Text>
+            </Box>
+            <Heading size="sm">
+              Số nước tháng {selectedRoom?.latestUnitRoom?.month} :
+            </Heading>
+            <Text>
+              {selectedRoom?.latestUnitRoom?.aquaIndex || "Đang tải..."} m³
+            </Text>
+            <Heading size="sm">Giá phòng:</Heading>
             <Text>
               {formatNumber(selectedRoom?.price) || "Đang tải..."} VND
             </Text>
-            <Heading size="md">Diện tích:</Heading>
+            <Heading size="sm">Diện tích:</Heading>
             <Text>{selectedRoom?.area || "Đang tải..."} m²</Text>
-            <Heading size="md">Mô tả:</Heading>
+            <Heading size="sm">Mô tả:</Heading>
             <Text>{selectedRoom?.description || "Đang tải..."}</Text>
           </VStack>
         </HStack>

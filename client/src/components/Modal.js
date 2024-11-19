@@ -23,6 +23,7 @@ import {
   GridItem,
   Heading,
   InputGroup,
+  Flex,
 } from "@chakra-ui/react";
 
 // Modal thêm phòng mới
@@ -341,28 +342,29 @@ export const ContractModal = ({
               onChange={(e) => handleInputChange(e, setContractDetails)}
             />
           </FormControl>
+          <HStack spacing={4} align="flex-start">
+            <FormControl isRequired>
+              <FormLabel>Giá điện (đồng/kWh)</FormLabel>
+              <Input
+                type="number"
+                name="electricityFee"
+                placeholder="Nhập số tiền điện"
+                value={contractDetails.electricityFee}
+                onChange={(e) => handleInputChange(e, setContractDetails)}
+              />
+            </FormControl>
 
-          <FormControl isRequired>
-            <FormLabel>Giá điện (đồng/kWh)</FormLabel>
-            <Input
-              type="number"
-              name="electricityFee"
-              placeholder="Nhập số tiền điện"
-              value={contractDetails.electricityFee}
-              onChange={(e) => handleInputChange(e, setContractDetails)}
-            />
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Giá nước (đồng/m³)</FormLabel>
-            <Input
-              type="number"
-              name="waterFee"
-              placeholder="Nhập số tiền nước"
-              value={contractDetails.waterFee}
-              onChange={(e) => handleInputChange(e, setContractDetails)}
-            />
-          </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Giá nước (đồng/m³)</FormLabel>
+              <Input
+                type="number"
+                name="waterFee"
+                placeholder="Nhập số tiền nước"
+                value={contractDetails.waterFee}
+                onChange={(e) => handleInputChange(e, setContractDetails)}
+              />
+            </FormControl>
+          </HStack>
           <FormControl isRequired>
             <FormLabel>Email người thuê</FormLabel>
             <Input

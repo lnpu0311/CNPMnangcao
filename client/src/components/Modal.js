@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Modal,
   ModalOverlay,
@@ -23,6 +23,7 @@ import {
   GridItem,
   Heading,
   InputGroup,
+  Flex,
 } from "@chakra-ui/react";
 
 // Modal thêm phòng mới
@@ -189,93 +190,89 @@ export const UpdateModal = ({
 export const BillModal = ({
   isOpen,
   onClose,
-  bill,
-  setBill,
-  handleCreateBill,
+  sampleBill,
+  setSampleBill,
   handleInputChange,
-}) => (
-  <Modal isCentered isOpen={isOpen} onClose={onClose}>
-    <ModalOverlay />
-    <ModalContent>
-      <ModalHeader
-        textTransform={"capitalize"}
-        fontSize={"2xl"}
-        fontWeight={"bold"}
-        textColor={"brand.700"}
-        textAlign={"center"}
-      >
-        hóa đơn mới
-      </ModalHeader>
-      <ModalCloseButton />
-      <ModalBody>
-        <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-          <FormControl isRequired>
-            <FormLabel>Tiền điện</FormLabel>
-            <Input
-              type="number"
-              name="elecBill"
-              value={bill.elecBill}
-              onChange={(e) => handleInputChange(e, setBill)}
-              placeholder="Nhập tiền điện"
-            />
-          </FormControl>
-          <FormControl isRequired>
-            <FormLabel>Tiền nước</FormLabel>
-            <Input
-              type="number"
-              name="waterBill"
-              value={bill.waterBill}
-              onChange={(e) => handleInputChange(e, setBill)}
-              placeholder="Nhập tiền nước"
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Phí khác</FormLabel>
-            <Input
-              type="number"
-              name="otherFees"
-              value={bill.otherFees}
-              onChange={(e) => handleInputChange(e, setBill)}
-              placeholder="Nhập phí khác (nếu có)"
-            />
-          </FormControl>
+  handleCreateBill,
+}) => {
+  // Tính toán tổng tiền mỗi khi các giá trị thay đổi
+  useEffect(() => {
+    const calculateTotal = () => {
+      const elecBill = parseFloat(sampleBill.elecBill) || 0;
+      const waterBill = parseFloat(sampleBill.waterBill) || 0;
+      const serviceFee = parseFloat(sampleBill.serviceFee) || 0;
+      const total = elecBill + waterBill + serviceFee;
 
-          {bill.otherFees && (
+      setSampleBill((prev) => ({ ...prev, total })); // Cập nhật tổng tiền
+    };
+
+    calculateTotal();
+  }, [
+    sampleBill.elecBill,
+    sampleBill.waterBill,
+    sampleBill.serviceFee,
+    setSampleBill,
+  ]);
+
+  return (
+    <Modal isCentered isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader textAlign="center">Tạo hóa đơn mới</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+            <FormControl isRequired>
+              <FormLabel>Tiền điện</FormLabel>
+              <Text>{sampleBill.elecBill || 0} VNĐ</Text>
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Tiền nước</FormLabel>
+              <Text>{sampleBill.waterBill || 0} VNĐ</Text>
+            </FormControl>
             <FormControl>
-              <FormLabel>Nội dung phí khác</FormLabel>
+              <FormLabel>Phí khác</FormLabel>
               <Input
-                type="text"
-                name="otherFeesDescription"
-                value={bill.otherFeesDescription || ""}
-                onChange={(e) => handleInputChange(e, setBill)}
-                placeholder="Nhập nội dung của phí khác"
+                type="number"
+                name="serviceFee"
+                value={sampleBill.serviceFee || ""}
+                onChange={(e) => handleInputChange(e, setSampleBill)}
+                placeholder="Nhập phí khác (nếu có)"
               />
             </FormControl>
-          )}
-
-          <FormControl isRequired>
-            <FormLabel>Tổng tiền</FormLabel>
-            <Input
-              type="number"
-              name="total"
-              value={bill.total}
-              onChange={(e) => handleInputChange(e, setBill)}
-              placeholder="Nhập tổng tiền"
-            />
-          </FormControl>
-        </Grid>
-      </ModalBody>
-      <ModalFooter>
-        <Button colorScheme="green" onClick={handleCreateBill}>
-          Tạo hóa đơn
-        </Button>
-        <Button onClick={onClose} ml={3}>
-          Hủy
-        </Button>
-      </ModalFooter>
-    </ModalContent>
-  </Modal>
-);
+            {sampleBill.serviceFee && (
+              <FormControl>
+                <FormLabel>Nội dung phí khác</FormLabel>
+                <Input
+                  type="text"
+                  name="serviceFeeDescription"
+                  value={sampleBill.serviceFeeDescription || ""}
+                  onChange={(e) => handleInputChange(e, setSampleBill)}
+                  placeholder="Nhập nội dung của phí khác"
+                />
+              </FormControl>
+            )}
+            <FormControl isRequired>
+              <FormLabel>Tổng tiền</FormLabel>
+              <Text fontWeight="bold">{sampleBill.total || 0} VNĐ</Text>
+            </FormControl>
+          </Grid>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            colorScheme="green"
+            onClick={() => handleCreateBill(sampleBill)}
+          >
+            Tạo hóa đơn
+          </Button>
+          <Button onClick={onClose} ml={3}>
+            Hủy
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  );
+};
 // Modal tạo hợp đồng
 export const ContractModal = ({
   isOpen,
@@ -341,28 +338,29 @@ export const ContractModal = ({
               onChange={(e) => handleInputChange(e, setContractDetails)}
             />
           </FormControl>
+          <HStack spacing={4} align="flex-start">
+            <FormControl isRequired>
+              <FormLabel>Giá điện (đồng/kWh)</FormLabel>
+              <Input
+                type="number"
+                name="electricityFee"
+                placeholder="Nhập số tiền điện"
+                value={contractDetails.electricityFee}
+                onChange={(e) => handleInputChange(e, setContractDetails)}
+              />
+            </FormControl>
 
-          <FormControl isRequired>
-            <FormLabel>Giá điện (đồng/kWh)</FormLabel>
-            <Input
-              type="number"
-              name="electricityFee"
-              placeholder="Nhập số tiền điện"
-              value={contractDetails.electricityFee}
-              onChange={(e) => handleInputChange(e, setContractDetails)}
-            />
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Giá nước (đồng/m³)</FormLabel>
-            <Input
-              type="number"
-              name="waterFee"
-              placeholder="Nhập số tiền nước"
-              value={contractDetails.waterFee}
-              onChange={(e) => handleInputChange(e, setContractDetails)}
-            />
-          </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Giá nước (đồng/m³)</FormLabel>
+              <Input
+                type="number"
+                name="waterFee"
+                placeholder="Nhập số tiền nước"
+                value={contractDetails.waterFee}
+                onChange={(e) => handleInputChange(e, setContractDetails)}
+              />
+            </FormControl>
+          </HStack>
           <FormControl isRequired>
             <FormLabel>Email người thuê</FormLabel>
             <Input
@@ -421,17 +419,31 @@ export const InfoModal = ({
           {/* Room Details */}
 
           <VStack align={"start"} spacing={2} flex="1">
-            <Heading size="md">Số điện:</Heading>
-            <Text> {selectedRoom?.electricity || "Đang tải..."}</Text>
-            <Heading size="md">Số nước:</Heading>
-            <Text>{selectedRoom?.water || "Đang tải..."}</Text>
-            <Heading size="md">Giá phòng:</Heading>
+            <Heading size="md">
+              Năm {selectedRoom?.latestUnitRoom?.year}
+            </Heading>
+            <Box>
+              <Heading size="sm">
+                Số điện tháng {selectedRoom?.latestUnitRoom?.month} :
+              </Heading>
+              <Text>
+                {" "}
+                {selectedRoom?.latestUnitRoom?.elecIndex || "Đang tải..."} kWh
+              </Text>
+            </Box>
+            <Heading size="sm">
+              Số nước tháng {selectedRoom?.latestUnitRoom?.month} :
+            </Heading>
+            <Text>
+              {selectedRoom?.latestUnitRoom?.aquaIndex || "Đang tải..."} m³
+            </Text>
+            <Heading size="sm">Giá phòng:</Heading>
             <Text>
               {formatNumber(selectedRoom?.price) || "Đang tải..."} VND
             </Text>
-            <Heading size="md">Diện tích:</Heading>
+            <Heading size="sm">Diện tích:</Heading>
             <Text>{selectedRoom?.area || "Đang tải..."} m²</Text>
-            <Heading size="md">Mô tả:</Heading>
+            <Heading size="sm">Mô tả:</Heading>
             <Text>{selectedRoom?.description || "Đang tải..."}</Text>
           </VStack>
         </HStack>

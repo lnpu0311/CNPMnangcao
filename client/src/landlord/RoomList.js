@@ -108,6 +108,25 @@ const RoomList = () => {
     }
   }, [hostel]);
 
+  useEffect(() => {
+    const fetchSample = async () => {
+      try {
+        const response = await axios.post(
+          `${process.env.REACT_APP_API}/landlord/${selectedRoom._id}/sampleBill`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        console.log("Hóa đơn nháp: ", response.data);
+        setSampleBill(response.data.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchSample();
+  }, [selectedRoom]);
   const [isLoading, setIsLoading] = useState({
     roomName: "",
     area: "",
@@ -157,18 +176,12 @@ const RoomList = () => {
     tenantEmail: "",
   });
 
-  const [bill, setBill] = useState({
-    rent: "",
+  const [sampleBill, setSampleBill] = useState({
     elecBill: "",
     waterBill: "",
-    otherFees: "",
-    otherFeesDescription: "",
+    serviceFee: "",
+    serviceFeeDescription: "",
     total: "",
-    isPaid: false,
-    paidAt: "",
-    dueDate: "",
-    elecIndex: "",
-    aquaIndex: "",
   });
 
   const handleCreateRoom = async () => {
@@ -384,28 +397,22 @@ const RoomList = () => {
     }
   };
 
-  const handleCreateBill = async () => {
-    if (
-      !bill.elecBill ||
-      !bill.waterBill ||
-      (bill.otherFees && !bill.otherFeesDescription)
-    ) {
+  const handleCreateBill = async (e) => {
+    if (!sampleBill.elecBill || !sampleBill.waterBill) {
       toast({
         title: "Thông tin chưa đầy đủ.",
-        description: bill.otherFees
-          ? "Vui lòng điền nội dung cho phí khác."
-          : "Vui lòng điền đầy đủ thông tin.",
+        description: "Vui lòng điền đầy đủ thông tin.",
         status: "warning",
         duration: 5000,
         isClosable: true,
       });
       return;
     }
-
+    console.log(e);
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API}/landlord/bill/create`,
-        bill,
+        `${process.env.REACT_APP_API}/landlord/hostel/${selectedRoom._id}/createBill`,
+        sampleBill,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
@@ -419,17 +426,6 @@ const RoomList = () => {
           duration: 5000,
           isClosable: true,
         });
-
-        // // Reset dữ liệu hóa đơn
-        // setBill({
-
-        //   month: "",
-        //   year: "",
-        //   electricityBill: "",
-        //   waterBill: "",
-        //   otherFees: "",
-        //   total: "",
-        // });
 
         // Đóng modal
         toggleModal("bill", false);
@@ -657,7 +653,12 @@ const RoomList = () => {
 
   return (
     <Box>
-      <Flex justifyContent="space-between" mb={4}>
+      <Flex
+        justifyContent="space-between"
+        mb={4}
+        wrap="wrap" // Cho phép các nút xuống hàng khi không đủ chỗ
+        gap={4}
+      >
         <Button
           onClick={handleGoBack}
           colorScheme="teal"
@@ -676,11 +677,12 @@ const RoomList = () => {
       <Heading
         textColor={"blue.500"}
         as="h3"
-        size="lg"
+        size={{ base: "md", md: "lg" }} // Kích thước chữ thay đổi theo màn hình
         mb={{ base: 4, md: 12 }}
       >
         Danh sách phòng của cơ sở: {hostel?.name || "Đang tải..."}
       </Heading>
+
       {isLoading ? (
         <Center>
           <Spinner size="xl" />
@@ -690,23 +692,27 @@ const RoomList = () => {
           <Text>Không có phòng nào</Text>
         </Center>
       ) : (
-        <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={6}>
+        <SimpleGrid
+          minChildWidth="250px" // Đảm bảo mỗi mục có chiều rộng tối thiểu
+          spacing={6} // Khoảng cách giữa các mục
+          mb={6}
+        >
           {getCurrentPageData().map((room) => (
             <Box
+              key={room.id}
+              w="100%" // Đảm bảo Box chiếm toàn bộ chiều rộng cột
+              p={4} // Padding bên trong
               border={"1px solid"}
               borderColor={"gray.200"}
               rounded={"lg"}
-              key={room.id}
-              borderRadius="lg"
               overflow="hidden"
-              boxShadow="xl"
+              boxShadow="lg"
+              cursor="pointer"
               bg={room.status === "occupied" ? "brand.100" : "brand.2"}
               position="relative"
-              p={2}
-              cursor="pointer"
               onClick={() => {
-                setSelectedRoom(room); // Lưu thông tin phòng được chọn
-                toggleModal("infoRoom", true); // Hiển thị modal thông tin phòng
+                setSelectedRoom(room);
+                toggleModal("infoRoom", true);
               }}
             >
               <Image
@@ -772,6 +778,7 @@ const RoomList = () => {
                         size="sm"
                         colorScheme="purple"
                         onClick={(e) => {
+                          setSelectedRoom(room);
                           e.stopPropagation();
                           toggleModal("bill", true);
                         }}
@@ -834,10 +841,10 @@ const RoomList = () => {
       <BillModal
         isOpen={modalState.bill}
         onClose={() => toggleModal("bill", false)}
-        bill={bill}
-        setBill={setBill}
-        handleCreateBill={handleCreateBill}
+        sampleBill={sampleBill}
+        setSampleBill={setSampleBill}
         handleInputChange={handleInputChange}
+        handleCreateBill={handleCreateBill}
       />
       <ContractModal
         isOpen={modalState.contract}

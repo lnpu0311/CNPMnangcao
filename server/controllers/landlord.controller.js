@@ -474,12 +474,18 @@ const sampleBill = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Không tìm thấy dữ liệu đơn vị" });
     }
-    console.log(unitData[1]);
     const data = {
       elecBill: "",
       waterBill: "",
     };
-
+    console.log(unitData[1]);
+    if (!unitData[0] || !unitData[1]) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Tìm chỉ số điện nước không thành công. Tạo hóa đơn yêu cầu có 2 chỉ số điện nước của 2 tháng liên tiếp",
+      });
+    }
     data.elecBill =
       (unitData[0].elecIndex - unitData[1].elecIndex) * contract.electricityFee;
     data.waterBill =

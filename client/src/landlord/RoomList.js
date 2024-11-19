@@ -108,25 +108,41 @@ const RoomList = () => {
     }
   }, [hostel]);
 
-  useEffect(() => {
-    const fetchSample = async () => {
-      try {
-        const response = await axios.post(
-          `${process.env.REACT_APP_API}/landlord/${selectedRoom._id}/sampleBill`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+  const fetchSample = async (room) => {
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API}/landlord/${room._id}/sampleBill`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (response.data.success) {
         console.log("Hóa đơn nháp: ", response.data);
         setSampleBill(response.data.data);
-      } catch (error) {
-        console.error(error);
+      } else {
+        toast({
+          title: "Có lỗi xảy ra.",
+          description: response.data.message || "Vui lòng thử lại.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
       }
-    };
-    fetchSample();
-  }, [selectedRoom]);
+    } catch (error) {
+      toast({
+        title: "Có lỗi xảy ra.",
+        description: error.response.data.message || "Vui lòng thử lại.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      console.error("Lỗi khi lấy hóa đơn nháp:", error);
+      throw error; // Ném lỗi để xử lý ở nơi gọi hàm
+    }
+  };
+
   const [isLoading, setIsLoading] = useState({
     roomName: "",
     area: "",
@@ -777,13 +793,30 @@ const RoomList = () => {
                         icon={<IoReceipt />}
                         size="sm"
                         colorScheme="purple"
-                        onClick={(e) => {
-                          setSelectedRoom(room);
+                        onClick={async (e) => {
                           e.stopPropagation();
-                          toggleModal("bill", true);
+                          setSelectedRoom(room); // Đặt room hiện tại
+                          try {
+                            await fetchSample(room); // Đợi lấy dữ liệu sampleBill
+                            toggleModal("bill", true); // Chỉ mở modal khi dữ liệu đã sẵn sàng
+                          } catch (error) {
+                            console.error(
+                              "Lỗi khi tải dữ liệu hóa đơn:",
+                              error
+                            );
+                            toast({
+                              title: "Lỗi",
+                              description:
+                                "Không thể tải dữ liệu hóa đơn. Vui lòng thử lại.",
+                              status: "error",
+                              duration: 5000,
+                              isClosable: true,
+                            });
+                          }
                         }}
                       />
                     </Tooltip>
+
                     <Tooltip label="Cập nhật" aria-label="Cập nhật">
                       <IconButton
                         icon={<FaUpload />}
@@ -846,6 +879,7 @@ const RoomList = () => {
         handleInputChange={handleInputChange}
         handleCreateBill={handleCreateBill}
       />
+
       <ContractModal
         isOpen={modalState.contract}
         onClose={() => toggleModal("contract", false)}

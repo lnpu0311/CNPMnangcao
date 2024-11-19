@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Modal,
   ModalOverlay,
@@ -171,85 +171,89 @@ export const UpdateModal = ({
 export const BillModal = ({
   isOpen,
   onClose,
-  bill,
-  setBill,
-  handleCreateBill,
+  sampleBill,
+  setSampleBill,
   handleInputChange,
-}) => (
-  <Modal isCentered isOpen={isOpen} onClose={onClose}>
-    <ModalOverlay />
-    <ModalContent>
-      <ModalHeader textAlign="center">Tạo hóa đơn mới</ModalHeader>
-      <ModalCloseButton />
-      <ModalBody>
-        <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-          <FormControl isRequired>
-            <FormLabel>Tiền điện</FormLabel>
-            <Input
-              type="number"
-              name="elecBill"
-              value={bill.elecBill}
-              onChange={(e) => handleInputChange(e, setBill)}
-              placeholder="Nhập tiền điện"
-            />
-          </FormControl>
-          <FormControl isRequired>
-            <FormLabel>Tiền nước</FormLabel>
-            <Input
-              type="number"
-              name="waterBill"
-              value={bill.waterBill}
-              onChange={(e) => handleInputChange(e, setBill)}
-              placeholder="Nhập tiền nước"
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Phí khác</FormLabel>
-            <Input
-              type="number"
-              name="otherFees"
-              value={bill.otherFees}
-              onChange={(e) => handleInputChange(e, setBill)}
-              placeholder="Nhập phí khác (nếu có)"
-            />
-          </FormControl>
+  handleCreateBill,
+}) => {
+  // Tính toán tổng tiền mỗi khi các giá trị thay đổi
+  useEffect(() => {
+    const calculateTotal = () => {
+      const elecBill = parseFloat(sampleBill.elecBill) || 0;
+      const waterBill = parseFloat(sampleBill.waterBill) || 0;
+      const serviceFee = parseFloat(sampleBill.serviceFee) || 0;
+      const total = elecBill + waterBill + serviceFee;
 
-          {bill.otherFees && (
+      setSampleBill((prev) => ({ ...prev, total })); // Cập nhật tổng tiền
+    };
+
+    calculateTotal();
+  }, [
+    sampleBill.elecBill,
+    sampleBill.waterBill,
+    sampleBill.serviceFee,
+    setSampleBill,
+  ]);
+
+  return (
+    <Modal isCentered isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader textAlign="center">Tạo hóa đơn mới</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+            <FormControl isRequired>
+              <FormLabel>Tiền điện</FormLabel>
+              <Text>{sampleBill.elecBill || 0} VNĐ</Text>
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Tiền nước</FormLabel>
+              <Text>{sampleBill.waterBill || 0} VNĐ</Text>
+            </FormControl>
             <FormControl>
-              <FormLabel>Nội dung phí khác</FormLabel>
+              <FormLabel>Phí khác</FormLabel>
               <Input
-                type="text"
-                name="otherFeesDescription"
-                value={bill.otherFeesDescription || ""}
-                onChange={(e) => handleInputChange(e, setBill)}
-                placeholder="Nhập nội dung của phí khác"
+                type="number"
+                name="serviceFee"
+                value={sampleBill.serviceFee || ""}
+                onChange={(e) => handleInputChange(e, setSampleBill)}
+                placeholder="Nhập phí khác (nếu có)"
               />
             </FormControl>
-          )}
-
-          <FormControl isRequired>
-            <FormLabel>Tổng tiền</FormLabel>
-            <Input
-              type="number"
-              name="total"
-              value={bill.total}
-              onChange={(e) => handleInputChange(e, setBill)}
-              placeholder="Nhập tổng tiền"
-            />
-          </FormControl>
-        </Grid>
-      </ModalBody>
-      <ModalFooter>
-        <Button colorScheme="green" onClick={handleCreateBill}>
-          Tạo hóa đơn
-        </Button>
-        <Button onClick={onClose} ml={3}>
-          Hủy
-        </Button>
-      </ModalFooter>
-    </ModalContent>
-  </Modal>
-);
+            {sampleBill.serviceFee && (
+              <FormControl>
+                <FormLabel>Nội dung phí khác</FormLabel>
+                <Input
+                  type="text"
+                  name="serviceFeeDescription"
+                  value={sampleBill.serviceFeeDescription || ""}
+                  onChange={(e) => handleInputChange(e, setSampleBill)}
+                  placeholder="Nhập nội dung của phí khác"
+                />
+              </FormControl>
+            )}
+            <FormControl isRequired>
+              <FormLabel>Tổng tiền</FormLabel>
+              <Text fontWeight="bold">{sampleBill.total || 0} VNĐ</Text>
+            </FormControl>
+          </Grid>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            colorScheme="green"
+            onClick={() => handleCreateBill(sampleBill)}
+          >
+            Tạo hóa đơn
+          </Button>
+          <Button onClick={onClose} ml={3}>
+            Hủy
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  );
+};
 // Modal tạo hợp đồng
 export const ContractModal = ({
   isOpen,

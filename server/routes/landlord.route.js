@@ -11,6 +11,8 @@ const {
   createContract,
   updateUnit,
   getTenantList,
+  sampleBill,
+  createBill,
 } = require("../controllers/landlord.controller");
 const upload = require("../middlewares/uploadImage");
 
@@ -27,8 +29,8 @@ router.post("/contract/create", authMiddleware(["landlord"]), createContract);
 router.get("/hostel/:roomId", getRoomById);
 // router.get("/hostel/:roomId/update", );
 router.post("/hostel/:roomId/updateUnit", updateUnit);
-//router.get("/hostel/:roomId/createReceipt",  )
-
+router.post("/hostel/:roomId/createBill", createBill);
+router.post("/:roomId/sampleBill", sampleBill);
 //Đăng cơ sở (chỉ landlord)
 router.post(
   "/room/:hostelId/create",

@@ -4,7 +4,7 @@ const Contract = require("../models/contracts.model");
 const RentalRequest = require("../models/rentalRequest.model");
 const UnitRoom = require("../models/unitRoom.model");
 const Bill = require("../models/bill.model");
-
+const Notification = require("../models/notification.model");
 const User = require("../models/user.model");
 const createHostel = async (req, res) => {
   const hostel = req.body;
@@ -507,7 +507,7 @@ const createBill = async (req, res) => {
   try {
     const contract = await Contract.findOne({ roomId: roomId });
     if (!contract) {
-      res.status(400).json({ success: false, message: "Chưa có hợp đồng" });
+      return res.status(400).json({ success: false, message: "Chưa có hợp đồng" });
     }
 
     const unitData = await UnitRoom.find({ roomId: roomId })
@@ -528,11 +528,28 @@ const createBill = async (req, res) => {
       serviceFee: bill.serviceFee,
       serviceFeeDescription: bill.serviceFeeDescription,
       totalAmount: bill.total,
+      status: 'PENDING',
+      dueDate: new Date(Date.now() + 7*24*60*60*1000)
     });
 
-    const data = await newBill.save();
+    const savedBill = await newBill.save();
 
-    res.status(200).json({ success: true, data: data });
+    // Tạo thông báo
+    const notification = await Notification.create({
+      userId: contract.tenantId,
+      title: "Hóa đơn mới",
+      message: `Bạn có hóa đơn mới cần thanh toán. Tổng tiền: ${bill.total}đ`,
+      type: "BILL",
+      billId: savedBill._id
+    });
+
+    // Trả về savedBill thay vì data
+    res.status(200).json({ 
+      success: true, 
+      data: savedBill,
+      notification: notification 
+    });
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Đã xảy ra lỗi" });

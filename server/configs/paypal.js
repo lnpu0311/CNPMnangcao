@@ -1,9 +1,16 @@
 const checkoutNodeJssdk = require('@paypal/checkout-server-sdk');
 
-const clientId = process.env.PAYPAL_CLIENT_ID;
-const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+// Khởi tạo môi trường sandbox PayPal
+const environment = new checkoutNodeJssdk.core.SandboxEnvironment(
+    process.env.PAYPAL_CLIENT_ID,
+    process.env.PAYPAL_CLIENT_SECRET
+);
 
-const environment = new checkoutNodeJssdk.core.LiveEnvironment(clientId, clientSecret);
 const paypalClient = new checkoutNodeJssdk.core.PayPalHttpClient(environment);
+
+console.log("PayPal Server Config:", {
+  clientId: process.env.PAYPAL_CLIENT_ID,
+  hasSecret: !!process.env.PAYPAL_CLIENT_SECRET
+});
 
 module.exports = { paypalClient };

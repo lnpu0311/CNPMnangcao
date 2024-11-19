@@ -32,6 +32,8 @@ import {
   MenuDivider,
   InputGroup,
   InputRightElement,
+  SimpleGrid,
+  useColorModeValue
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { debounce } from "lodash";
@@ -75,12 +77,13 @@ import {
 import "../../src/index.css";
 import { Link as RouterLink } from "react-router-dom";
 import { IoHomeSharp } from "react-icons/io5";
+import NotificationBell from "../components/NotificationBell";
+import { Link as ChakraLink } from "@chakra-ui/react";
 
 const MotionBox = motion.create(Box);
 
 function TenantHome() {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [hasNewNotification, setHasNewNotification] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(true);
   const navigate = useNavigate();
@@ -180,6 +183,18 @@ function TenantHome() {
     setIsNavOpen(!isNavOpen);
   };
 
+  const bgColor = useColorModeValue('white', 'gray.800');
+
+  const features = [
+    {
+      title: 'Hóa đơn',
+      icon: FaFileInvoiceDollar,
+      description: 'Xem và thanh toán hóa đơn',
+      path: '/tenant/bills'
+    },
+    // Giữ nguyên các card khác
+  ];
+
   return (
     <Grid
       templateAreas={{
@@ -273,14 +288,13 @@ function TenantHome() {
 
         {/* Right Section */}
         <Flex alignItems="center" gap={8}>
-          <Box position="relative">
+          {/* <Box position="relative">
             <IconButton
               color="brand.1"
               aria-label="Notifications"
               icon={<BellIcon />}
               variant="ghost"
               _hover={{ bg: "gray.300" }}
-              
             />
             {hasNewNotification && (
               <Badge
@@ -294,43 +308,44 @@ function TenantHome() {
                 border="2px solid white"
               />
             )}
-          </Box>
+          </Box> */}
 
-        
+          <NotificationBell />
+
           {/* User Menu */}
-        <Menu>
-          <MenuButton>
-            <Avatar size="sm" name={userData.name} cursor="pointer" />
-          </MenuButton>
-          <MenuList>
-            {/* Menu items chỉ hiển thị ở desktop */}
-            <Box display={{ base: "none", md: "block" }}>
-              {menuItems.map((item) => (
-                <MenuItem
-                  key={item.name}
-                  icon={item.icon}
-                  as={RouterLink}
-                  to={item.path}
-                >
-                  {item.name}
-                </MenuItem>
-              ))}
+          <Menu>
+            <MenuButton>
+              <Avatar size="sm" name={userData.name} cursor="pointer" />
+            </MenuButton>
+            <MenuList>
+              {/* Menu items chỉ hiển thị ở desktop */}
+              <Box display={{ base: "none", md: "block" }}>
+                {menuItems.map((item) => (
+                  <MenuItem
+                    key={item.name}
+                    icon={item.icon}
+                    as={RouterLink}
+                    to={item.path}
+                  >
+                    {item.name}
+                  </MenuItem>
+                ))}
 
-              <MenuDivider borderColor="black" borderWidth="1px"/>
-            </Box>
+                <MenuDivider borderColor="black" borderWidth="1px"/>
+              </Box>
 
-            {/* Chỉnh sửa thông tin cá nhân - hiển thị ở cả desktop và mobile */}
-            <MenuItem icon={<EditIcon />} onClick={handleEditProfile}>
-              Chỉnh sửa thông tin cá nhân
-            </MenuItem>
-
-            <Box display={{ base: "none", md: "block" }}>
-              <MenuItem icon={<ArrowForwardIcon />} onClick={handleLogout}>
-                Đăng xuất
+              {/* Chỉnh sửa thông tin cá nhân - hiển thị ở cả desktop và mobile */}
+              <MenuItem icon={<EditIcon />} onClick={handleEditProfile}>
+                Chỉnh sửa thông tin cá nhân
               </MenuItem>
-            </Box>
-          </MenuList>
-        </Menu>
+
+              <Box display={{ base: "none", md: "block" }}>
+                <MenuItem icon={<ArrowForwardIcon />} onClick={handleLogout}>
+                  Đăng xuất
+                </MenuItem>
+              </Box>
+            </MenuList>
+          </Menu>
         </Flex>
 
         {/* Mobile Menu Button */}
@@ -467,30 +482,30 @@ function TenantHome() {
                 Kết nối với chúng tôi
               </Text>
               <HStack spacing={4}>
-                <Link href="https://facebook.com" isExternal>
+                <ChakraLink href="https://facebook.com" isExternal>
                   <Icon
                     as={FaFacebook}
                     boxSize={6}
                     _hover={{ color: "blue.400", transform: "scale(1.1)" }}
                     transition="all 0.3s"
                   />
-                </Link>
-                <Link href="https://youtube.com" isExternal>
+                </ChakraLink>
+                <ChakraLink href="https://youtube.com" isExternal>
                   <Icon
                     as={FaYoutube}
                     boxSize={6}
                     _hover={{ color: "red.400", transform: "scale(1.1)" }}
                     transition="all 0.3s"
                   />
-                </Link>
-                <Link href="https://instagram.com" isExternal>
+                </ChakraLink>
+                <ChakraLink href="https://instagram.com" isExternal>
                   <Icon
                     as={FaInstagram}
                     boxSize={6}
                     _hover={{ color: "pink.400", transform: "scale(1.1)" }}
                     transition="all 0.3s"
                   />
-                </Link>
+                </ChakraLink>
               </HStack>
             </VStack>
           </Grid>

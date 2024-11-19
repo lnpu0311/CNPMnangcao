@@ -72,20 +72,17 @@ const TenantRoomList = () => {
 
   const FilterForm = () => (
     <VStack 
-  spacing={2}
-  align="center"
-  bg="white"
-  p={6}
-  borderRadius="xl"
-  boxShadow="md"
-  border="2px solid"
-  borderColor="gray.200"
-  position="fixed"  // Sử dụng position fixed
-  top="34%"  
-  zIndex="8"
-  mt={4}  // Thêm margin-top để tạo khoảng cách với phần tử phía trên
-  mb={4}  // Thêm margin-bottom nếu cần tạo khoảng cách với phần tử phía dưới
->
+      spacing={2}
+      align="center"
+      bg="white"
+      p={6}
+      borderRadius="xl"
+      boxShadow="md"
+      border="2px solid"
+      borderColor="gray.200"
+      top="30%"  
+      zIndex="8"
+    >
       <Text fontSize="xl" fontWeight="bold" mb={2}>
         Lọc để tìm kiếm
       </Text>
@@ -608,8 +605,8 @@ const TenantRoomList = () => {
               <Spinner size="xl" />
             </Center>
           ) : filteredRooms.length === 0 ? (
-            <Center>
-              <Text>Không có phòng nào</Text>
+            <Center mr={200}>
+              <Text textAlign="center" w="100%">Không có phòng nào</Text>
             </Center>
           ) : (
           <Box className='mb-20'>

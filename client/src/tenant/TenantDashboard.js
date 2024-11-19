@@ -18,12 +18,16 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Banner from "./Banner";
 
-const categories = [
-  { name: "Quận 1", image: "./house1.png" },
-  { name: "Quận 2", image: "./house2.png" },
-  { name: "Quận 3", image: "./house3.png" },
-  // Thêm các quận khác
-];
+ const categories = [
+   { name: "Quận 1", image: "./houses/house1.png" },
+   { name: "Quận 2", image: "./houses/house2.png" },
+   { name: "Quận 3", image: "./houses/house3.png" },
+   { name: "Quận 4", image: "./houses/house4.png" }, // Thêm danh mục mới
+   { name: "Quận 5", image: "./houses/house5.png" }, // Thêm danh mục mới
+   { name: "Quận 6", image: "./houses/house6.png" }, // Thêm danh mục mới
+ 
+   // Thêm các quận khác
+ ];
 
 const rooms = [
   {
@@ -112,6 +116,8 @@ const curriculumPathways = [
   },
 ];
 
+
+
 // About & Values Section
 const contentData = [
   {
@@ -181,13 +187,6 @@ function TenantDashboard() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // const nextSlide = () => {
-  //   setCurrentIndex((prevIndex) => (prevIndex + 1) % rooms.length);
-  // };
-
-  // const prevSlide = () => {
-  //   setCurrentIndex((prevIndex) => (prevIndex - 1 + rooms.length) % rooms.length);
-  // };
 
     // Hàm mở modal
   const handleOpenDetails = (name) => {
@@ -234,7 +233,7 @@ function TenantDashboard() {
     <VStack spacing={10} align="center" p={4} w="100%">
       {/* Banner Section */}
       <Box mb={20}> 
-        <Banner/>
+        <Banner />
       </Box>
 
       {/* <VStack spacing={10} align="center" p={4} w="100%">
@@ -276,6 +275,28 @@ function TenantDashboard() {
         </Box>
       )}
     </VStack> */}
+  
+        {/* Danh mục */}
+        {/* <Flex overflow="hidden" mb={10} w="100%" justifyContent="center">
+          <Flex as={motion.div} whileTap={{ cursor: "grabbing" }} w="100%" overflowX="auto" justifyContent="center">
+            {categories.map((category, index) => (
+              <Box 
+                key={index} 
+                p={4} 
+                minW="200px" 
+                textAlign="center" 
+                onClick={() => handleCategoryClick(category.name)}
+                borderRadius="md" 
+                boxShadow="md" 
+                transition="transform 0.2s" 
+                _hover={{ transform: "scale(1.05)", boxShadow: "lg" }} // Hiệu ứng hover
+              >
+                <Image src={category.image} alt={category.name} boxSize="150px" objectFit="cover" borderRadius="md" />
+                <Text mt={2} fontWeight="bold">{category.name}</Text>
+              </Box>
+            ))}
+          </Flex>
+        </Flex> */}
 
        {/* RoomList button */}
        <Box 
@@ -286,8 +307,8 @@ function TenantDashboard() {
         <Button
           size="lg"
           height="60px"
-          width={{ base: "90%", md: "400px" }}
-          colorScheme="orange"
+          width={{ base: "90%", md: "300px" }}
+          bg="orange.400"
           
           onClick={() => navigate('room-list')}
           fontSize="xl"
@@ -300,6 +321,8 @@ function TenantDashboard() {
           Tìm Phòng Ngay!
         </Button>
       </Box>
+
+      
       
       {/* Profile Section */}
       <Box 
@@ -429,26 +452,7 @@ function TenantDashboard() {
         </ModalContent>
       </Modal>
 
-      {/* Testimonials */}
-      {/* <Heading fontSize="2xl" textAlign="center">Cộng đồng của chúng tôi</Heading>
-      <Stack spacing={4} align="center" w="60%">
-        {testimonials.map(({ quote, author, avatar }, idx) => (
-          <Box key={idx} w="80%" p={6} bg="yellow.100" borderRadius="lg" textAlign="left">
-            <HStack spacing={4}>
-              <Image
-                src={avatar} 
-                alt={author}
-                borderRadius="full"
-                boxSize="50px"
-              />
-              <Box>
-                <Text fontStyle="italic" fontSize="lg">“{quote}”</Text>
-                <Text fontWeight="bold" mt={2}>- {author}</Text>
-              </Box>
-            </HStack>
-          </Box>
-        ))}
-      </Stack> */}
+
 
       {/* News & Updates */}
       {/* <Heading fontSize="2xl" textAlign="center">Tin tức & Thành tựu</Heading>

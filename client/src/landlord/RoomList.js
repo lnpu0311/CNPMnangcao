@@ -657,7 +657,12 @@ const RoomList = () => {
 
   return (
     <Box>
-      <Flex justifyContent="space-between" mb={4}>
+      <Flex
+        justifyContent="space-between"
+        mb={4}
+        wrap="wrap" // Cho phép các nút xuống hàng khi không đủ chỗ
+        gap={4}
+      >
         <Button
           onClick={handleGoBack}
           colorScheme="teal"
@@ -676,11 +681,12 @@ const RoomList = () => {
       <Heading
         textColor={"blue.500"}
         as="h3"
-        size="lg"
+        size={{ base: "md", md: "lg" }} // Kích thước chữ thay đổi theo màn hình
         mb={{ base: 4, md: 12 }}
       >
         Danh sách phòng của cơ sở: {hostel?.name || "Đang tải..."}
       </Heading>
+
       {isLoading ? (
         <Center>
           <Spinner size="xl" />
@@ -690,23 +696,27 @@ const RoomList = () => {
           <Text>Không có phòng nào</Text>
         </Center>
       ) : (
-        <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing={6}>
+        <SimpleGrid
+          minChildWidth="250px" // Đảm bảo mỗi mục có chiều rộng tối thiểu
+          spacing={6} // Khoảng cách giữa các mục
+          mb={6}
+        >
           {getCurrentPageData().map((room) => (
             <Box
+              key={room.id}
+              w="100%" // Đảm bảo Box chiếm toàn bộ chiều rộng cột
+              p={4} // Padding bên trong
               border={"1px solid"}
               borderColor={"gray.200"}
               rounded={"lg"}
-              key={room.id}
-              borderRadius="lg"
               overflow="hidden"
-              boxShadow="xl"
+              boxShadow="lg"
+              cursor="pointer"
               bg={room.status === "occupied" ? "brand.100" : "brand.2"}
               position="relative"
-              p={2}
-              cursor="pointer"
               onClick={() => {
-                setSelectedRoom(room); // Lưu thông tin phòng được chọn
-                toggleModal("infoRoom", true); // Hiển thị modal thông tin phòng
+                setSelectedRoom(room);
+                toggleModal("infoRoom", true);
               }}
             >
               <Image

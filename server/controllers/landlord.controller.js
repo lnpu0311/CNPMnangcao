@@ -452,75 +452,84 @@ const updateUnit = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-const createBill = async (req, res) => {
-  const { roomId, tenantId, rentFee, serviceFee, dueDate } = req.body;
+const sampleBill = async (req, res) => {
+  const { roomId } = req.params;
+  console.log(roomId);
   try {
-    // Tìm hai bản ghi UnitRoom gần nhất cho phòng
-    const unitRecords = await UnitRoom.find({ roomId: roomId })
-      .sort({ year: -1, month: -1 })
-      .limit(2);
-    if (unitRecords.length < 2) {
-      return res.status(400).json({
-        success: false,
-        message: "Không đủ dữ liệu điện nước để tính toán hóa đơn",
-      });
+    // Kiểm tra hợp đồng
+    const contract = await Contract.findOne({ roomId: roomId });
+    if (!contract) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Phòng chưa có hợp đồng" });
     }
-    // Tách dữ liệu điện và nước từ hai bản ghi gần nhất
-    const [newRecord, oldRecord] = unitRecords;
-    const elecIndexDifference = newRecord.elecIndex - oldRecord.elecIndex;
-    const aquaIndexDifference = newRecord.aquaIndex - oldRecord.aquaIndex;
-    // Tính chi phí điện
-    const calculateElectricityFee = (kWh) => {
-      let fee = 0;
-      if (kWh <= 50) {
-        fee = kWh * 1678;
-      } else if (kWh <= 100) {
-        fee = 50 * 1678 + (kWh - 50) * 1734;
-      } else if (kWh <= 200) {
-        fee = 50 * 1678 + 50 * 1734 + (kWh - 100) * 2014;
-      } else if (kWh <= 300) {
-        fee = 50 * 1678 + 50 * 1734 + 100 * 2014 + (kWh - 200) * 2536;
-      } else {
-        fee =
-          50 * 1678 + 50 * 1734 + 100 * 2014 + 100 * 2536 + (kWh - 300) * 2834;
-      }
-      return fee;
+
+    // Lấy 2 tháng mới nhất
+    const unitData = await UnitRoom.find({ roomId: roomId })
+      .sort({ year: -1, month: -1 }) // Sắp xếp giảm dần theo năm và tháng
+      .limit(2); // Chỉ lấy 2 bản ghi mới nhất
+
+    if (!unitData || unitData.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Không tìm thấy dữ liệu đơn vị" });
+    }
+    console.log(unitData[1]);
+    const data = {
+      elecBill: "",
+      waterBill: "",
     };
-    // Tính chi phí nước
-    const calculateWaterFee = (m3) => {
-      let fee = 0;
-      if (m3 <= 10) {
-        fee = m3 * 5973;
-      } else if (m3 <= 20) {
-        fee = 10 * 5973 + (m3 - 10) * 7052;
-      } else if (m3 <= 30) {
-        fee = 10 * 5973 + 10 * 7052 + (m3 - 20) * 8669;
-      } else {
-        fee = 10 * 5973 + 10 * 7052 + 10 * 8669 + (m3 - 30) * 15929;
-      }
-      return fee;
-    };
-    // Tính toán chi phí điện và nước
-    const electricityFee = calculateElectricityFee(elecIndexDifference);
-    const waterFee = calculateWaterFee(aquaIndexDifference);
-    // Tính tổng chi phí
-    const totalAmount = rentFee + serviceFee + electricityFee + waterFee;
-    // Tạo hóa đơn mới
-    const newBill = new Bill({
-      roomId,
-      tenantId,
-      rentFee,
-      electricityFee,
-      waterFee,
-      serviceFee,
-      totalAmount,
-      dueDate,
-    });
-    // Lưu hóa đơn vào cơ sở dữ liệu
-    const savedBill = await newBill.save();
-    res.status(201).json({ success: true, data: savedBill });
+
+    data.elecBill =
+      (unitData[0].elecIndex - unitData[1].elecIndex) * contract.electricityFee;
+    data.waterBill =
+      (unitData[0].aquaIndex - unitData[1].aquaIndex) * contract.waterFee;
+    res.status(200).json({ success: true, data: data });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Đã xảy ra lỗi trong khi xử lý yêu cầu",
+    });
+  }
+};
+const createBill = async (req, res) => {
+  const bill = req.body;
+  const { roomId } = req.params;
+
+  console.log(roomId);
+  try {
+    const contract = await Contract.findOne({ roomId: roomId });
+    if (!contract) {
+      res.status(400).json({ success: false, message: "Chưa có hợp đồng" });
+    }
+
+    const unitData = await UnitRoom.find({ roomId: roomId })
+      .sort({ year: -1, month: -1 }) // Sắp xếp giảm dần theo năm và tháng
+      .limit(2); // Chỉ lấy 2 bản ghi mới nhất
+
+    if (!unitData || unitData.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Không tìm thấy dữ liệu đơn vị" });
+    }
+    const newBill = new Bill({
+      roomId: roomId,
+      tenantId: contract.tenantId,
+      rentFee: contract.rentFee,
+      electricityFee: bill.elecBill,
+      waterFee: bill.waterBill,
+      serviceFee: bill.serviceFee,
+      serviceFeeDescription: bill.serviceFeeDescription,
+      totalAmount: bill.total,
+    });
+
+    const data = await newBill.save();
+
+    res.status(200).json({ success: true, data: data });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Đã xảy ra lỗi" });
   }
 };
 module.exports = {
@@ -532,4 +541,6 @@ module.exports = {
   createContract,
   getTenantList,
   updateUnit,
+  sampleBill,
+  createBill,
 };

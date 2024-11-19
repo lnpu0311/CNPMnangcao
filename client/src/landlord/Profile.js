@@ -11,11 +11,13 @@ import {
   useToast,
   IconButton,
   Stack,
+  Flex
 } from "@chakra-ui/react";
 import { EditIcon } from "@chakra-ui/icons";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
-import { useLoaderData } from "react-router-dom";
+import { useLoaderData, useNavigate } from "react-router-dom";
+import {  FaArrowLeft } from "react-icons/fa";
 function ProfilePage() {
   const toast = useToast();
   const [token, setToken] = useState(null);
@@ -24,6 +26,11 @@ function ProfilePage() {
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [newAvatar, setNewAvatar] = useState(null);
+
+  const navigate = useNavigate();
+  const handleGoBack = () => {
+    navigate(-1);
+  };
   // Sample user data
   const [originalUser, setOriginalUser] = useState({
     name: "Pukachu",
@@ -121,6 +128,16 @@ function ProfilePage() {
 
   return (
     <Stack>
+      <Flex alignItems="center" justifyContent="space-between" mb={4}>
+        <Button
+          onClick={handleGoBack}
+          colorScheme="teal"
+          leftIcon={<FaArrowLeft />}
+        >
+          Quay lại
+        </Button>
+        
+      </Flex>
       <Box maxW="md" mx="auto" p={4} textAlign="center">
         <Box position="relative" display="inline-block">
           <Avatar

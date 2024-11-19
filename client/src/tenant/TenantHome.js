@@ -296,13 +296,15 @@ function TenantHome() {
             )}
           </Box>
 
+        
           {/* User Menu */}
-          <Menu>
-            <MenuButton>
-              <Avatar size="sm" name={userData.name} cursor="pointer" />
-            </MenuButton>
-            <MenuList>
-              {/* Các chức năng chính */}
+        <Menu>
+          <MenuButton>
+            <Avatar size="sm" name={userData.name} cursor="pointer" />
+          </MenuButton>
+          <MenuList>
+            {/* Menu items chỉ hiển thị ở desktop */}
+            <Box display={{ base: "none", md: "block" }}>
               {menuItems.map((item) => (
                 <MenuItem
                   key={item.name}
@@ -314,25 +316,21 @@ function TenantHome() {
                 </MenuItem>
               ))}
 
-              <MenuDivider />
+              <MenuDivider borderColor="black" borderWidth="1px"/>
+            </Box>
 
-              {/* Cài đặt và thông tin cá nhân */}
-              {/* <MenuItem icon={<FaCog />} as={RouterLink} to={settingsItem.path}>
-                {settingsItem.name}
-              </MenuItem> */}
+            {/* Chỉnh sửa thông tin cá nhân - hiển thị ở cả desktop và mobile */}
+            <MenuItem icon={<EditIcon />} onClick={handleEditProfile}>
+              Chỉnh sửa thông tin cá nhân
+            </MenuItem>
 
-              <MenuItem icon={<EditIcon />} onClick={handleEditProfile}>
-                Chỉnh sửa thông tin cá nhân
-              </MenuItem>
-
-              <MenuDivider />
-
-              {/* Đăng xuất */}
+            <Box display={{ base: "none", md: "block" }}>
               <MenuItem icon={<ArrowForwardIcon />} onClick={handleLogout}>
                 Đăng xuất
               </MenuItem>
-            </MenuList>
-          </Menu>
+            </Box>
+          </MenuList>
+        </Menu>
         </Flex>
 
         {/* Mobile Menu Button */}
@@ -381,7 +379,22 @@ function TenantHome() {
                   </NavLink>
                 ))}
 
-                <Divider />
+                <Divider borderColor="black" borderWidth="1px" />
+                
+
+                {/* Mobile Logout */}
+                <Button
+                  leftIcon={<ArrowForwardIcon />}
+                  variant="ghost"
+                  w="100%"
+                  justifyContent="flex-start"
+                  onClick={() => {
+                    handleLogout();
+                    onClose();
+                  }}
+                >
+                  Đăng xuất
+                </Button>
 
                 {/* Mobile Settings */}
                 {/* <Button
@@ -396,86 +409,12 @@ function TenantHome() {
                   {settingsItem.name}
                 </Button> */}
 
-                {/* Mobile Theme Toggle */}
+                
               </VStack>
             </DrawerBody>
           </DrawerContent>
         </Drawer>
       </GridItem>
-
-      {/* Sidebar */}
-      {/* <GridItem
-        as="nav"
-        p="2"
-        bg="brand.900"
-        area="nav"
-        display={{ base: "none", md: "block" }}
-        w={isNavOpen ? "auto" : "60px"}
-        position="fixed"
-        h={"100%"}
-      >
-        <VStack align="start" mt={2} h="100%" justifyContent="space-between">
-          <Flex justify="space-between" width="100%">
-           
-            <Image
-              src="../house.png"
-              alt="Logo"
-              boxSize="100px"
-              mx="auto"
-              transition="transform 0.2s"
-              _hover={{ transform: "scale(1.1)" }}
-              display={isNavOpen ? "block" : "none"}
-            />
-            <IconButton
-              aria-label="Toggle Nav"
-              icon={isNavOpen ? <FaChevronLeft /> : <FaChevronRight />}
-              onClick={toggleNav}
-              variant="ghost"
-            />
-          </Flex>
-
-          {menuItems.map((item) => (
-            <NavLink
-              className={({ isActive }) =>
-                isActive ? "navlink active-navlink" : "navlink"
-              }
-              to={item.path}
-              key={item.name}
-            >
-              <Flex
-                alignItems="center"
-                justifyContent={isNavOpen ? "start" : "center"}
-              >
-                {item.icon}
-                <Collapse in={isNavOpen} animateOpacity>
-                  <Text>{item.name}</Text>
-                </Collapse>
-              </Flex>
-            </NavLink>
-          ))}
-
-         
-          <Divider borderColor="black" borderWidth="1px" />
-          <Flex justifyContent="center" width="100%" mb={2}>
-            {" "}
-            
-            <NavLink
-              className={({ isActive }) =>
-                isActive ? "navlink active-navlink" : "navlink"
-              }
-              to={settingsItem.path}
-              key={settingsItem.name}
-            >
-              <Flex alignItems="center" justifyContent="center">
-                {settingsItem.icon}
-                <Collapse in={isNavOpen} animateOpacity>
-                  <Text>{settingsItem.name}</Text>
-                </Collapse>
-              </Flex>
-            </NavLink>
-          </Flex>
-        </VStack>
-      </GridItem> */}
 
       {/* Main */}
       <GridItem as="main" area="main" mt="4" p={8}>

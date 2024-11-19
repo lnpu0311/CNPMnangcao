@@ -24,7 +24,8 @@ import { MdCheckCircle } from "react-icons/md";
 import Chat from "../components/Chat";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
-// import BookingModal from "./BookingModal"; // Tách BookingModal thành component riêng
+
+import {  FaArrowLeft } from "react-icons/fa";
 
 const RoomDetail = () => {
   const { id } = useParams();
@@ -49,37 +50,28 @@ const RoomDetail = () => {
   }, []);
 
   useEffect(() => {
-    const fetchRoomDetail = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(
-          `${process.env.REACT_APP_API}/user/rooms/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+    if (!room) {
+      const fetchRoomDetail = async () => {
+        try {
+          const response = await axios.get(`${process.env.REACT_APP_API}/user/room-detail/${id}`);
+          if (response.data.success) {
+            setRoom(response.data.data);
           }
-        );
-
-        if (response.data.success) {
-          setRoom(response.data.data);
+        } catch (error) {
+          console.error("Error fetching room detail:", error);
+          toast({
+            title: "Lỗi",
+            description: "Không thể tải thông tin phòng",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
         }
-      } catch (error) {
-        console.error("Error fetching room detail:", error);
-        toast({
-          title: "Lỗi",
-          description: "Không thể tải thông tin phòng",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    };
+      };
 
-    if (id && !location.state?.roomData) {
       fetchRoomDetail();
     }
-  }, [id, location.state]);
+  }, [id, room, toast]);
 
   if (!room) {
     return <Center><Spinner size="xl" /></Center>;
@@ -87,6 +79,15 @@ const RoomDetail = () => {
 
   return (
     <Container maxW="container.xl" py={8}>
+       {/* Nút Quay lại */}
+       <Button
+        onClick={() => navigate(-1)} // Quay lại trang trước
+        colorScheme="teal"
+        leftIcon={<FaArrowLeft />}
+        mb={4} // Thêm margin-bottom nếu cần
+      >
+        Quay lại
+      </Button>
       <Box bg="white" borderRadius="lg" overflow="hidden" boxShadow="lg">
         <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
           <GridItem>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Modal,
   ModalOverlay,
@@ -21,6 +21,9 @@ import {
   Box,
   Avatar,
   GridItem,
+  Heading,
+  InputGroup,
+  Flex,
 } from "@chakra-ui/react";
 
 // Modal thêm phòng mới
@@ -33,82 +36,90 @@ export const NewRoomModal = ({
   handleImageChange,
   handleInputChange,
 }) => (
-  <Modal isCentered isOpen={isOpen} onClose={onClose}>
+  <Modal isCentered isOpen={isOpen} onClose={onClose} size={"xl"}>
     <ModalOverlay />
     <ModalContent>
-      <ModalHeader textAlign="center">Thêm phòng mới</ModalHeader>
+      <ModalHeader
+        fontSize={"2xl"}
+        fontWeight={"bold"}
+        textColor={"brand.700"}
+        textAlign={"center"}
+        textTransform={"capitalize"}
+      >
+        Thêm phòng mới
+      </ModalHeader>
       <ModalCloseButton />
       <ModalBody>
+        <FormControl mb={2} isRequired>
+          <FormLabel>Tiêu đề bài đăng</FormLabel>
+          <Input
+            name="roomTitle"
+            value={newRoom.roomTitle}
+            onChange={(e) => handleInputChange(e, setNewRoom)}
+            placeholder="Nhập tiêu đề bài đăng"
+          />
+        </FormControl>
+        <FormControl mb={2} isRequired>
+          <FormLabel>Tên phòng</FormLabel>
+          <Input
+            name="roomName"
+            value={newRoom.roomName}
+            onChange={(e) => handleInputChange(e, setNewRoom)}
+            placeholder="Nhập tên phòng"
+          />
+        </FormControl>
+        <FormControl mb={2} isRequired>
+          <FormLabel>Diện tích (m²)</FormLabel>
+          <Input
+            type="number"
+            name="area"
+            value={newRoom.area}
+            onChange={(e) => handleInputChange(e, setNewRoom)}
+            placeholder="Nhập diện tích phòng"
+          />
+        </FormControl>
         <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-          <FormControl mb={2} isRequired>
-            <FormLabel>Tiêu đề bài đăng</FormLabel>
-            <Input
-              name="roomTitle"
-              value={newRoom.roomTitle}
-              onChange={(e) => handleInputChange(e, setNewRoom)}
-              placeholder="Nhập tiêu đề bài đăng"
-            />
-          </FormControl>
-          <FormControl mb={2} isRequired>
-            <FormLabel>Tên phòng</FormLabel>
-            <Input
-              name="roomName"
-              value={newRoom.roomName}
-              onChange={(e) => handleInputChange(e, setNewRoom)}
-              placeholder="Nhập tên phòng"
-            />
-          </FormControl>
-          <FormControl mb={2} isRequired>
-            <FormLabel>Diện tích (m²)</FormLabel>
-            <Input
-              type="number"
-              name="area"
-              value={newRoom.area}
-              onChange={(e) => handleInputChange(e, setNewRoom)}
-              placeholder="Nhập diện tích phòng"
-            />
-          </FormControl>
           <FormControl mb={2} isRequired>
             <FormLabel>Số tiền cọc (VND)</FormLabel>
             <Input
-              type="number"
+              type="text"
               name="deposit"
               value={newRoom.deposit}
               onChange={(e) => handleInputChange(e, setNewRoom)}
-              placeholder="Nhập giá tiền cọc"
+              placeholder="Nhập số tiền cọc"
             />
           </FormControl>
           <FormControl mb={2} isRequired>
             <FormLabel>Giá phòng (VND)</FormLabel>
             <Input
-              type="number"
+              type="text"
               name="price"
               value={newRoom.price}
               onChange={(e) => handleInputChange(e, setNewRoom)}
               placeholder="Nhập giá phòng"
             />
           </FormControl>
-          <FormControl mb={2} isRequired gridColumn="span 2">
-            <FormLabel>Mô tả chi tiết</FormLabel>
-            <Textarea
-              name="description"
-              value={newRoom.description}
-              onChange={(e) => handleInputChange(e, setNewRoom)}
-              placeholder="Nhập mô tả phòng"
-            />
-          </FormControl>
-          <FormControl mb={2} isRequired gridColumn="span 2">
-            <FormLabel>Thêm hình ảnh</FormLabel>
-            <Input
-              type="file"
-              name="images"
-              onChange={handleImageChange}
-              multiple
-              accept="image/*"
-            />
-            <Text mt={2}>Bạn có thể tải lên tối đa 5 hình ảnh</Text>
-          </FormControl>
         </Grid>
+        <FormControl mb={2} isRequired gridColumn="span 2">
+          <FormLabel>Mô tả chi tiết</FormLabel>
+          <Textarea
+            name="description"
+            value={newRoom.description}
+            onChange={(e) => handleInputChange(e, setNewRoom)}
+            placeholder="Nhập mô tả phòng"
+          />
+        </FormControl>
+        <FormControl mb={2} isRequired gridColumn="span 2">
+          <FormLabel>Thêm hình ảnh</FormLabel>
+          <Input
+            type="file"
+            name="images"
+            onChange={handleImageChange}
+            multiple
+            accept="image/*"
+          />
+          <Text mt={2}>Bạn có thể tải lên tối đa 5 hình ảnh</Text>
+        </FormControl>
       </ModalBody>
       <ModalFooter>
         <Button colorScheme="green" mr={3} onClick={handleCreateRoom}>
@@ -132,7 +143,15 @@ export const UpdateModal = ({
   <Modal isCentered isOpen={isOpen} onClose={onClose}>
     <ModalOverlay />
     <ModalContent>
-      <ModalHeader>Cập nhật số điện và số nước</ModalHeader>
+      <ModalHeader
+        textTransform={"capitalize"}
+        fontSize={"2xl"}
+        fontWeight={"bold"}
+        textColor={"brand.700"}
+        textAlign={"center"}
+      >
+        Cập nhật số điện và Số Nước
+      </ModalHeader>
       <ModalCloseButton />
       <ModalBody>
         <FormControl mb={4}>
@@ -171,85 +190,89 @@ export const UpdateModal = ({
 export const BillModal = ({
   isOpen,
   onClose,
-  bill,
-  setBill,
-  handleCreateBill,
+  sampleBill,
+  setSampleBill,
   handleInputChange,
-}) => (
-  <Modal isCentered isOpen={isOpen} onClose={onClose}>
-    <ModalOverlay />
-    <ModalContent>
-      <ModalHeader textAlign="center">Tạo hóa đơn mới</ModalHeader>
-      <ModalCloseButton />
-      <ModalBody>
-        <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-          <FormControl isRequired>
-            <FormLabel>Tiền điện</FormLabel>
-            <Input
-              type="number"
-              name="elecBill"
-              value={bill.elecBill}
-              onChange={(e) => handleInputChange(e, setBill)}
-              placeholder="Nhập tiền điện"
-            />
-          </FormControl>
-          <FormControl isRequired>
-            <FormLabel>Tiền nước</FormLabel>
-            <Input
-              type="number"
-              name="waterBill"
-              value={bill.waterBill}
-              onChange={(e) => handleInputChange(e, setBill)}
-              placeholder="Nhập tiền nước"
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Phí khác</FormLabel>
-            <Input
-              type="number"
-              name="otherFees"
-              value={bill.otherFees}
-              onChange={(e) => handleInputChange(e, setBill)}
-              placeholder="Nhập phí khác (nếu có)"
-            />
-          </FormControl>
+  handleCreateBill,
+}) => {
+  // Tính toán tổng tiền mỗi khi các giá trị thay đổi
+  useEffect(() => {
+    const calculateTotal = () => {
+      const elecBill = parseFloat(sampleBill.elecBill) || 0;
+      const waterBill = parseFloat(sampleBill.waterBill) || 0;
+      const serviceFee = parseFloat(sampleBill.serviceFee) || 0;
+      const total = elecBill + waterBill + serviceFee;
 
-          {bill.otherFees && (
+      setSampleBill((prev) => ({ ...prev, total })); // Cập nhật tổng tiền
+    };
+
+    calculateTotal();
+  }, [
+    sampleBill.elecBill,
+    sampleBill.waterBill,
+    sampleBill.serviceFee,
+    setSampleBill,
+  ]);
+
+  return (
+    <Modal isCentered isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader textAlign="center">Tạo hóa đơn mới</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+            <FormControl isRequired>
+              <FormLabel>Tiền điện</FormLabel>
+              <Text>{sampleBill.elecBill || 0} VNĐ</Text>
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Tiền nước</FormLabel>
+              <Text>{sampleBill.waterBill || 0} VNĐ</Text>
+            </FormControl>
             <FormControl>
-              <FormLabel>Nội dung phí khác</FormLabel>
+              <FormLabel>Phí khác</FormLabel>
               <Input
-                type="text"
-                name="otherFeesDescription"
-                value={bill.otherFeesDescription || ""}
-                onChange={(e) => handleInputChange(e, setBill)}
-                placeholder="Nhập nội dung của phí khác"
+                type="number"
+                name="serviceFee"
+                value={sampleBill.serviceFee || ""}
+                onChange={(e) => handleInputChange(e, setSampleBill)}
+                placeholder="Nhập phí khác (nếu có)"
               />
             </FormControl>
-          )}
-
-          <FormControl isRequired>
-            <FormLabel>Tổng tiền</FormLabel>
-            <Input
-              type="number"
-              name="total"
-              value={bill.total}
-              onChange={(e) => handleInputChange(e, setBill)}
-              placeholder="Nhập tổng tiền"
-            />
-          </FormControl>
-        </Grid>
-      </ModalBody>
-      <ModalFooter>
-        <Button colorScheme="green" onClick={handleCreateBill}>
-          Tạo hóa đơn
-        </Button>
-        <Button onClick={onClose} ml={3}>
-          Hủy
-        </Button>
-      </ModalFooter>
-    </ModalContent>
-  </Modal>
-);
+            {sampleBill.serviceFee && (
+              <FormControl>
+                <FormLabel>Nội dung phí khác</FormLabel>
+                <Input
+                  type="text"
+                  name="serviceFeeDescription"
+                  value={sampleBill.serviceFeeDescription || ""}
+                  onChange={(e) => handleInputChange(e, setSampleBill)}
+                  placeholder="Nhập nội dung của phí khác"
+                />
+              </FormControl>
+            )}
+            <FormControl isRequired>
+              <FormLabel>Tổng tiền</FormLabel>
+              <Text fontWeight="bold">{sampleBill.total || 0} VNĐ</Text>
+            </FormControl>
+          </Grid>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            colorScheme="green"
+            onClick={() => handleCreateBill(sampleBill)}
+          >
+            Tạo hóa đơn
+          </Button>
+          <Button onClick={onClose} ml={3}>
+            Hủy
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  );
+};
 // Modal tạo hợp đồng
 export const ContractModal = ({
   isOpen,
@@ -262,7 +285,15 @@ export const ContractModal = ({
   <Modal isCentered isOpen={isOpen} onClose={onClose}>
     <ModalOverlay />
     <ModalContent>
-      <ModalHeader textAlign={"center"}>Tạo Hợp Đồng Thuê Phòng</ModalHeader>
+      <ModalHeader
+        textTransform={"capitalize"}
+        fontSize={"2xl"}
+        fontWeight={"bold"}
+        textColor={"brand.700"}
+        textAlign={"center"}
+      >
+        Hợp Đồng Thuê Phòng
+      </ModalHeader>
       <ModalCloseButton />
       <ModalBody>
         <VStack spacing={4}>
@@ -307,28 +338,29 @@ export const ContractModal = ({
               onChange={(e) => handleInputChange(e, setContractDetails)}
             />
           </FormControl>
+          <HStack spacing={4} align="flex-start">
+            <FormControl isRequired>
+              <FormLabel>Giá điện (đồng/kWh)</FormLabel>
+              <Input
+                type="number"
+                name="electricityFee"
+                placeholder="Nhập số tiền điện"
+                value={contractDetails.electricityFee}
+                onChange={(e) => handleInputChange(e, setContractDetails)}
+              />
+            </FormControl>
 
-          <FormControl isRequired>
-            <FormLabel>Giá điện (đồng/kWh)</FormLabel>
-            <Input
-              type="number"
-              name="electricityFee"
-              placeholder="Nhập số tiền điện"
-              value={contractDetails.electricityFee}
-              onChange={(e) => handleInputChange(e, setContractDetails)}
-            />
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Giá nước (đồng/m³)</FormLabel>
-            <Input
-              type="number"
-              name="waterFee"
-              placeholder="Nhập số tiền nước"
-              value={contractDetails.waterFee}
-              onChange={(e) => handleInputChange(e, setContractDetails)}
-            />
-          </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Giá nước (đồng/m³)</FormLabel>
+              <Input
+                type="number"
+                name="waterFee"
+                placeholder="Nhập số tiền nước"
+                value={contractDetails.waterFee}
+                onChange={(e) => handleInputChange(e, setContractDetails)}
+              />
+            </FormControl>
+          </HStack>
           <FormControl isRequired>
             <FormLabel>Email người thuê</FormLabel>
             <Input
@@ -357,14 +389,19 @@ export const InfoModal = ({
   selectedRoom,
   selectedImage,
   setSelectedImage,
+  formatNumber,
 }) => (
-  <Modal isCentered isOpen={isOpen} onClose={onClose}>
+  <Modal size={"2xl"} isCentered isOpen={isOpen} onClose={onClose}>
     <ModalOverlay />
     <ModalContent>
-      <ModalHeader>
-        <Text fontSize="2xl" fontWeight="bold" align={"center"}>
-          {selectedRoom?.roomName || "Đang tải..."}
-        </Text>
+      <ModalHeader
+        fontSize={"2xl"}
+        fontWeight={"bold"}
+        textColor={"brand.700"}
+        textAlign={"center"}
+        textTransform={"capitalize"}
+      >
+        thông tin {selectedRoom?.roomName || "Đang tải..."}
       </ModalHeader>
       <ModalCloseButton />
 
@@ -375,42 +412,44 @@ export const InfoModal = ({
             src={selectedImage || "Đang tải..."}
             alt={selectedRoom?.roomName || "Đang tải..."}
             borderRadius="md"
-            boxSize="250px"
+            boxSize="300px"
             objectFit="cover"
           />
 
           {/* Room Details */}
 
           <VStack align={"start"} spacing={2} flex="1">
-            <Text fontWeight="bold">
-              Năm : <b>{selectedRoom?.latestUnitRoom.year || "Đang tải..."}</b>
-            </Text>{" "}
-            <Text fontWeight="bold">
-              Số điện tháng{" "}
-              {selectedRoom?.latestUnitRoom.month || "Đang tải..."}:
-            </Text>{" "}
+            <Heading size="md">
+              Năm {selectedRoom?.latestUnitRoom?.year}
+            </Heading>
+            <Box>
+              <Heading size="sm">
+                Số điện tháng {selectedRoom?.latestUnitRoom?.month} :
+              </Heading>
+              <Text>
+                {" "}
+                {selectedRoom?.latestUnitRoom?.elecIndex || "Đang tải..."} kWh
+              </Text>
+            </Box>
+            <Heading size="sm">
+              Số nước tháng {selectedRoom?.latestUnitRoom?.month} :
+            </Heading>
             <Text>
-              {" "}
-              {selectedRoom?.latestUnitRoom.elecIndex || "Đang tải..."} kW·h
+              {selectedRoom?.latestUnitRoom?.aquaIndex || "Đang tải..."} m³
             </Text>
-            <Text fontWeight="bold">
-              Số nước tháng{" "}
-              {selectedRoom?.latestUnitRoom.month || "Đang tải..."}
-            </Text>{" "}
+            <Heading size="sm">Giá phòng:</Heading>
             <Text>
-              {selectedRoom?.latestUnitRoom.aquaIndex || "Đang tải..."} m³
+              {formatNumber(selectedRoom?.price) || "Đang tải..."} VND
             </Text>
-            <Text fontWeight="bold">Giá phòng:</Text>{" "}
-            <Text>{selectedRoom?.price || "Đang tải..."} VND</Text>
-            <Text fontWeight="bold">Diện tích:</Text>{" "}
+            <Heading size="sm">Diện tích:</Heading>
             <Text>{selectedRoom?.area || "Đang tải..."} m²</Text>
-            <Text fontWeight="bold">Mô tả:</Text>{" "}
+            <Heading size="sm">Mô tả:</Heading>
             <Text>{selectedRoom?.description || "Đang tải..."}</Text>
           </VStack>
         </HStack>
 
         {/* Thumbnail Images */}
-        <HStack mt={4} spacing={2}>
+        <HStack mt={3} spacing={3}>
           {selectedRoom?.images.map((image, index) => (
             <Image
               key={index}
@@ -424,17 +463,16 @@ export const InfoModal = ({
             />
           )) || "Đang tải"}
         </HStack>
-
+        <Heading my={3} size="md">
+          Thông tin khách thuê:
+        </Heading>
         {/* Tenant Information */}
-        <Box mt={6} borderWidth="1px" borderRadius="md" p={4}>
-          <Text fontWeight="bold" mb={2}>
-            Khách thuê:
-          </Text>
+        <Box bgColor={"brand.100"} borderWidth="1px" borderRadius="md" p={4}>
           <HStack spacing={3}>
-            {/* <Avatar src={newRoom.tenantAvatar} /> */}
+            {/* <Avatar src={selectedRoom.tenantAvatar} /> */}
             <VStack align="start" spacing={0}>
-              {/* <Text>Tên khách thuê: {newRoom.tenantName}</Text>
-              <Text>Số điện thoại: {newRoom.tenantPhone}</Text> */}
+              {/* <Text>Tên khách thuê: {selectedRoom.tenantName}</Text>
+              <Text>Số điện thoại: {selectedRoom.tenantPhone}</Text> */}
             </VStack>
           </HStack>
         </Box>
@@ -460,18 +498,18 @@ export const EditModal = ({
     <ModalOverlay />
     <ModalContent>
       <ModalHeader>
-        <Input
-          w={"80%"}
-          value={selectedRoom?.roomName || ""}
-          onChange={(e) => handleInputChange("roomName", e.target.value)}
-          fontSize="2xl"
-          fontWeight="bold"
-          align={"center"}
-          placeholder="Tên phòng"
-        />
+        <ModalHeader
+          textTransform={"capitalize"}
+          fontSize={"2xl"}
+          fontWeight={"bold"}
+          textColor={"brand.700"}
+          textAlign={"center"}
+        >
+          chỉnh sửa thông tin {selectedRoom?.roomName || "Đang tải..."}
+        </ModalHeader>
       </ModalHeader>
-      <ModalCloseButton />
 
+      <ModalCloseButton />
       <ModalBody>
         {/* Main Image and Details */}
         <HStack align="start" spacing={4}>
@@ -483,24 +521,34 @@ export const EditModal = ({
             objectFit="cover"
           />
           <VStack align={"start"} spacing={2} flex="1">
-            <Text fontWeight="bold">Giá phòng:</Text>
+            <Heading size="md">Tên phòng:</Heading>
+            <Input
+              value={selectedRoom?.roomName || ""}
+              onChange={(e) =>
+                handleInputChange("roomName", e, handleInputChange)
+              }
+              placeholder="Tên phòng"
+            />
+            <Heading size="md">Giá phòng:</Heading>
             <Input
               type="number"
               value={selectedRoom?.price || ""}
-              onChange={(e) => handleInputChange("price", e.target.value)}
+              onChange={(e) => handleInputChange("price", e, handleInputChange)}
               placeholder="Giá phòng (VND)"
             />
-            <Text fontWeight="bold">Diện tích:</Text>
+            <Heading size="md">Diện tích:</Heading>
             <Input
               type="number"
               value={selectedRoom?.area || ""}
-              onChange={(e) => handleInputChange("area", e.target.value)}
+              onChange={(e) => handleInputChange("area", e, handleInputChange)}
               placeholder="Diện tích (m²)"
             />
-            <Text fontWeight="bold">Mô tả:</Text>
+            <Heading size="md">Mô tả:</Heading>
             <Textarea
               value={selectedRoom?.description || ""}
-              onChange={(e) => handleInputChange("description", e.target.value)}
+              onChange={(e) =>
+                handleInputChange("description", e, handleInputChange)
+              }
               placeholder="Mô tả phòng"
             />
           </VStack>
@@ -521,7 +569,6 @@ export const EditModal = ({
           ))}
         </HStack>
       </ModalBody>
-
       <ModalFooter>
         <Button colorScheme="blue" onClick={handleEditRoom} mr={3}>
           Lưu thay đổi

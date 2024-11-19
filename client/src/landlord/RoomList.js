@@ -108,6 +108,25 @@ const RoomList = () => {
     }
   }, [hostel]);
 
+  useEffect(() => {
+    const fetchSample = async () => {
+      try {
+        const response = await axios.post(
+          `${process.env.REACT_APP_API}/landlord/${selectedRoom._id}/sampleBill`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        console.log("Hóa đơn nháp: ", response.data);
+        setSampleBill(response.data.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchSample();
+  }, [selectedRoom]);
   const [isLoading, setIsLoading] = useState({
     roomName: "",
     area: "",
@@ -157,18 +176,12 @@ const RoomList = () => {
     tenantEmail: "",
   });
 
-  const [bill, setBill] = useState({
-    rent: "",
+  const [sampleBill, setSampleBill] = useState({
     elecBill: "",
     waterBill: "",
-    otherFees: "",
-    otherFeesDescription: "",
+    serviceFee: "",
+    serviceFeeDescription: "",
     total: "",
-    isPaid: false,
-    paidAt: "",
-    dueDate: "",
-    elecIndex: "",
-    aquaIndex: "",
   });
 
   const handleCreateRoom = async () => {
@@ -384,28 +397,22 @@ const RoomList = () => {
     }
   };
 
-  const handleCreateBill = async () => {
-    if (
-      !bill.elecBill ||
-      !bill.waterBill ||
-      (bill.otherFees && !bill.otherFeesDescription)
-    ) {
+  const handleCreateBill = async (e) => {
+    if (!sampleBill.elecBill || !sampleBill.waterBill) {
       toast({
         title: "Thông tin chưa đầy đủ.",
-        description: bill.otherFees
-          ? "Vui lòng điền nội dung cho phí khác."
-          : "Vui lòng điền đầy đủ thông tin.",
+        description: "Vui lòng điền đầy đủ thông tin.",
         status: "warning",
         duration: 5000,
         isClosable: true,
       });
       return;
     }
-
+    console.log(e);
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API}/landlord/bill/create`,
-        bill,
+        `${process.env.REACT_APP_API}/landlord/hostel/${selectedRoom._id}/createBill`,
+        sampleBill,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
@@ -419,17 +426,6 @@ const RoomList = () => {
           duration: 5000,
           isClosable: true,
         });
-
-        // // Reset dữ liệu hóa đơn
-        // setBill({
-
-        //   month: "",
-        //   year: "",
-        //   electricityBill: "",
-        //   waterBill: "",
-        //   otherFees: "",
-        //   total: "",
-        // });
 
         // Đóng modal
         toggleModal("bill", false);
@@ -782,6 +778,7 @@ const RoomList = () => {
                         size="sm"
                         colorScheme="purple"
                         onClick={(e) => {
+                          setSelectedRoom(room);
                           e.stopPropagation();
                           toggleModal("bill", true);
                         }}
@@ -844,10 +841,10 @@ const RoomList = () => {
       <BillModal
         isOpen={modalState.bill}
         onClose={() => toggleModal("bill", false)}
-        bill={bill}
-        setBill={setBill}
-        handleCreateBill={handleCreateBill}
+        sampleBill={sampleBill}
+        setSampleBill={setSampleBill}
         handleInputChange={handleInputChange}
+        handleCreateBill={handleCreateBill}
       />
       <ContractModal
         isOpen={modalState.contract}

@@ -12,4 +12,8 @@ router.get('/paypal/cancel', (req, res) => {
     res.redirect(`${process.env.CLIENT_URL}/tenant/bills?payment=cancelled`);
 });
 
+// Route thanh toán VNPAY
+router.post('/vnpay/create', authMiddleware(["tenant"]), rentController.createVNPayPayment);
+router.get('/vnpay/callback', rentController.vnpayCallback);
+
 module.exports = router;

@@ -25,7 +25,12 @@ import {
   Flex,
   Divider,
   Select,
+  Container
 } from "@chakra-ui/react";
+import {  FaArrowLeft } from "react-icons/fa";
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+
+
 
 // Dữ liệu giả cho thanh toán
 const mockPayments = [
@@ -73,6 +78,7 @@ function TenantPayments() {
   const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const navigate = useNavigate();
 
   const [selectedTimeFrame, setSelectedTimeFrame] = useState("all");
   const [customDate, setCustomDate] = useState("");
@@ -175,12 +181,26 @@ function TenantPayments() {
     }).format(amount);
   };
 
-  return (
-    <VStack spacing={4} align="stretch" w="100%" p={4}>
-      <Text fontSize="2xl" fontWeight="bold">
-        Lịch sử thanh toán
-      </Text>
+  const handleGoBack = () => {
+    navigate(-1);
+  };
 
+  return (
+    
+    <Container maxW="container.xl" py={4}>
+      <Flex alignItems="center" justifyContent="space-between" mb={4}>
+        <Button
+          onClick={handleGoBack}
+          colorScheme="teal"
+          leftIcon={<FaArrowLeft />}
+        >
+          Quay lại
+        </Button>
+        
+      </Flex>
+      <Text fontSize="2xl" fontWeight="bold" textAlign="center" flex="1" mx={4}>
+          Lịch sử thanh toán
+        </Text>
       <Box borderWidth={1} borderRadius="lg" p={4}>
         {/* <Text fontWeight="bold">RoomID: 2, 3, 4</Text> */}
         <Text>Member: Nguyễn Văn A</Text>
@@ -289,7 +309,7 @@ function TenantPayments() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-    </VStack>
+      </Container>
   );
 }
 

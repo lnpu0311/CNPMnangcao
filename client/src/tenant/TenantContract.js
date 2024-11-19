@@ -12,14 +12,19 @@ import {
   Tag,
   Divider,
   Spinner,
-  useToast
+  useToast,
+  Button,
+  Flex
+
 } from "@chakra-ui/react";
 import axios from "axios";
-
+import {  FaArrowLeft } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 function TenantContract() {
   const [contracts, setContracts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const toast = useToast();
+  const navigate = useNavigate();
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -84,9 +89,27 @@ function TenantContract() {
     );
   }
 
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
+
   return (
     <Box p={4}>
-      <Text fontSize="2xl" mb={4}>Danh sách hợp đồng</Text>
+      {/* Nút Quay lại */}
+      <Flex alignItems="center" justifyContent="space-between" mb={4}>
+        <Button
+          onClick={handleGoBack}
+          colorScheme="teal"
+          leftIcon={<FaArrowLeft />}
+        >
+          Quay lại
+        </Button>
+        
+      </Flex>
+      <Text fontSize="2xl" fontWeight="bold" textAlign="center" flex="1" mx={4}>
+          Danh sách hợp đồng
+        </Text>
       {isLoading ? (
         <Spinner />
       ) : (

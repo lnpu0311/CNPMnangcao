@@ -30,6 +30,7 @@ import { jwtDecode } from "jwt-decode";
 import BillList from "./tenant/BillList";
 import BillDetail from "./tenant/BillDetail";
 
+
 function App() {
   const toast = useToast();
   const [currentUser, setCurrentUser] = useState(null);
@@ -181,7 +182,7 @@ function App() {
               <Route path="room-detail/:id" element={<RoomDetail />} />
               <Route path="bills" element={<BillList />} />
               <Route path="bills/:billId" element={<BillDetail />} />
-            </Route>
+              </Route>
 
             <Route path="/search-results" element={<SearchResults />} />
           </Routes>

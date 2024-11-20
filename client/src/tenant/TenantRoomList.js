@@ -502,38 +502,52 @@ const TenantRoomList = () => {
 
   return (
     <Container maxW="container.xl" py={4}>
-    <Flex alignItems="center" justifyContent="space-between" mb={4}>
-        <Button
-          onClick={handleGoBack}
-          colorScheme="teal"
-          leftIcon={<FaArrowLeft />}
-        >
-          Quay lại
-        </Button>
-        <Text fontSize="3xl" fontWeight="bold" textAlign="center" flex="1" mx={4}>
+      <Flex 
+        alignItems="center" 
+        justifyContent="space-between" 
+        mb={4} 
+        flexWrap="wrap" // Cho phép các phần tử xếp chồng lên nhau khi cần
+      >
+      <Button
+        onClick={handleGoBack}
+        colorScheme="teal"
+        leftIcon={<FaArrowLeft />}
+        mb={{ base: 2, md: 0 }} // Thêm khoảng cách dưới nút ở chế độ mobile
+      >
+        Quay lại
+      </Button>
+
+      <IconButton
+        icon={<FiFilter />}
+        onClick={onOpen}
+        colorScheme="blue"
+        aria-label="Open filters"
+        display={{ base: "flex", md: "none" }}
+      />
+    </Flex>
+
+      {/* Tiêu đề danh sách phòng */}
+      <Flex 
+        alignItems="center" 
+        justifyContent="center" 
+        mb={4} 
+        flexWrap="wrap" // Cho phép xếp chồng khi cần
+      >
+        <Text fontSize="3xl" fontWeight="bold" textAlign="center" mx={4}>
           Danh sách phòng
         </Text>
       </Flex>
-        
-      
-        {/* Filter Button và Active Filters */}
+
+      {/* Hiển thị các filter đã chọn */}
         <Flex 
           mb={4} 
           gap={2} 
           alignItems="center"
           flexWrap="wrap"
+          width={{ base: "100%", md: "auto" }} // Đảm bảo chiếm toàn bộ chiều rộng ở chế độ responsive
         >
-          <IconButton
-            icon={<FiFilter />}
-            onClick={onOpen}
-            colorScheme="blue"
-            aria-label="Open filters"
-            display={{ base: "flex", md: "none" }}
-          />
-          
-          {/* Hiển thị các filter đã chọn */}
           {(searchTerm || filterCity || filterDistrict || priceRange) && (
-            <Flex gap={2} flexWrap="wrap">
+            <>
               {searchTerm && (
                 <Tag colorScheme="blue" size="md">
                   Địa chỉ chi tiết: {searchTerm}
@@ -560,7 +574,7 @@ const TenantRoomList = () => {
                   <TagCloseButton onClick={() => setPriceRange("")} />
                 </Tag>
               )}
-            </Flex>
+            </>
           )}
         </Flex>
         {/* Filter Drawer cho mobile */}
@@ -605,9 +619,14 @@ const TenantRoomList = () => {
               <Spinner size="xl" />
             </Center>
           ) : filteredRooms.length === 0 ? (
-            <Center mr={200}>
-              <Text textAlign="center" w="100%">Không có phòng nào</Text>
-            </Center>
+            <Flex 
+            alignItems="center" 
+            justifyContent="center" 
+            mb={4} 
+            flexWrap="wrap" // Cho phép xếp chồng khi cần
+          >
+            <Text textAlign="center" w="100%">Không có phòng nào</Text>
+          </Flex>
           ) : (
           <Box className='mb-20'>
             <Box className='container mx-auto'>

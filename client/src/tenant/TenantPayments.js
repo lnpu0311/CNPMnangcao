@@ -189,99 +189,111 @@ function TenantPayments() {
     
     <Container maxW="container.xl" py={4}>
       <Flex alignItems="center" justifyContent="space-between" mb={4}>
-        <Button
-          onClick={handleGoBack}
-          colorScheme="teal"
-          leftIcon={<FaArrowLeft />}
-        >
-          Quay lại
-        </Button>
-        
+      <Button
+        onClick={handleGoBack}
+        colorScheme="teal"
+        leftIcon={<FaArrowLeft />}
+      >
+        Quay lại
+      </Button>
       </Flex>
-      <Text fontSize="2xl" fontWeight="bold" textAlign="center" flex="1" mx={4}>
-          Lịch sử thanh toán
-        </Text>
-      <Box borderWidth={1} borderRadius="lg" p={4}>
-        {/* <Text fontWeight="bold">RoomID: 2, 3, 4</Text> */}
-        <Text>Member: Nguyễn Văn A</Text>
+
+    <Text fontSize="2xl" fontWeight="bold" textAlign="center" flex="1" my={2}>
+      Lịch sử thanh toán
+    </Text>
+
+    <Box 
+      p={2} 
+      maxWidth="400px" 
+      width="100%" 
+      display="flex" 
+      justifyContent="center" // Căn giữa theo chiều ngang 
+      alignItems="center" // Căn giữa theo chiều dọc
+      mx="auto" // Tự động căn giữa trong không gian
+    >
+      <Text>Member: Nguyễn Văn A</Text>
+    </Box>
+
+    <Flex gap={2} alignItems="flex-end" textColor="black" maxWidth="400px" width="100%"> {/* Giảm chiều rộng */}
+      <Box flex={1} mb={2}>
+        <Text mb={1}>Thời gian</Text>
+        <Select
+          value={selectedTimeFrame}
+          onChange={(e) => {
+            setSelectedTimeFrame(e.target.value);
+            if (e.target.value !== "custom") {
+              setCustomDate("");
+              filterPayments();
+            }
+          }}
+          size="sm"
+        >
+          <option value="all">Tất cả</option>
+          <option value="month">Tháng</option>
+          <option value="year">Năm</option>
+        </Select>
       </Box>
+      
+      <Box flex={1} mb={2}>
+        <Text mb={1}>Ngày cụ thể</Text>
+        <Input
+          type="text"
+          value={customDate}
+          onChange={handleDateChange}
+          placeholder="DD/MM/YYYY"
+          maxLength={10}
+          size="sm"
+        />
+      </Box>
+      
+      <Button
+        colorScheme="teal"
+        onClick={handleFilter}
+        isDisabled={!isValidDate(customDate)}
+        mb={2}
+        size="sm"
+      >
+        Xác nhận
+      </Button>
+    </Flex>
 
-      <Flex gap={4} alignItems="flex-end" textColor="black">
-        <Box flex={1}>
-          <Text mb={2}>Thời gian</Text>
-          <Select
-            value={selectedTimeFrame}
-            onChange={(e) => {
-              setSelectedTimeFrame(e.target.value);
-              if (e.target.value !== "custom") {
-                setCustomDate("");
-                filterPayments();
-              }
-            }}
-          >
-            <option value="all">Tất cả</option>
-            <option value="month">Tháng</option>
-            <option value="year">Năm</option>
-          </Select>
-        </Box>
-        <Box flex={1}>
-          <Text mb={2}>Ngày cụ thể</Text>
-          <Input
-            type="text"
-            value={customDate}
-            onChange={handleDateChange}
-            placeholder="DD/MM/YYYY"
-            maxLength={10}
-          />
-        </Box>
-        <Button
-          colorScheme="teal"
-          onClick={handleFilter}
-          isDisabled={!isValidDate(customDate)}
-        >
-          Xác nhận
-        </Button>
-      </Flex>
-
-      <Table variant="simple" borderWidth={1} borderRadius="lg">
-        <Thead bg="cyan.100">
-          <Tr>
-            <Th borderRightWidth={1}>Phòng</Th>
-            <Th borderRightWidth={1}>Ngày thanh toán</Th>
-            <Th borderRightWidth={1}>Loại</Th>
-            <Th borderRightWidth={1}>Số tiền</Th>
-            
-            <Th borderRightWidth={1}>Số điện thoại</Th>
-            <Th>Trạng thái</Th>
-          </Tr>
-        </Thead>
-        <Tbody textColor="black">
-          {filteredPayments.map((payment, index) => (
-            <React.Fragment key={payment.id}>
-              {index > 0 && (
-                <Tr>
-                  <Td colSpan={7}>
-                    <Divider borderColor="black" borderWidth="1px" />
-                  </Td>
-                </Tr>
-              )}
-              <Tr
-                onClick={() => handlePaymentClick(payment)}
-                cursor="pointer"
-                _hover={{ bg: "gray.50" }}
-              >
-                <Td borderRightWidth={1}>{payment.roomId}</Td>
-                <Td borderRightWidth={1}>{formatDate(payment.date)}</Td>
-                <Td borderRightWidth={1}>{payment.type}</Td>
-                <Td borderRightWidth={1}>{formatCurrency(payment.amount)}</Td>
-                
-                <Td borderRightWidth={1}>{payment.phone}</Td>
-                <Td>Đã thanh toán</Td>
+    <Table variant="simple" borderWidth={1} borderRadius="lg">
+      <Thead bg="cyan.100">
+        <Tr>
+          <Th borderRightWidth={1} textAlign="center">Phòng</Th>
+          <Th borderRightWidth={1} textAlign="center">Ngày thanh toán</Th>
+          <Th borderRightWidth={1} textAlign="center">Loại</Th>
+          <Th borderRightWidth={1} textAlign="center">Số tiền</Th>
+          <Th borderRightWidth={1} textAlign="center">Số điện thoại</Th>
+          <Th textAlign="center">Trạng thái</Th>
+        </Tr>
+      </Thead>
+      <Tbody textColor="black">
+        {filteredPayments.map((payment, index) => (
+          <React.Fragment key={payment.id}>
+            {index > 0 && (
+              <Tr>
+                <Td colSpan={7}>
+                  <Divider borderColor="black" borderWidth="1px" />
+                </Td>
               </Tr>
-            </React.Fragment>
-          ))}
-        </Tbody>
-      </Table>
+            )}
+            <Tr
+              onClick={() => handlePaymentClick(payment)}
+              cursor="pointer"
+              _hover={{ bg: "gray.50" }}
+            >
+              <Td textAlign="center">{payment.roomId}</Td>
+              <Td textAlign="center">{formatDate(payment.date)}</Td>
+              <Td textAlign="center">{payment.type}</Td>
+              <Td textAlign="center">{formatCurrency(payment.amount)}</Td>
+              <Td textAlign="center">{payment.phone}</Td>
+              <Td textAlign="center">Đã thanh toán</Td>
+            </Tr>
+          </React.Fragment>
+        ))}
+      </Tbody>
+    </Table>
 
       {/* Modal hiển thị chi tiết thanh toán */}
       <Modal isOpen={isOpenDetail} onClose={handleCloseDetail}>

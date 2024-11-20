@@ -28,3 +28,76 @@ exports.getBillHistory = async (req, res) => {
         });
     }
 }; 
+
+exports.getLandlordBills = async (req, res) => {
+    try {
+        const landlordId = req.user.id;
+        
+        const bills = await Bill.find()
+            .populate({
+                path: 'roomId',
+                select: 'roomName hostelId',
+                populate: {
+                    path: 'hostelId',
+                    select: 'name',
+                    match: { landlordId: landlordId }
+                }
+            })
+            .populate('tenantId', 'name')
+            .sort({ createdAt: -1 });
+
+        // Lọc bills chỉ lấy những bill thuộc về hostel của landlord
+        const filteredBills = bills.filter(bill => 
+            bill.roomId && bill.roomId.hostelId
+        );
+
+        res.status(200).json({
+            success: true,
+            data: filteredBills
+        });
+
+    } catch (error) {
+        console.error('Get landlord bills error:', error);
+        res.status(500).json({
+            success: false,
+            message: "Không thể lấy danh sách hóa đơn"
+        });
+    }
+};
+
+exports.getLandlordPaidBills = async (req, res) => {
+    try {
+        const landlordId = req.user.id;
+
+        const paidBills = await Bill.find({
+            status: 'PAID'
+        })
+        .populate({
+            path: 'roomId',
+            select: 'roomName hostelId',
+            populate: {
+                path: 'hostelId',
+                select: 'name',
+                match: { landlordId: landlordId }
+            }
+        })
+        .sort({ paymentDate: -1 });
+
+        // Lọc bills chỉ lấy những bill thuộc về hostel của landlord
+        const filteredBills = paidBills.filter(bill => 
+            bill.roomId && bill.roomId.hostelId
+        );
+
+        res.status(200).json({
+            success: true,
+            data: filteredBills
+        });
+
+    } catch (error) {
+        console.error('Get landlord paid bills error:', error);
+        res.status(500).json({
+            success: false,
+            message: "Không thể lấy danh sách hóa đơn đã thanh toán"
+        });
+    }
+};

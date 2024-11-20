@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   VStack,
@@ -16,38 +16,42 @@ import {
   ModalHeader,
   ModalCloseButton,
   ModalBody,
-  ModalFooter
-} from '@chakra-ui/react';
-import { ChatIcon, CloseIcon, DeleteIcon, MinusIcon } from '@chakra-ui/icons';
-import io from 'socket.io-client';
-import axios from 'axios';
-import socket from '../services/socket';
+  ModalFooter,
+} from "@chakra-ui/react";
+import { ChatIcon, CloseIcon, DeleteIcon, MinusIcon } from "@chakra-ui/icons";
+import io from "socket.io-client";
+import axios from "axios";
+import socket from "../services/socket";
 
 const Chat = ({ currentUserId, recipientId, recipientName, onClose }) => {
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
   const toast = useToast();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const { isOpen: isModalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure();
+  const {
+    isOpen: isModalOpen,
+    onOpen: onModalOpen,
+    onClose: onModalClose,
+  } = useDisclosure();
 
   useEffect(() => {
     if (!socket.connected) {
-      socket.auth = { token: localStorage.getItem('token') };
+      socket.auth = { token: localStorage.getItem("token") };
       socket.connect();
     }
 
     // Đánh dấu tin nhắn đã đọc khi mở chat
     const markMessagesAsRead = () => {
       if (recipientId && currentUserId) {
-        console.log('Marking messages as read:', {
+        console.log("Marking messages as read:", {
           senderId: recipientId,
-          recipientId: currentUserId
+          recipientId: currentUserId,
         });
-        
-        socket.emit('mark_messages_read', {
+
+        socket.emit("mark_messages_read", {
           senderId: recipientId,
-          recipientId: currentUserId
+          recipientId: currentUserId,
         });
       }
     };
@@ -56,10 +60,10 @@ const Chat = ({ currentUserId, recipientId, recipientName, onClose }) => {
     markMessagesAsRead();
 
     // Lắng nghe tin nhắn mới
-    socket.on('receive_message', (message) => {
-      console.log('Received message:', message);
+    socket.on("receive_message", (message) => {
+      console.log("Received message:", message);
       if (message.senderId === recipientId) {
-        setMessages(prev => [...prev, message]);
+        setMessages((prev) => [...prev, message]);
         // Đánh dấu đã đọc ngay khi nhận tin nhắn mới
         markMessagesAsRead();
         scrollToBottom();
@@ -67,13 +71,13 @@ const Chat = ({ currentUserId, recipientId, recipientName, onClose }) => {
     });
 
     // Lắng nghe kết quả đánh dấu đã đọc
-    socket.on('messages_marked_read', (result) => {
-      console.log('Messages marked as read:', result);
+    socket.on("messages_marked_read", (result) => {
+      console.log("Messages marked as read:", result);
       // Cập nhật UI nếu cần
     });
 
-    socket.on('mark_messages_error', (error) => {
-      console.error('Error marking messages:', error);
+    socket.on("mark_messages_error", (error) => {
+      console.error("Error marking messages:", error);
       toast({
         title: "Lỗi",
         description: "Không thể đánh dấu tin nhắn đã đọc",
@@ -84,9 +88,9 @@ const Chat = ({ currentUserId, recipientId, recipientName, onClose }) => {
     });
 
     return () => {
-      socket.off('receive_message');
-      socket.off('messages_marked_read');
-      socket.off('mark_messages_error');
+      socket.off("receive_message");
+      socket.off("messages_marked_read");
+      socket.off("mark_messages_error");
     };
   }, [currentUserId, recipientId, toast]);
 
@@ -94,27 +98,27 @@ const Chat = ({ currentUserId, recipientId, recipientName, onClose }) => {
   useEffect(() => {
     const fetchMessages = async () => {
       if (!recipientId || !currentUserId) return;
-      
+
       try {
         const response = await axios.get(
           `${process.env.REACT_APP_API}/messages/history/${recipientId}`,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
           }
         );
-        
+
         setMessages(response.data.data);
         scrollToBottom();
 
         // Đánh dấu đã đọc sau khi load history
-        socket.emit('mark_messages_read', {
+        socket.emit("mark_messages_read", {
           senderId: recipientId,
-          recipientId: currentUserId
+          recipientId: currentUserId,
         });
       } catch (error) {
-        console.error('Error fetching messages:', error);
+        console.error("Error fetching messages:", error);
         toast({
           title: "Lỗi",
           description: "Không thể tải tin nhắn",
@@ -131,7 +135,7 @@ const Chat = ({ currentUserId, recipientId, recipientName, onClose }) => {
   }, [recipientId, currentUserId, toast]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const sendMessage = () => {
@@ -140,11 +144,11 @@ const Chat = ({ currentUserId, recipientId, recipientName, onClose }) => {
     // Tạo message object
     const messageData = {
       recipientId,
-      content: newMessage.trim()
+      content: newMessage.trim(),
     };
 
     // Emit socket event
-    socket.emit('send_message', messageData);
+    socket.emit("send_message", messageData);
 
     // Thêm tin nhắn vào state messages ngay lập tức cho người gửi
     const tempMessage = {
@@ -152,18 +156,18 @@ const Chat = ({ currentUserId, recipientId, recipientName, onClose }) => {
       recipientId: recipientId,
       content: newMessage.trim(),
       timestamp: new Date(),
-      read: false
+      read: false,
     };
-    setMessages(prev => [...prev, tempMessage]);
-    
+    setMessages((prev) => [...prev, tempMessage]);
+
     // Clear input
-    setNewMessage('');
+    setNewMessage("");
     scrollToBottom();
   };
 
   // Thêm socket listener để xác nhận tin nhắn đã được gửi
   useEffect(() => {
-    socket.on('message_sent', (response) => {
+    socket.on("message_sent", (response) => {
       if (!response.success) {
         toast({
           title: "Lỗi",
@@ -176,7 +180,7 @@ const Chat = ({ currentUserId, recipientId, recipientName, onClose }) => {
     });
 
     return () => {
-      socket.off('message_sent');
+      socket.off("message_sent");
     };
   }, [toast]);
 
@@ -186,11 +190,11 @@ const Chat = ({ currentUserId, recipientId, recipientName, onClose }) => {
         `${process.env.REACT_APP_API}/messages/delete-conversation`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           data: {
-            recipientId: recipientId
-          }
+            recipientId: recipientId,
+          },
         }
       );
 
@@ -205,16 +209,16 @@ const Chat = ({ currentUserId, recipientId, recipientName, onClose }) => {
         });
         onModalClose();
         onClose(); // Đóng chat box
-        
+
         // Emit event để cập nhật MessageManagement
-        socket.emit('conversation_deleted', {
-          recipientId: recipientId
+        socket.emit("conversation_deleted", {
+          recipientId: recipientId,
         });
       }
     } catch (error) {
-      console.error('Error deleting messages:', error);
+      console.error("Error deleting messages:", error);
       toast({
-        title: "Lỗi", 
+        title: "Lỗi",
         description: "Không thể xóa tin nhắn",
         status: "error",
         duration: 3000,
@@ -233,7 +237,7 @@ const Chat = ({ currentUserId, recipientId, recipientName, onClose }) => {
         position="fixed"
         bottom="20px"
         right="20px"
-        width="300px"
+        width="1000px"
         height="400px"
         bg="white"
         borderRadius="lg"
@@ -267,15 +271,17 @@ const Chat = ({ currentUserId, recipientId, recipientName, onClose }) => {
             <HStack
               key={index}
               w="100%"
-              justify={msg.senderId === currentUserId ? 'flex-end' : 'flex-start'}
+              justify={
+                msg.senderId === currentUserId ? "flex-end" : "flex-start"
+              }
             >
               {msg.senderId !== currentUserId && (
                 <Avatar size="sm" name={recipientName} />
               )}
               <Box
                 maxW="70%"
-                bg={msg.senderId === currentUserId ? 'blue.500' : 'gray.100'}
-                color={msg.senderId === currentUserId ? 'white' : 'black'}
+                bg={msg.senderId === currentUserId ? "blue.500" : "gray.100"}
+                color={msg.senderId === currentUserId ? "white" : "black"}
                 p={2}
                 borderRadius="lg"
               >
@@ -294,7 +300,7 @@ const Chat = ({ currentUserId, recipientId, recipientName, onClose }) => {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Nhập tin nhắn..."
-            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+            onKeyPress={(e) => e.key === "Enter" && sendMessage()}
           />
           <Button colorScheme="blue" onClick={sendMessage}>
             Gửi

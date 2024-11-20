@@ -159,4 +159,146 @@ router.get('/all', authMiddleware(['landlord', 'tenant']), async (req, res) => {
   }
 });
 
+// Lấy danh sách tin nhắn chưa đọc cho tenant
+router.get('/tenant/unread', authMiddleware(['tenant']), async (req, res) => {
+  try {
+    const tenantId = req.user.id;
+    
+    const unreadMessages = await Message.find({
+      recipientId: tenantId,
+      read: false,
+      deletedFor: { $ne: tenantId } // Không lấy tin nhắn đã xóa
+    })
+    .populate('senderId', 'name')
+    .sort({ timestamp: -1 });
+
+    // Nhóm tin nhắn theo người gửi (landlord)
+    const groupedMessages = unreadMessages.reduce((acc, message) => {
+      const senderId = message.senderId._id.toString();
+      if (!acc[senderId]) {
+        acc[senderId] = {
+          ...message.toObject(),
+          count: 1
+        };
+      } else {
+        acc[senderId].count += 1;
+      }
+      return acc;
+    }, {});
+
+    res.json({ 
+      success: true, 
+      data: Object.values(groupedMessages)
+    });
+  } catch (error) {
+    console.error('Error getting tenant unread messages:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Lấy danh sách tin nhắn của tenant
+router.get('/tenant/conversations', authMiddleware(['tenant']), async (req, res) => {
+  try {
+    const tenantId = req.user.id;
+    
+    // Lấy tất cả tin nhắn liên quan đến tenant này
+    const messages = await Message.find({
+      $or: [
+        { senderId: tenantId },
+        { recipientId: tenantId }
+      ],
+      deletedFor: { $ne: tenantId }
+    })
+    .populate('senderId', 'name')
+    .populate('recipientId', 'name')
+    .sort({ timestamp: -1 });
+
+    // Nhóm tin nhắn theo landlord
+    const conversations = messages.reduce((acc, message) => {
+      const landlordId = message.senderId._id.toString() === tenantId ? 
+        message.recipientId._id.toString() : 
+        message.senderId._id.toString();
+
+      if (!acc[landlordId]) {
+        acc[landlordId] = {
+          landlord: message.senderId._id.toString() === tenantId ? 
+            message.recipientId : message.senderId,
+          messages: [message],
+          lastMessage: message,
+          unreadCount: message.recipientId._id.toString() === tenantId && !message.read ? 1 : 0
+        };
+      } else {
+        acc[landlordId].messages.push(message);
+        if (message.recipientId._id.toString() === tenantId && !message.read) {
+          acc[landlordId].unreadCount++;
+        }
+      }
+      return acc;
+    }, {});
+
+    res.json({
+      success: true,
+      data: Object.values(conversations)
+    });
+
+  } catch (error) {
+    console.error('Error getting tenant conversations:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/tenant/message', authMiddleware(['tenant']), async (req, res) => {
+  try {
+    const tenantId = req.user.id;
+    
+    const messages = await Message.find({
+      $or: [
+        { senderId: tenantId },
+        { recipientId: tenantId }
+      ],
+      deletedFor: { $ne: tenantId }
+    })
+    .populate('senderId', 'name')
+    .populate('recipientId', 'name')
+    .sort({ timestamp: -1 });
+
+    // Nhóm tin nhắn theo landlord giống MessageManagement
+    const conversations = messages.reduce((acc, message) => {
+      const landlordId = message.senderId._id.toString() === tenantId ? 
+        message.recipientId._id.toString() : 
+        message.senderId._id.toString();
+      
+      const sender = message.senderId._id.toString() === tenantId ? 
+        message.recipientId : message.senderId;
+
+      if (!acc[landlordId]) {
+        acc[landlordId] = {
+          sender,
+          messages: [message],
+          lastMessage: message,
+          unreadCount: message.recipientId._id.toString() === tenantId && !message.read ? 1 : 0
+        };
+      } else {
+        acc[landlordId].messages.push(message);
+        if (message.recipientId._id.toString() === tenantId && !message.read) {
+          acc[landlordId].unreadCount++;
+        }
+        if (new Date(message.timestamp) > new Date(acc[landlordId].lastMessage.timestamp)) {
+          acc[landlordId].lastMessage = message;
+        }
+      }
+      return acc;
+    }, {});
+
+    res.json({
+      success: true,
+      data: Object.values(conversations)
+    });
+
+  } catch (error) {
+    console.error('Error getting tenant messages:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 module.exports = router; 

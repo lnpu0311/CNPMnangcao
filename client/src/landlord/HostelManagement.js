@@ -236,14 +236,42 @@ const HostelManagement = () => {
 
   const handleDeleteFacility = async (id) => {
     try {
-      await axios.delete(`${process.env.REACT_APP_API}/hostel/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setFacilities((prev) => prev.filter((facility) => facility.id !== id));
+      const response = await axios.delete(
+        `${process.env.REACT_APP_API}/landlord/hostel/${id}/delete`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+  
+      if (response.data.success) {
+        toast({
+          title: "Xóa cơ sở thành công!",
+          description: response.data.message,
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+  
+        setFacilities((prev) => prev.filter((facility) => facility.id !== id));
+      } else {
+        toast({
+          title: "Có lỗi xảy ra.",
+          description: response.data.message || "Vui lòng thử lại.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
     } catch (error) {
-      console.error("Lỗi khi xóa cơ sở:", error);
+      toast({
+        title: "Không thể xóa cơ sở.",
+        description: error.response?.data?.message || "Vui lòng thử lại.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 

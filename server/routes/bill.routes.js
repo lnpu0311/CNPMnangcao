@@ -1,12 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middlewares/authMiddleware');
-const Bill = require('../models/bill.model');
+const billController = require('../controllers/bill.controller');
+
+// Lấy lịch sử thanh toán
+router.get('/history', authMiddleware(['tenant']), billController.getBillHistory);
+
+// Lấy danh sách hóa đơn của landlord
+router.get('/landlord/bills', authMiddleware(['landlord']), billController.getLandlordBills);
+
+// Lấy danh sách hóa đơn đã thanh toán của landlord
+router.get('/landlord/paid-bills', authMiddleware(['landlord']), billController.getLandlordPaidBills);
 
 // Lấy danh sách hóa đơn của tenant 
 router.get('/', authMiddleware(['tenant']), async(req, res) => {
   try {
-    // Lấy bills theo tenantId từ token
     const bills = await Bill.find({ 
       tenantId: req.user.id 
     })
@@ -33,10 +41,9 @@ router.get('/', authMiddleware(['tenant']), async(req, res) => {
 // Lấy chi tiết một hóa đơn của tenant
 router.get('/:id', authMiddleware(['tenant']), async(req, res) => {
   try {
-    // Tìm bill theo id và tenantId
     const bill = await Bill.findOne({
       _id: req.params.id,
-      tenantId: req.user.id  // Đảm bảo chỉ lấy hóa đơn của tenant hiện tại
+      tenantId: req.user.id
     }).populate({
       path: 'roomId',
       select: 'roomName'

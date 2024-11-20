@@ -63,6 +63,7 @@ import {
   FaInstagram,
   FaCalendarAlt,
   FaCalendarCheck,
+  FaEnvelope,
 } from "react-icons/fa";
 import {
   NavLink,
@@ -73,6 +74,7 @@ import {
   useNavigate,
   Link,
 } from "react-router-dom";
+import BillList from "./BillList";
 
 import "../../src/index.css";
 import { Link as RouterLink } from "react-router-dom";
@@ -159,12 +161,22 @@ function TenantHome() {
       path: "bookings",
       icon: <FaCalendarCheck />,
     },
+    {
+      name: "Tin nhắn",
+      path: "messages",
+      icon: <FaEnvelope />,
+    },
     
     {
       name: "Lịch sử thanh toán",
       path: "payments",
       icon: <FaMoneyCheckAlt />,
     },
+    {
+      name: "Danh sách hóa đơn",
+      path: "bills",
+      icon: <FaFileInvoiceDollar />,
+    }
   ];
 
   // const settingsItem = {

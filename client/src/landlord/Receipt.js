@@ -11,70 +11,90 @@ import {
   VStack,
   Stack,
   Heading,
-  Input,
+  Spinner,
+  useToast,
 } from "@chakra-ui/react";
-import { useState } from "react";
-
-const paidInvoices = [
-  {
-    roomName: "Phòng 101",
-    amountPaid: "1,500,000 VND",
-    invoiceDate: "2024-10-01",
-    paymentDate: "2024-11-01", // Thanh toán vào tháng 11
-    facility: "Cơ sở A",
-  },
-  {
-    roomName: "Phòng 102",
-    amountPaid: "2,000,000 VND",
-    invoiceDate: "2024-09-15",
-    paymentDate: "2024-09-20",
-    facility: "Cơ sở A",
-  },
-  {
-    roomName: "Phòng 103",
-    amountPaid: "1,800,000 VND",
-    invoiceDate: "2024-10-10",
-    paymentDate: "2024-10-20",
-    facility: "Cơ sở B",
-  },
-  {
-    roomName: "Phòng 104",
-    amountPaid: "2,500,000 VND",
-    invoiceDate: "2024-08-20",
-    paymentDate: "2024-09-01",
-    facility: "Cơ sở C",
-  },
-  {
-    roomName: "Phòng 105",
-    amountPaid: "2,000,000 VND",
-    invoiceDate: "2023-09-15",
-    paymentDate: "2023-09-20",
-    facility: "Cơ sở B",
-  },
-];
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const Receipt = () => {
   const [selectedMonth, setSelectedMonth] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedFacility, setSelectedFacility] = useState("");
-  const [searchRoomName, setSearchRoomName] = useState("");
 
-  const filteredInvoices = paidInvoices.filter((invoice) => {
-    if (!selectedMonth && !selectedYear && !selectedFacility && !searchRoomName)
-      return true;
+  const [isLoading, setIsLoading] = useState(true);
+  const [receipts, setReceipts] = useState([]);
+  const [facilities, setFacilities] = useState([]);
+  const toast = useToast();
 
-    const invoiceDate = new Date(invoice.invoiceDate);
-    const invoiceMonth = invoiceDate.getMonth() + 1;
-    const invoiceYear = invoiceDate.getFullYear();
+  // Fetch danh sách cơ sở và hóa đơn khi component mount
+  useEffect(() => {
+    fetchFacilities();
+    fetchReceipts();
+  }, []);
+
+  // Fetch danh sách cơ sở
+  const fetchFacilities = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API}/landlord/hostel`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        }
+      );
+      setFacilities(response.data.data);
+    } catch (error) {
+      toast({
+        title: "Lỗi",
+        description: "Không thể tải danh sách cơ sở",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  // Fetch danh sách hóa đơn đã thanh toán
+  const fetchReceipts = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get(
+        `${process.env.REACT_APP_API}/bills/landlord/paid-bills`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        }
+      );
+      setReceipts(response.data.data);
+    } catch (error) {
+      toast({
+        title: "Lỗi",
+        description: "Không thể tải danh sách thanh toán",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Hàm lọc hóa đơn theo tháng, năm và cơ sở
+  const filteredReceipts = receipts.filter((receipt) => {
+    if (!selectedMonth && !selectedYear && !selectedFacility) return true;
+
+
+    const paymentDate = new Date(receipt.paymentDate);
+    const paymentMonth = paymentDate.getMonth() + 1;
+    const paymentYear = paymentDate.getFullYear();
 
     const monthMatches = selectedMonth
-      ? invoiceMonth === parseInt(selectedMonth)
+      ? paymentMonth === parseInt(selectedMonth)
       : true;
     const yearMatches = selectedYear
-      ? invoiceYear === parseInt(selectedYear)
+      ? paymentYear === parseInt(selectedYear)
       : true;
     const facilityMatches = selectedFacility
-      ? invoice.facility === selectedFacility
+      ? receipt.roomId.hostelId.name === selectedFacility
       : true;
     const roomNameMatches = searchRoomName
       ? invoice.roomName.toLowerCase().includes(searchRoomName.toLowerCase())
@@ -83,10 +103,25 @@ const Receipt = () => {
     return monthMatches && yearMatches && facilityMatches && roomNameMatches;
   });
 
-  const getMonthFromDate = (date) => {
-    const invoiceDate = new Date(date);
-    return `${invoiceDate.getMonth() + 1}/${invoiceDate.getFullYear()}`;
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount);
   };
+
+  const getMonthFromDate = (date) => {
+    const paymentDate = new Date(date);
+    return `${paymentDate.getMonth() + 1}/${paymentDate.getFullYear()}`;
+  };
+
+  if (isLoading) {
+    return (
+      <Box textAlign="center" py={10}>
+        <Spinner size="xl" />
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -99,6 +134,19 @@ const Receipt = () => {
       >
         Danh Sách Thanh Toán
       </Heading>
+      <HStack spacing={8} align="center">
+        <Select
+          placeholder="Chọn cơ sở"
+          value={selectedFacility}
+          onChange={(e) => setSelectedFacility(e.target.value)}
+          maxWidth="200px"
+        >
+          {facilities.map((facility) => (
+            <option key={facility._id} value={facility.name}>
+              {facility.name}
+            </option>
+          ))}
+        </Select>
 
       {/* Bộ lọc */}
       <Stack
@@ -192,14 +240,8 @@ const Receipt = () => {
         </Stack>
       </Stack>
 
-      {/* Hiển thị dữ liệu */}
-      {filteredInvoices.length > 0 ? (
-        <Table
-          variant="striped"
-          colorScheme="blue"
-          mt={4}
-          size={{ base: "sm", md: "md" }}
-        >
+      {filteredReceipts.length > 0 ? (
+        <Table variant="striped" colorScheme="blue" mt={4}>
           <Thead>
             <Tr>
               <Th>Cơ Sở</Th>
@@ -210,19 +252,19 @@ const Receipt = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {filteredInvoices.map((invoice, index) => (
-              <Tr key={index}>
-                <Td>{invoice.facility}</Td>
-                <Td>{invoice.roomName}</Td>
-                <Td>{invoice.amountPaid}</Td>
-                <Td>{getMonthFromDate(invoice.invoiceDate)}</Td>
-                <Td>{invoice.paymentDate}</Td>
+            {filteredReceipts.map((receipt) => (
+              <Tr key={receipt._id}>
+                <Td>{receipt.roomId.hostelId.name}</Td>
+                <Td>{receipt.roomId.roomName}</Td>
+                <Td>{formatCurrency(receipt.totalAmount)}</Td>
+                <Td>{getMonthFromDate(receipt.paymentDate)}</Td>
+                <Td>{new Date(receipt.paymentDate).toLocaleDateString('vi-VN')}</Td>
               </Tr>
             ))}
           </Tbody>
         </Table>
       ) : (
-        <Text fontSize="lg" color="gray.500" textAlign="center" w="100%">
+        <Text fontSize="lg" color="gray.500" textAlign="center" w="100%" mt={4}>
           Không có dữ liệu
         </Text>
       )}

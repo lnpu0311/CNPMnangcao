@@ -11,13 +11,13 @@ import {
   useToast,
   IconButton,
   Stack,
-  Flex
+  Flex,
 } from "@chakra-ui/react";
 import { EditIcon } from "@chakra-ui/icons";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { useLoaderData, useNavigate } from "react-router-dom";
-import {  FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 function ProfilePage() {
   const toast = useToast();
   const [token, setToken] = useState(null);
@@ -66,7 +66,6 @@ function ProfilePage() {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
-              timeout: 10000,
             }
           );
           setUser(response.data.data);
@@ -136,7 +135,6 @@ function ProfilePage() {
         >
           Quay lại
         </Button>
-        
       </Flex>
       <Box maxW="md" mx="auto" p={4} textAlign="center">
         <Box position="relative" display="inline-block">

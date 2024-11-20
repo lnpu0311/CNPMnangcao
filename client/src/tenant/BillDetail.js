@@ -34,7 +34,7 @@ const getErrorMessage = (errorCode) => {
     case '11':
       return 'Đã hết hạn chờ thanh toán';
     case '12':
-      return 'Thẻ/Tài khoản của khách hàng bị khóa';
+      return 'Thẻ/Tài khoản của khách hàng b khóa';
     case '13':
       return 'Khách hàng nhập sai mật khẩu xác thực giao dịch';
     case '51':
@@ -57,37 +57,31 @@ const BillDetail = () => {
   const toast = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
 
-  useEffect(() => {
-    // Chỉ fetch bill details khi không phải là payment-result
-    if (billId !== 'payment-result') {
-        fetchBillDetails();
-    }
-  }, [billId]);
+  const checkPaymentResult = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const vnp_ResponseCode = urlParams.get('vnp_ResponseCode');
+    const vnp_TxnRef = urlParams.get('vnp_TxnRef');
 
-  useEffect(() => {
-    const checkPaymentResult = async () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const paymentStatus = urlParams.get('payment');
-        const errorCode = urlParams.get('error') || urlParams.get('code');
-        const billId = urlParams.get('billId');
+    console.log('Payment result check:', { vnp_ResponseCode, vnp_TxnRef });
 
-        if (paymentStatus) {
-            if (paymentStatus === 'success') {
-                // Nếu có billId, fetch lại thông tin bill mới nhất
-                if (billId) {
-                    try {
-                        const response = await axios.get(
-                            `${process.env.REACT_APP_API}/bills/${billId}`,
-                            {
-                                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-                            }
-                        );
-                        setBill(response.data.data);
-                    } catch (error) {
-                        console.error('Error fetching updated bill:', error);
+    if (vnp_ResponseCode === '00' && vnp_TxnRef) {
+        try {
+            // Gọi API để cập nhật trạng thái bill
+            const response = await axios.get(
+                `${process.env.REACT_APP_API}/payment/vnpay/callback`,
+                {
+                    params: {
+                        vnp_ResponseCode,
+                        vnp_TxnRef,
+                        ...Object.fromEntries(urlParams)
+                    },
+                    headers: { 
+                        Authorization: `Bearer ${localStorage.getItem('token')}` 
                     }
                 }
+            );
 
+            if (response.data.success) {
                 toast({
                     title: "Thanh toán thành công",
                     description: "Hóa đơn đã được thanh toán thành công",
@@ -96,27 +90,43 @@ const BillDetail = () => {
                     isClosable: true,
                     position: "top"
                 });
-
-                // Chuyển về trang danh sách hóa đơn sau 2 giây
-                setTimeout(() => {
-                    navigate('/tenant/bills', { replace: true });
-                }, 2000);
-            } else if (paymentStatus === 'failed') {
-                toast({
-                    title: "Thanh toán thất bại",
-                    description: getErrorMessage(errorCode),
-                    status: "error",
-                    duration: 3000,
-                    isClosable: true,
-                    position: "top"
-                });
                 navigate('/tenant/bills', { replace: true });
+            } else {
+                throw new Error(response.data.message);
             }
+        } catch (error) {
+            console.error('Error processing payment:', error);
+            toast({
+                title: "Lỗi xử lý thanh toán",
+                description: error.response?.data?.message || "Vui lòng kiểm tra lại trạng thái thanh toán",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+                position: "top"
+            });
+            navigate('/tenant/bills', { replace: true });
         }
-    };
+    } else {
+        toast({
+            title: "Thanh toán thất bại",
+            description: "Giao dịch không thành công",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+            position: "top"
+        });
+        navigate('/tenant/bills', { replace: true });
+    }
+  };
 
-    checkPaymentResult();
-  }, [navigate, toast]);
+  useEffect(() => {
+    // Chỉ fetch bill details khi không phải là payment-result
+    if (billId !== 'payment-result') {
+      fetchBillDetails();
+    } else {
+      checkPaymentResult();
+    }
+  }, [billId]);
 
   const fetchBillDetails = async () => {
     try {
@@ -164,9 +174,17 @@ const BillDetail = () => {
     try {
         setIsProcessing(true);
         
+        // Format amount - phải là số nguyên, đơn vị là VND * 100
+        const amount = Math.round(bill.totalAmount * 100);
+        
         const response = await axios.post(
             `${process.env.REACT_APP_API}/payment/vnpay/create`,
-            { billId: bill._id },
+            { 
+                billId: bill._id,
+                amount: amount,
+                orderDescription: `Thanh toan hoa don #${bill._id}`,
+                language: 'vn'
+            },
             {
                 headers: { 
                     Authorization: `Bearer ${localStorage.getItem('token')}` 
@@ -176,9 +194,14 @@ const BillDetail = () => {
         );
 
         if (response.data.success) {
+            // Lưu thông tin thanh toán vào localStorage để kiểm tra sau
             localStorage.setItem('lastPaymentBillId', bill._id);
             localStorage.setItem('lastPaymentTimestamp', Date.now().toString());
+            
+            // Chuyển hướng đến trang thanh toán VNPAY
             window.location.href = response.data.paymentUrl;
+        } else {
+            throw new Error(response.data.message || 'Không thể tạo URL thanh toán');
         }
     } catch (error) {
         console.error('VNPAY payment error:', error);
@@ -198,9 +221,9 @@ const BillDetail = () => {
 
   const handleVNPayCallback = async (params) => {
     try {
-        const response = await axios.post(
-            `${process.env.REACT_APP_API}/payment/vnpay/callback`,
-            params,
+        console.log('Sending callback params:', params);
+        const response = await axios.get(
+            `${process.env.REACT_APP_API}/bills/${params.vnp_TxnRef}`,
             {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -209,30 +232,22 @@ const BillDetail = () => {
         );
 
         if (response.data.success) {
-            await fetchBillDetails();
+            setBill(response.data.data);
             toast({
                 title: "Thanh toán thành công",
                 status: "success",
                 duration: 3000,
                 isClosable: true
             });
-        } else {
-            toast({
-                title: "Thanh toán thất bại",
-                description: response.data.message,
-                status: "error",
-                duration: 3000,
-                isClosable: true
-            });
+            navigate('/tenant/bills', { replace: true });
         }
-        navigate('/tenant/bills', { replace: true });
     } catch (error) {
         console.error('VNPAY callback error:', error);
         toast({
             title: "Lỗi xử lý thanh toán",
-            description: error.response?.data?.message || "Vui lòng liên hệ admin",
+            description: error.response?.data?.message || "Vui lòng kiểm tra lại trạng thái thanh toán",
             status: "error",
-            duration: 3000,
+            duration: 5000,
             isClosable: true
         });
         navigate('/tenant/bills', { replace: true });

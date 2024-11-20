@@ -16,4 +16,14 @@ router.get('/paypal/cancel', (req, res) => {
 router.post('/vnpay/create', authMiddleware(["tenant"]), rentController.createVNPayPayment);
 router.get('/vnpay/callback', rentController.vnpayCallback);
 
+// Route xử lý kết quả thanh toán
+router.get('/payment-result', authMiddleware(["tenant"]), (req, res) => {
+    const { vnp_ResponseCode, vnp_TxnRef } = req.query;
+    if (vnp_ResponseCode === '00') {
+        res.redirect(`${process.env.CLIENT_URL}/tenant/bills/payment-result?vnp_ResponseCode=${vnp_ResponseCode}&vnp_TxnRef=${vnp_TxnRef}`);
+    } else {
+        res.redirect(`${process.env.CLIENT_URL}/tenant/bills/payment-result?payment=failed&code=${vnp_ResponseCode}`);
+    }
+});
+
 module.exports = router;

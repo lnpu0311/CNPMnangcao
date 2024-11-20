@@ -4,6 +4,7 @@ const Bill = require('../models/bill.model');
 const {vnpayConfig,createPaymentUrl, verifyReturnUrl} = require('../configs/vnpay');
 const moment = require('moment');
 const crypto = require('crypto');
+const Notification = require('../models/notification.model');
 
 // Hàm tạo thanh toán tiền thuê
 exports.createRentPayment = async (req, res) => {
@@ -185,42 +186,65 @@ exports.createVNPayPayment = async (req, res) => {
 // Thêm hàm xử lý callback từ VNPAY
 exports.vnpayCallback = async (req, res) => {
     try {
-        const vnp_Params = req.query;
+        // Lấy params từ cả query và body
+        const vnp_Params = { ...req.query, ...req.body };
         console.log('Received VNPAY callback params:', vnp_Params);
-
-        // Verify signature
-        const isValidSignature = verifyReturnUrl(vnp_Params);
-        
-        if (!isValidSignature) {
-            return res.json({
-                success: false,
-                message: 'Invalid signature'
-            });
-        }
 
         const billId = vnp_Params.vnp_TxnRef;
         const responseCode = vnp_Params.vnp_ResponseCode;
 
         // Kiểm tra bill tồn tại
         const bill = await Bill.findById(billId);
+        console.log('Found bill:', bill);
+
         if (!bill) {
-            return res.json({
+            console.log('Bill not found:', billId);
+            return res.status(404).json({
                 success: false,
-                message: 'Bill not found'
+                message: 'Không tìm thấy hóa đơn'
             });
         }
 
         if (responseCode === '00') {
-            // Cập nhật trạng thái bill
-            await Bill.findByIdAndUpdate(billId, {
-                status: 'PAID',
-                paymentMethod: 'VNPAY',
-                paymentDate: new Date(),
-                vnpayTransactionId: vnp_Params.vnp_TransactionNo
-            }, { new: true });
+            try {
+                // Cập nhật trạng thái bill
+                const updatedBill = await Bill.findOneAndUpdate(
+                    { 
+                        _id: billId,
+                        status: { $in: ['PENDING', 'PROCESSING'] }
+                    },
+                    {
+                        status: 'PAID',
+                        paymentMethod: 'VNPAY',
+                        paymentDate: new Date(),
+                        vnpayTransactionId: vnp_Params.vnp_TransactionNo
+                    },
+                    { 
+                        new: true,
+                        runValidators: true
+                    }
+                );
 
-            return res.redirect(`${process.env.CLIENT_URL}/tenant/bills/payment-result?payment=success`);
+                console.log('Updated bill:', updatedBill);
+
+                if (!updatedBill) {
+                    throw new Error('Không thể cập nhật trạng thái hóa đơn');
+                }
+
+                return res.json({
+                    success: true,
+                    message: 'Thanh toán thành công',
+                    data: updatedBill
+                });
+            } catch (error) {
+                console.error('Error updating bill:', error);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Lỗi cập nhật trạng thái hóa đơn'
+                });
+            }
         } else {
+            // Cập nhật lại trạng thái bill về PENDING
             await Bill.findByIdAndUpdate(billId, {
                 status: 'PENDING',
                 paymentMethod: null
@@ -228,15 +252,15 @@ exports.vnpayCallback = async (req, res) => {
 
             return res.json({
                 success: false,
-                message: 'Payment failed',
-                code: responseCode
+                message: 'Thanh toán thất bại',
+                errorCode: responseCode
             });
         }
     } catch (error) {
         console.error('VNPAY callback error:', error);
-        return res.json({
+        return res.status(500).json({
             success: false,
-            message: error.message
+            message: 'Lỗi xử lý thanh toán'
         });
     }
 };
@@ -359,5 +383,88 @@ exports.verifyReturnUrl = (vnp_Params) => {
     } catch (error) {
         console.error('Error verifying signature:', error);
         return false;
+    }
+};
+
+exports.createVNPayUrl = async (req, res) => {
+    try {
+        const { billId, amount, orderDescription, language } = req.body;
+
+        // Validate input
+        if (!billId || !amount) {
+            return res.status(400).json({
+                success: false,
+                message: 'Thiếu thông tin thanh toán'
+            });
+        }
+
+        // Kiểm tra bill tồn tại và chưa thanh toán
+        const bill = await Bill.findOne({
+            _id: billId,
+            status: 'PENDING'
+        });
+
+        if (!bill) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy hóa đơn hoặc hóa đơn đã được thanh toán'
+            });
+        }
+
+        // Tạo thông tin thanh toán
+        let date = new Date();
+        let createDate = moment(date).format('YYYYMMDDHHmmss');
+        let orderId = moment(date).format('HHmmss');
+        let ipAddr = req.headers['x-forwarded-for'] || 
+                     req.connection.remoteAddress || 
+                     req.socket.remoteAddress;
+
+        let tmnCode = process.env.VNP_TMN_CODE;
+        let secretKey = process.env.VNP_HASH_SECRET;
+        let vnpUrl = process.env.VNP_URL;
+        let returnUrl = process.env.VNP_RETURN_URL;
+        
+        let vnp_Params = {
+            vnp_Version: '2.1.0',
+            vnp_Command: 'pay',
+            vnp_TmnCode: tmnCode,
+            vnp_Locale: language || 'vn',
+            vnp_CurrCode: 'VND',
+            vnp_TxnRef: billId,
+            vnp_OrderInfo: orderDescription || `Thanh toan hoa don ${billId}`,
+            vnp_OrderType: 'billpayment',
+            vnp_Amount: amount,
+            vnp_ReturnUrl: returnUrl,
+            vnp_IpAddr: ipAddr,
+            vnp_CreateDate: createDate
+        };
+
+        // Sắp xếp các tham số theo thứ tự a-z
+        let querystring = require('qs');
+        let signData = querystring.stringify(vnp_Params, { encode: false });
+        let crypto = require("crypto");     
+        let hmac = crypto.createHmac("sha512", secretKey);
+        let signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex"); 
+        vnp_Params['vnp_SecureHash'] = signed;
+
+        vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
+
+        // Cập nhật trạng thái bill sang PROCESSING
+        await Bill.findByIdAndUpdate(billId, {
+            status: 'PROCESSING',
+            paymentMethod: 'VNPAY'
+        });
+
+        return res.status(200).json({
+            success: true,
+            paymentUrl: vnpUrl
+        });
+
+    } catch (error) {
+        console.error('Create VNPAY URL error:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Không thể tạo URL thanh toán'
+        });
     }
 };

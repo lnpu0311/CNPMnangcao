@@ -13,6 +13,8 @@ const {
   getTenantList,
   sampleBill,
   createBill,
+  deleteRoom,
+  deleteHostel,
 } = require("../controllers/landlord.controller");
 const upload = require("../middlewares/uploadImage");
 
@@ -42,5 +44,7 @@ router.post(
 router.post("/manager/create", authMiddleware(["landlord"]));
 
 router.get("/tenant-list", authMiddleware(["landlord"]), getTenantList);
+router.delete('/room/:roomId/delete', authMiddleware(["landlord"]), deleteRoom);
+router.delete('/hostel/:hostelId/delete', authMiddleware(["landlord"]), deleteHostel);
 
 module.exports = router;

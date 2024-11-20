@@ -368,8 +368,19 @@ const RoomList = () => {
   };
 
   const handleDeleteRoom = async (roomId) => {
+    // Kiểm tra roomId có tồn tại không
+    if (!roomId) {
+      toast({
+        title: "Lỗi!",
+        description: "Không tìm thấy ID phòng",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
     try {
-      // Send DELETE request to the API with roomId in the URL
       const response = await axios.delete(
         `${process.env.REACT_APP_API}/landlord/room/${roomId}/delete`,
         {
@@ -379,35 +390,25 @@ const RoomList = () => {
         }
       );
 
-      // Check if the response indicates a successful deletion
-      if (response.data.success) {
+      if (response && response.data && response.data.success) {
         toast({
-          title: "Xóa phòng thành công!",
-          description: "Phòng đã được xóa khỏi danh sách.",
+          title: "Thành công!",
+          description: response.data.message || "Đã xóa phòng thành công",
           status: "success",
           duration: 5000,
           isClosable: true,
         });
 
-        // Update the room list in state by removing the deleted room
-        setRooms((prevRooms) =>
-          prevRooms.filter((room) => room._id !== roomId)
-        );
-      } else {
-        toast({
-          title: "Có lỗi xảy ra.",
-          description: response.data.message || "Vui lòng thử lại.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
+        // Cập nhật danh sách phòng
+        setRooms((prevRooms) => prevRooms.filter((room) => room._id !== roomId));
       }
     } catch (error) {
-      console.error("Lỗi khi xóa phòng:", error);
+      console.error("Delete room error:", error);
+      const errorMessage = error.response?.data?.message || "Có lỗi xảy ra khi xóa phòng";
+      
       toast({
-        title: "Không thể xóa phòng.",
-        description:
-          "Đã xảy ra lỗi trong quá trình xóa phòng. Vui lòng thử lại.",
+        title: "Lỗi!",
+        description: errorMessage,
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -795,7 +796,7 @@ const RoomList = () => {
                         colorScheme="red"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDeleteRoom(room.roomId);
+                          handleDeleteRoom(room._id);
                         }}
                       />
                     </Tooltip>

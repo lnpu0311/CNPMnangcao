@@ -5,7 +5,7 @@ exports.vnpayConfig = {
     tmnCode: process.env.VNPAY_TMCODE ,
     hashSecret: process.env.VNPAY_HASHSECRET ,
     url: process.env.VNPAY_URL,
-    returnUrl: process.env.VNP_RETURN_URL 
+    returnUrl: 'http://localhost:3000/tenant/bills/payment-result'
 };
 
 exports.createPaymentUrl = (orderId, amount, orderInfo, locale='vn') => {

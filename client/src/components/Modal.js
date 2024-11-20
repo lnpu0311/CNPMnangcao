@@ -236,7 +236,15 @@ export const BillModal = ({
                 type="number"
                 name="serviceFee"
                 value={sampleBill.serviceFee || ""}
-                onChange={(e) => handleInputChange(e, setSampleBill)}
+                onChange={(e) => {
+                  const numericValue = parseNumber(e.target.value); // Chuyển đổi sang số
+                  if (numericValue >= 0) {
+                    handleInputChange(
+                      { target: { name: "serviceFee", value: numericValue } },
+                      setSampleBill
+                    );
+                  }
+                }}
                 placeholder="Nhập phí khác (nếu có)"
               />
             </FormControl>
@@ -320,7 +328,7 @@ export const ContractModal = ({
           <FormControl isRequired>
             <FormLabel>Tiền đặt cọc (VNĐ)</FormLabel>
             <Input
-              type="number"
+              type="text"
               name="depositFee"
               placeholder="Nhập số tiền cọc"
               value={contractDetails.depositFee}
@@ -331,7 +339,7 @@ export const ContractModal = ({
           <FormControl isRequired>
             <FormLabel>Tiền thuê hàng tháng (VNĐ)</FormLabel>
             <Input
-              type="number"
+              type="text"
               name="rentFee"
               placeholder="Nhập số tiền thuê"
               value={contractDetails.rentFee}
@@ -342,7 +350,7 @@ export const ContractModal = ({
             <FormControl isRequired>
               <FormLabel>Giá điện (đồng/kWh)</FormLabel>
               <Input
-                type="number"
+                type="text"
                 name="electricityFee"
                 placeholder="Nhập số tiền điện"
                 value={contractDetails.electricityFee}
@@ -353,7 +361,7 @@ export const ContractModal = ({
             <FormControl isRequired>
               <FormLabel>Giá nước (đồng/m³)</FormLabel>
               <Input
-                type="number"
+                type="text"
                 name="waterFee"
                 placeholder="Nhập số tiền nước"
                 value={contractDetails.waterFee}
@@ -391,7 +399,12 @@ export const InfoModal = ({
   setSelectedImage,
   formatNumber,
 }) => (
-  <Modal size={"2xl"} isCentered isOpen={isOpen} onClose={onClose}>
+  <Modal
+    size={{ base: "full", md: "2xl" }}
+    isCentered
+    isOpen={isOpen}
+    onClose={onClose}
+  >
     <ModalOverlay />
     <ModalContent>
       <ModalHeader

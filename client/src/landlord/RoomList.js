@@ -40,6 +40,8 @@ const RoomList = () => {
   const [itemPerPage] = useState(12);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  // Thêm state để quản lý loading khi lấy thông tin phòng
+  const [isLoadingRoom, setIsLoadingRoom] = useState(false);
 
   //Tính toán số trang
   const totalPages = Math.ceil(rooms.length / itemPerPage);
@@ -466,10 +468,22 @@ const RoomList = () => {
     const numericValue = val.toString().replace(/[^0-9]/g, ""); // Chuyển sang chuỗi và loại bỏ ký tự không phải số
     return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Thêm dấu chấm
   };
-  const numericFields = ["deposit", "price"];
-  //  loại bỏ dấu chấm và chuyển chuỗi về số
+
+  const numericFields = [
+    "deposit",
+    "price",
+    "total",
+    "depositFee",
+    "rentFee",
+    "electricityFee",
+    "waterFee",
+  ];
   const parseNumber = (formattedValue) => {
-    return Number(formattedValue.replace(/\./g, ""));
+    // Kiểm tra nếu giá trị không tồn tại, trả về 0
+    if (!formattedValue) return 0;
+
+    // Loại bỏ tất cả dấu chấm (.) và chuyển đổi chuỗi thành số
+    return parseInt(formattedValue.toString().replace(/\./g, ""), 10) || 0;
   };
 
   const handleUpdate = async () => {
@@ -845,6 +859,7 @@ const RoomList = () => {
         setSampleBill={setSampleBill}
         handleInputChange={handleInputChange}
         handleCreateBill={handleCreateBill}
+        parseNumber={parseNumber}
       />
       <ContractModal
         isOpen={modalState.contract}
@@ -861,6 +876,7 @@ const RoomList = () => {
         selectedRoom={selectedRoom}
         setSelectedImage={setSelectedImage}
         formatNumber={formatNumber}
+        isLoadingRoom={isLoadingRoom}
       />
       <EditModal
         isOpen={modalState.editRoom}

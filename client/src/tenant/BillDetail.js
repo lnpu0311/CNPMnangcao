@@ -136,7 +136,6 @@ const BillDetail = () => {
       if (billId === "payment-result") {
         return;
       }
-      console.log;
       const response = await axios.get(
         `${process.env.REACT_APP_API}/bills/${billId}`,
         {

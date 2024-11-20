@@ -27,10 +27,6 @@ function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [newAvatar, setNewAvatar] = useState(null);
 
-  const navigate = useNavigate();
-  const handleGoBack = () => {
-    navigate(-1);
-  };
   // Sample user data
   const [originalUser, setOriginalUser] = useState({
     name: "Pukachu",
@@ -127,15 +123,6 @@ function ProfilePage() {
 
   return (
     <Stack>
-      <Flex alignItems="center" justifyContent="space-between" mb={4}>
-        <Button
-          onClick={handleGoBack}
-          colorScheme="teal"
-          leftIcon={<FaArrowLeft />}
-        >
-          Quay lại
-        </Button>
-      </Flex>
       <Box maxW="md" mx="auto" p={4} textAlign="center">
         <Box position="relative" display="inline-block">
           <Avatar

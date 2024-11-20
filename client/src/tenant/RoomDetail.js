@@ -36,6 +36,7 @@ const RoomDetail = () => {
   const [room, setRoom] = useState(location.state?.roomData || null);
   const [currentUser, setCurrentUser] = useState(null);
   const [showChat, setShowChat] = useState(false);
+  const [landlordInfo, setLandlordInfo] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -72,6 +73,24 @@ const RoomDetail = () => {
       fetchRoomDetail();
     }
   }, [id, room, toast]);
+
+  const fetchLandlordInfo = async (landlordId) => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API}/user/${landlordId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (response.data.success) {
+        setLandlordInfo(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching landlord info:", error);
+    }
+  };
 
   if (!room) {
     return <Center><Spinner size="xl" /></Center>;
@@ -157,8 +176,9 @@ const RoomDetail = () => {
                 <Button
                   colorScheme="teal"
                   size="lg"
-                  onClick={() => {
+                  onClick={async () => {
                     if (currentUser) {
+                      await fetchLandlordInfo(room.landlordId);
                       setShowChat(true);
                     } else {
                       toast({
@@ -202,11 +222,11 @@ const RoomDetail = () => {
       </Box>
 
       {showChat && currentUser && room.landlordId && 
-        currentUser.id !== room.landlordId && (
+        currentUser.id !== room.landlordId && landlordInfo && (
         <Chat
           currentUserId={currentUser.id}
           recipientId={room.landlordId.toString()}
-          recipientName={room.landlordName || "Chủ trọ"}
+          recipientName={landlordInfo.name}
           onClose={() => setShowChat(false)}
         />
       )}

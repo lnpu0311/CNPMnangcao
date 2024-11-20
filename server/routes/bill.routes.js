@@ -1,11 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middlewares/authMiddleware');
-const Bill = require('../models/bill.model');
 const billController = require('../controllers/bill.controller');
 
 // Lấy lịch sử thanh toán
 router.get('/history', authMiddleware(['tenant']), billController.getBillHistory);
+
+// Lấy danh sách hóa đơn của landlord
+router.get('/landlord/bills', authMiddleware(['landlord']), billController.getLandlordBills);
+
+// Lấy danh sách hóa đơn đã thanh toán của landlord
+router.get('/landlord/paid-bills', authMiddleware(['landlord']), billController.getLandlordPaidBills);
 
 // Lấy danh sách hóa đơn của tenant 
 router.get('/', authMiddleware(['tenant']), async(req, res) => {

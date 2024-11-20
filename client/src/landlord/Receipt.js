@@ -18,6 +18,7 @@ import {
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 const Receipt = () => {
   const [selectedMonth, setSelectedMonth] = useState("");
@@ -28,20 +29,26 @@ const Receipt = () => {
   const [receipts, setReceipts] = useState([]);
   const [facilities, setFacilities] = useState([]);
   const toast = useToast();
+  const token = localStorage.getItem("token");
 
   // Fetch danh sách cơ sở và hóa đơn khi component mount
   useEffect(() => {
     fetchFacilities();
     fetchReceipts();
-  }, []);
+  }, [token]);
 
   // Fetch danh sách cơ sở
   const fetchFacilities = async () => {
+    const user = jwtDecode(token);
     try {
       const response = await axios.get(
         `${process.env.REACT_APP_API}/landlord/hostel`,
+
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          params: {
+            landlordId: user.id,
+          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       setFacilities(response.data.data);

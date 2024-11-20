@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react"; 
+import { useState, useEffect,  } from "react"; 
 import React from "react";
 import { VStack, Box, Image, Heading, Text, Button, Grid, Stack, Link, Icon, HStack,  
   Modal,
@@ -11,12 +11,16 @@ import { VStack, Box, Image, Heading, Text, Button, Grid, Stack, Link, Icon, HSt
   ModalFooter,
   IconButton,
   Container,
-  Flex
+  Flex,
+  useToast,
+  Tag
  } from "@chakra-ui/react";
 import { FaFacebook, FaYoutube, FaInstagram, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Banner from "./Banner";
+import { useLocation } from 'react-router-dom';
+import axios from "axios"; // Import axios để gọi API
 
  const categories = [
    { name: "Quận 1", image: "./houses/house1.png" },
@@ -29,27 +33,7 @@ import Banner from "./Banner";
    // Thêm các quận khác
  ];
 
-const rooms = [
-  {
-    category: "Quận 1",
-    address: "39 Phan Xích Long, Phường 03, Quận Phú Nhuận, Thành phố Hồ Chí Minh",
-    area: "100 m²",
-    price: "10.000.000 ₫",
-    deposit: "500.000 ₫",
-    amenities: ["Wifi miễn phí", "Bảo vệ 24/7", "Chỗ để xe", "Tự do giờ giấc"],
-    image: "./house1.png",
-  },
-  {
-    category: "Quận 2",
-    address: "39 Phan Xích Long, Phường 03, Quận Phú Nhuận, Thành phố Hồ Chí Minh",
-    area: "100 m²",
-    price: "10.000.000 ₫",
-    deposit: "500.000 ₫",
-    amenities: ["Wifi miễn phí", "Bảo vệ 24/7", "Chỗ để xe", "Tự do giờ giấc"],
-    image: "./house2.png",
-  },
-  // Thêm các phòng khác
-];
+
 
 
 const heroImages = [
@@ -176,8 +160,53 @@ function TenantDashboard() {
   const [selectedMember, setSelectedMember] = useState(null);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
+  const toast = useToast();
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [rooms, setRooms] = useState([]); // State để lưu danh sách phòng
+  const [selectedRoom, setSelectedRoom] = useState(null);
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API}/user/rooms`,{
+          headers:{Authorization:`Bearer ${localStorage.getItem("token")}`}
+        }); // Gọi API để lấy danh sách phòng
+        console.log(response.data.data)
+        setRooms(response.data.data); // Lưu dữ liệu vào state
+      } catch (error) {
+        console.error("Error fetching rooms:", error);
+        toast({
+          title: "Lỗi",
+          description: "Không thể tải danh sách phòng",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    };
+
+    fetchRooms();
+  }, []);
+
+  const handleRoomClick = async (roomId) => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API}/user/rooms/${roomId}`,{
+        headers:{Authorization:`Bearer ${localStorage.getItem("token")}`}
+      });
+      if (response.data.success) {
+        setSelectedRoom(response.data.data); // Lưu thông tin phòng đã chọn vào state
+      }
+    } catch (error) {
+      console.error("Error fetching room detail:", error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể tải thông tin phòng",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
 
   const handleCategoryClick = (categoryName) => {
     setSelectedCategory(categoryName);
@@ -206,7 +235,7 @@ function TenantDashboard() {
   const nextImage = () => {
     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
   };
-
+  
   
 
   // Tự động chuyển đổi hình ảnh sau mỗi 5 giây
@@ -235,6 +264,112 @@ function TenantDashboard() {
       <Box mb={20}> 
         <Banner />
       </Box>
+      
+        {/* Hiển thị thông tin phòng đã chọn nếu có */}
+        {selectedRoom && (
+        <Box>
+          <Heading size="lg">Thông tin phòng đã chọn:</Heading>
+          <Text fontWeight="bold">Tên phòng: {selectedRoom.category}</Text>
+          <Text>Địa chỉ: {selectedRoom.address}</Text>
+          <Text>Giá: {selectedRoom.price}</Text>
+          <Text>Diện tích: {selectedRoom.area}</Text>
+          <Text>Đặt cọc: {selectedRoom.deposit}</Text>
+          <Text>Tiện ích: {selectedRoom.amenities.join(', ')}</Text>
+        </Box>
+        )}
+
+      {/* Danh sách phòng */}
+      <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap={4}>
+        {rooms.map((room) => (
+          <Box
+          key={room.id}
+          borderWidth="1px"
+          borderRadius="lg"
+          overflow="hidden"
+          boxShadow="md"
+          bg="white"
+          height="100%"
+          display="flex"
+          flexDirection="column"
+          onClick={() => handleRoomClick(room)}
+          cursor="pointer"
+          _hover={{ transform: "scale(1.02)", transition: "all 0.2s" }}
+          p={2}
+        >
+          <Image
+            src={room.images[0]}
+            alt={room.roomName}
+            w="100%"
+            h="200px"
+            objectFit="cover"
+            fallbackSrc="https://via.placeholder.com/200"
+            borderRadius={{ base: "8px", lg: "8px" }}
+          />
+          <VStack p={4} align="stretch" spacing={2} flex="1">
+            <Text 
+              fontWeight="bold" 
+              fontSize="lg"
+              noOfLines={1}  // Giới hạn tiêu đề 1 dòng
+            >
+              {room.roomTitle}
+            </Text>
+            {/* <Flex alignItems="flex-start">
+               <Text fontWeight="bold" width="70px" flexShrink={0}>
+                Địa chỉ:
+              </Text>
+              <Text 
+                color="gray.600" 
+                fontSize="sm"  
+                noOfLines={2}  // Giới hạn địa chỉ 2 dòng
+              >
+                {room.address}
+              </Text> 
+            </Flex> */}
+            <Flex justifyContent="space-between" alignItems="center">
+              <Text fontWeight="bold">Tình trạng:</Text>
+              <Tag
+                colorScheme={room.status === "Còn trống" ? "green" : "red"}
+              >
+                {room.status}
+              </Tag>
+            </Flex>
+            {/* <Flex justifyContent="space-between">
+              <Text fontWeight="bold">Giá:</Text>
+              <Text>
+                {new Intl.NumberFormat("vi-VN", {
+                  style: "currency",
+                  currency: "VND",
+                }).format(room.price)}
+              </Text>
+            </Flex> */}
+          </VStack>
+        </Box>
+        ))}
+      </Grid>
+
+      {/* Modal */}
+      <Modal isOpen={!!selectedRoom} onClose={() => setSelectedRoom(null)} size="md">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Thông tin phòng</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {selectedRoom && (
+              <VStack spacing={4}>
+                <Text fontWeight="bold">Địa chỉ: {selectedRoom.address}</Text>
+                <Text fontWeight="bold">Giá: {selectedRoom.price}</Text>
+                <Text fontWeight="bold">Diện tích: {selectedRoom.area}</Text>
+                <Text fontWeight="bold">Đặt cọc: {selectedRoom.deposit}</Text>
+                <Text fontWeight="bold">Tiện ích:</Text>
+                <Text>{selectedRoom.amenities.join(', ')}</Text>
+              </VStack>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={() => setSelectedRoom(null)}>Đóng</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
       {/* <VStack spacing={10} align="center" p={4} w="100%">
      
@@ -321,6 +456,18 @@ function TenantDashboard() {
           Tìm Phòng Ngay!
         </Button>
       </Box>
+      {/* Hiển thị thông tin phòng đã chọn nếu có */}
+      {selectedRoom && (
+        <Box>
+          <Heading size="lg">Thông tin phòng đã chọn:</Heading>
+          <Text fontWeight="bold">Tên phòng: {selectedRoom.category}</Text>
+          <Text>Địa chỉ: {selectedRoom.address}</Text>
+          <Text>Giá: {selectedRoom.price}</Text>
+          <Text>Diện tích: {selectedRoom.area}</Text>
+          <Text>Đặt cọc: {selectedRoom.deposit}</Text>
+          <Text>Tiện ích: {selectedRoom.amenities.join(', ')}</Text>
+        </Box>
+      )}
 
       
       

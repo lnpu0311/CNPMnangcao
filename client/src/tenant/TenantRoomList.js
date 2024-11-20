@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, } from "react";
 import axios from "axios";
 import {
   Box,
@@ -520,39 +520,58 @@ const TenantRoomList = () => {
   };
 
   return (
+    <Flex 
+    direction="column" // Thay đổi hướng thành cột để chứa nút và container
+    alignItems="stretch"
+  >
+    <Flex 
+        alignItems="center" 
+        justifyContent="space-between" 
+        mb={4} 
+        flexWrap="wrap" // Cho phép các phần tử xếp chồng lên nhau khi cần
+      >
+      <Button
+        onClick={handleGoBack}
+        colorScheme="teal"
+        leftIcon={<FaArrowLeft />}
+        mb={{ base: 2, md: 0 }} // Thêm khoảng cách dưới nút ở chế độ mobile
+      >
+        Quay lại
+      </Button>
+
+      <IconButton
+        icon={<FiFilter />}
+        onClick={onOpen}
+        colorScheme="blue"
+        aria-label="Open filters"
+        display={{ base: "flex", md: "none" }}
+      />
+    </Flex>
     <Container maxW="container.xl" py={4}>
-    <Flex alignItems="center" justifyContent="space-between" mb={4}>
-        <Button
-          onClick={handleGoBack}
-          colorScheme="teal"
-          leftIcon={<FaArrowLeft />}
-        >
-          Quay lại
-        </Button>
-        <Text fontSize="3xl" fontWeight="bold" textAlign="center" flex="1" mx={4}>
+      
+
+      {/* Tiêu đề danh sách phòng */}
+      <Flex 
+        alignItems="center" 
+        justifyContent="center" 
+        mb={4} 
+        flexWrap="wrap" // Cho phép xếp chồng khi cần
+      >
+        <Text fontSize="3xl" fontWeight="bold" textAlign="center" mx={4}>
           Danh sách phòng
         </Text>
       </Flex>
-        
-      
-        {/* Filter Button và Active Filters */}
+
+      {/* Hiển thị các filter đã chọn */}
         <Flex 
           mb={4} 
           gap={2} 
           alignItems="center"
           flexWrap="wrap"
+          width={{ base: "100%", md: "auto" }} // Đảm bảo chiếm toàn bộ chiều rộng ở chế độ responsive
         >
-          <IconButton
-            icon={<FiFilter />}
-            onClick={onOpen}
-            colorScheme="blue"
-            aria-label="Open filters"
-            display={{ base: "flex", md: "none" }}
-          />
-          
-          {/* Hiển thị các filter đã chọn */}
           {(searchTerm || filterCity || filterDistrict || priceRange) && (
-            <Flex gap={2} flexWrap="wrap">
+            <>
               {searchTerm && (
                 <Tag colorScheme="blue" size="md">
                   Địa chỉ chi tiết: {searchTerm}
@@ -579,7 +598,7 @@ const TenantRoomList = () => {
                   <TagCloseButton onClick={() => setPriceRange("")} />
                 </Tag>
               )}
-            </Flex>
+            </>
           )}
         </Flex>
         {/* Filter Drawer cho mobile */}
@@ -624,9 +643,14 @@ const TenantRoomList = () => {
               <Spinner size="xl" />
             </Center>
           ) : filteredRooms.length === 0 ? (
-            <Center mr={200}>
-              <Text textAlign="center" w="100%">Không có phòng nào</Text>
-            </Center>
+            <Flex 
+            alignItems="center" 
+            justifyContent="center" 
+            mb={4} 
+            flexWrap="wrap" // Cho phép xếp chồng khi cần
+          >
+            <Text textAlign="center" w="100%">Không có phòng nào</Text>
+          </Flex>
           ) : (
           <Box className='mb-20'>
             <Box className='container mx-auto'>
@@ -657,6 +681,7 @@ const TenantRoomList = () => {
                     h="200px"
                     objectFit="cover"
                     fallbackSrc="https://via.placeholder.com/200"
+                    borderRadius={{ base: "8px", lg: "8px" }}
                   />
                   <VStack p={4} align="stretch" spacing={2} flex="1">
                     <Text 
@@ -666,8 +691,8 @@ const TenantRoomList = () => {
                     >
                       {room.roomTitle}
                     </Text>
-                    <Flex alignItems="flex-start">
-                      <Text fontWeight="bold" width="70px" flexShrink={0}>
+                    {/* <Flex alignItems="flex-start">
+                       <Text fontWeight="bold" width="70px" flexShrink={0}>
                         Địa chỉ:
                       </Text>
                       <Text 
@@ -676,8 +701,8 @@ const TenantRoomList = () => {
                         noOfLines={2}  // Giới hạn địa chỉ 2 dòng
                       >
                         {room.address}
-                      </Text>
-                    </Flex>
+                      </Text> 
+                    </Flex> */}
                     <Flex justifyContent="space-between" alignItems="center">
                       <Text fontWeight="bold">Tình trạng:</Text>
                       <Tag
@@ -686,7 +711,7 @@ const TenantRoomList = () => {
                         {room.status}
                       </Tag>
                     </Flex>
-                    <Flex justifyContent="space-between">
+                    {/* <Flex justifyContent="space-between">
                       <Text fontWeight="bold">Giá:</Text>
                       <Text>
                         {new Intl.NumberFormat("vi-VN", {
@@ -694,7 +719,7 @@ const TenantRoomList = () => {
                           currency: "VND",
                         }).format(room.price)}
                       </Text>
-                    </Flex>
+                    </Flex> */}
                   </VStack>
                 </Box>
               ))}
@@ -730,7 +755,7 @@ const TenantRoomList = () => {
                   w="100%"
                   h="300px"
                   objectFit="cover"
-                  borderRadius="md"
+                  borderRadius={{ base: "20px", lg: "20px" }}
                 />
                 <Button
                   colorScheme="yellow"
@@ -749,7 +774,7 @@ const TenantRoomList = () => {
                     spacing={4}
                     w={{ base: "100%", md: "100%" }}
                   >
-                    <Box>
+                    {/* <Box>
                       <Text fontWeight="bold">Địa chỉ:</Text>
                       <Text color="gray.600">{selectedRoom.address}</Text>
                     </Box>
@@ -765,7 +790,7 @@ const TenantRoomList = () => {
                           currency: "VND",
                         }).format(selectedRoom.price)}
                       </Text>
-                    </Box>
+                    </Box> */}
                     <Box>
                       <Text fontWeight="bold">Đặt cọc:</Text>
                       <Text color="gray.600">
@@ -862,6 +887,7 @@ const TenantRoomList = () => {
         />
       )}
       </Container>
+      </Flex>
   );
 };
 

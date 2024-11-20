@@ -616,21 +616,22 @@ const RentalRequest = () => {
                           variant="link"
                           onClick={() => openRoomInfoModal(request)}
                         >
-                          {request.roomId.roomName}
+                          {request?.roomId?.roomName}
                         </Button>
                         <Text fontSize="sm" color="gray.600">
                           Cơ sở:{" "}
-                          {request.roomId.hostelId?.name || "Chưa có thông tin"}
+                          {request?.roomId?.hostelId?.name ||
+                            "Chưa có thông tin"}
                         </Text>
                         <Text fontSize="sm" color="gray.600">
                           Địa chỉ:{" "}
-                          {request.roomId.hostelId?.address ||
+                          {request?.roomId?.hostelId?.address ||
                             "Chưa có thông tin"}
                         </Text>
                       </VStack>
                     </Td>
                     <Td>
-                      {new Date(request.createdAt).toLocaleDateString("vi-VN")}
+                      {new Date(request?.createdAt).toLocaleDateString("vi-VN")}
                     </Td>
                     <Td>
                       <ButtonGroup>

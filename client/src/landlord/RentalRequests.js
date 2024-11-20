@@ -458,7 +458,7 @@ const RentalRequest = () => {
   return (
     <Box>
       <Heading
-        textColor={"blue.500"}
+        textColor={"brand.700"}
         as="h3"
         size="lg"
         mb={{ base: 4, md: 12 }}
@@ -469,10 +469,10 @@ const RentalRequest = () => {
       <Tabs
         isFitted
         variant="enclosed"
+        size={{ base: "sm", md: "md" }}
         index={tabIndex}
         onChange={(index) => {
           setTabIndex(index);
-          // Cập nhật URL khi tab thay đổi
           const newUrl = `${window.location.pathname}?tab=${index}`;
           window.history.pushState({}, "", newUrl);
         }}
@@ -485,108 +485,109 @@ const RentalRequest = () => {
 
         <TabPanels>
           <TabPanel>
-            <Table variant="simple">
-              <Thead>
-                <Tr>
-                  <Th>Người đặt lịch</Th>
-                  <Th>Thông tin phòng</Th>
-                  <Th>Ngày xem</Th>
-                  <Th>Ngày dự phòng</Th>
-                  <Th>Trạng thái</Th>
-                  <Th>Thao tác</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {bookings.map((booking) => (
-                  <Tr key={booking._id}>
-                    <Td>
-                      <VStack align="start">
-                        <Text fontWeight="bold">{booking.tenantId?.name}</Text>
-                        <Text fontSize="sm">{booking.tenantId?.numPhone}</Text>
-                        <Text fontSize="sm">{booking.tenantId?.email}</Text>
-                      </VStack>
-                    </Td>
-                    <Td>
-                      <VStack align="start">
-                        <Button
-                          variant="link"
-                          onClick={() => openRoomInfoModal(booking)}
-                        >
-                          {booking.roomId?.roomName || "N/A"}
-                        </Button>
-                        <Text fontSize="sm" color="gray.600">
-                          Cơ sở:{" "}
-                          {booking.roomId?.hostelId?.name ||
-                            "Chưa có thông tin"}
-                        </Text>
-                        <Text fontSize="sm" color="gray.600">
-                          Địa chỉ:{" "}
-                          {`${booking.roomId?.hostelId?.address || ""}, 
-                                    ${booking.roomId?.hostelId?.ward || ""}, 
-                                    ${
-                                      booking.roomId?.hostelId?.district || ""
-                                    }, 
-                                    ${booking.roomId?.hostelId?.city || ""}`}
-                        </Text>
-                      </VStack>
-                    </Td>
-                    <Td>
-                      {new Date(booking.proposedDate).toLocaleDateString(
-                        "vi-VN"
-                      )}
-                    </Td>
-                    <Td>
-                      {booking.alternativeDate
-                        ? new Date(booking.alternativeDate).toLocaleDateString(
-                            "vi-VN"
-                          )
-                        : "Không có"}
-                    </Td>
-                    <Td>
-                      <Tag
-                        colorScheme={
-                          booking.status === "pending"
-                            ? "yellow"
-                            : booking.status === "accepted"
-                            ? "green"
-                            : "red"
-                        }
-                      >
-                        {booking.status === "pending"
-                          ? "Chờ duyệt"
-                          : booking.status === "accepted"
-                          ? "Đã chấp nhận"
-                          : "Đã từ chối"}
-                      </Tag>
-                    </Td>
-                    <Td>
-                      {booking.status === "pending" && (
-                        <ButtonGroup>
-                          <Button
-                            colorScheme="green"
-                            size="sm"
-                            onClick={() =>
-                              handleBookingAction(booking._id, "accepted")
-                            }
-                          >
-                            Chấp nhận
-                          </Button>
-                          <Button
-                            colorScheme="red"
-                            size="sm"
-                            onClick={() =>
-                              handleBookingAction(booking._id, "rejected")
-                            }
-                          >
-                            Từ chối
-                          </Button>
-                        </ButtonGroup>
-                      )}
-                    </Td>
+            <Box overflowX="auto">
+              <Table variant="simple">
+                <Thead>
+                  <Tr>
+                    <Th>Người đặt lịch</Th>
+                    <Th>Thông tin phòng</Th>
+                    <Th>Ngày xem</Th>
+                    <Th>Ngày dự phòng</Th>
+                    <Th>Trạng thái</Th>
+                    <Th>Thao tác</Th>
                   </Tr>
-                ))}
-              </Tbody>
-            </Table>
+                </Thead>
+                <Tbody>
+                  {bookings.map((booking) => (
+                    <Tr key={booking._id}>
+                      <Td>
+                        <VStack align="start">
+                          <Text fontWeight="bold">
+                            {booking.tenantId?.name}
+                          </Text>
+                          <Text fontSize="sm">
+                            {booking.tenantId?.numPhone}
+                          </Text>
+                          <Text fontSize="sm">{booking.tenantId?.email}</Text>
+                        </VStack>
+                      </Td>
+                      <Td>
+                        <VStack align="start">
+                          <Button
+                            variant="link"
+                            onClick={() => openRoomInfoModal(booking)}
+                          >
+                            {booking.roomId?.roomName || "N/A"}
+                          </Button>
+                          <Text fontSize="sm" color="gray.600">
+                            Cơ sở:{" "}
+                            {booking.roomId?.hostelId?.name ||
+                              "Chưa có thông tin"}
+                          </Text>
+                          <Text fontSize="sm" color="gray.600">
+                            Địa chỉ:{" "}
+                            {`${booking.roomId?.hostelId?.address || ""}`}
+                          </Text>
+                        </VStack>
+                      </Td>
+                      <Td>
+                        {new Date(booking.proposedDate).toLocaleDateString(
+                          "vi-VN"
+                        )}
+                      </Td>
+                      <Td>
+                        {booking.alternativeDate
+                          ? new Date(
+                              booking.alternativeDate
+                            ).toLocaleDateString("vi-VN")
+                          : "Không có"}
+                      </Td>
+                      <Td>
+                        <Tag
+                          colorScheme={
+                            booking.status === "pending"
+                              ? "yellow"
+                              : booking.status === "accepted"
+                              ? "green"
+                              : "red"
+                          }
+                        >
+                          {booking.status === "pending"
+                            ? "Chờ duyệt"
+                            : booking.status === "accepted"
+                            ? "Đã chấp nhận"
+                            : "Đã từ chối"}
+                        </Tag>
+                      </Td>
+                      <Td>
+                        {booking.status === "pending" && (
+                          <ButtonGroup>
+                            <Button
+                              colorScheme="green"
+                              size="sm"
+                              onClick={() =>
+                                handleBookingAction(booking._id, "accepted")
+                              }
+                            >
+                              Chấp nhận
+                            </Button>
+                            <Button
+                              colorScheme="red"
+                              size="sm"
+                              onClick={() =>
+                                handleBookingAction(booking._id, "rejected")
+                              }
+                            >
+                              Từ chối
+                            </Button>
+                          </ButtonGroup>
+                        )}
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </Box>
           </TabPanel>
 
           <TabPanel>
@@ -767,12 +768,12 @@ const RentalRequest = () => {
                   <Text>
                     {selectedRoom?.electricityUnitPrice?.toLocaleString(
                       "vi-VN"
-                    )}{" "}
+                    )}
                     VND/số
                   </Text>
                   <Text fontWeight="bold">Giá nước:</Text>
                   <Text>
-                    {selectedRoom?.waterUnitPrice?.toLocaleString("vi-VN")}{" "}
+                    {selectedRoom?.waterUnitPrice?.toLocaleString("vi-VN")}
                     VND/khối
                   </Text>
                   <Text fontWeight="bold">Giá phòng:</Text>
@@ -801,7 +802,11 @@ const RentalRequest = () => {
       </Modal>
 
       {/* Modal tạo hợp đồng */}
-      <Modal isOpen={isOpenContract} onClose={closeContractModal} size="xl">
+      <Modal
+        isOpen={isOpenContract}
+        onClose={closeContractModal}
+        size={{ base: "full", md: "xl" }}
+      >
         <ModalOverlay />
         <ModalContent>
           <ModalHeader

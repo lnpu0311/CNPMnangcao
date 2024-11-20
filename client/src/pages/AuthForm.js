@@ -362,7 +362,7 @@ const AuthForm = () => {
           left="0"
           right="0"
           width="100%"
-          height="100%"
+          height={{ base: "fit-content", md: "100%" }}
           flexDirection={{ base: "column", md: "row" }}
         >
           {/* Sign In Form */}

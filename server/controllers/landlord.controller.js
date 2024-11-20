@@ -555,6 +555,96 @@ const createBill = async (req, res) => {
     res.status(500).json({ success: false, message: "Đã xảy ra lỗi" });
   }
 };
+
+const deleteRoom = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+
+    // Kiểm tra roomId có hợp lệ không
+    if (!roomId) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu ID phòng",
+        data: null
+      });
+    }
+
+    // Kiểm tra phòng có tồn tại không
+    const room = await Room.findById(roomId);
+    if (!room) {
+      return res.status(404).json({
+        success: false,
+        message: "Phòng không tồn tại",
+        data: null
+      });
+    }
+
+    // Kiểm tra xem phòng có đang được thuê không
+    if (room.status === "occupied") {
+      return res.status(400).json({
+        success: false,
+        message: "Không thể xóa phòng đang có người thuê",
+        data: null
+      });
+    }
+
+    // Xóa phòng
+    await Room.findByIdAndDelete(roomId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Xóa phòng thành công",
+      data: null
+    });
+
+  } catch (error) {
+    console.error('Delete room error:', error);
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi server khi xóa phòng",
+      error: error.message,
+      data: null
+    });
+  }
+};
+
+const deleteHostel = async (req, res) => {
+  const { hostelId } = req.params;
+
+  try {
+    // Kiểm tra cơ sở có tồn tại không
+    const hostel = await Hostel.findById(hostelId);
+    if (!hostel) {
+      return res.status(404).json({
+        success: false,
+        message: "Cơ sở không tồn tại",
+      });
+    }
+
+    // Kiểm tra xem có phòng nào trong cơ sở không
+    const rooms = await Room.find({ hostelId: hostelId });
+    if (rooms.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Không thể xóa cơ sở còn phòng",
+      });
+    }
+
+    // Xóa cơ sở
+    await Hostel.findByIdAndDelete(hostelId);
+
+    res.status(200).json({
+      success: true,
+      message: "Xóa cơ sở thành công",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getHostelByLandLordId,
   createHostel,
@@ -566,4 +656,6 @@ module.exports = {
   updateUnit,
   sampleBill,
   createBill,
+  deleteRoom,
+  deleteHostel,
 };

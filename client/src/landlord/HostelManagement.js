@@ -395,7 +395,13 @@ const HostelManagement = () => {
         <Modal isCentered isOpen={isOpen} onClose={onClose} size="lg">
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader fontSize="x-large" textAlign="center">
+            <ModalHeader
+              fontSize={"2xl"}
+              fontWeight={"bold"}
+              textColor={"brand.700"}
+              textAlign={"center"}
+              textTransform={"capitalize"}
+            >
               Tạo cơ sở mới
             </ModalHeader>
             <ModalCloseButton />

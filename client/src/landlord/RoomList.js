@@ -400,12 +400,15 @@ const RoomList = () => {
         });
 
         // Cập nhật danh sách phòng
-        setRooms((prevRooms) => prevRooms.filter((room) => room._id !== roomId));
+        setRooms((prevRooms) =>
+          prevRooms.filter((room) => room._id !== roomId)
+        );
       }
     } catch (error) {
       console.error("Delete room error:", error);
-      const errorMessage = error.response?.data?.message || "Có lỗi xảy ra khi xóa phòng";
-      
+      const errorMessage =
+        error.response?.data?.message || "Có lỗi xảy ra khi xóa phòng";
+
       toast({
         title: "Lỗi!",
         description: errorMessage,
@@ -687,7 +690,8 @@ const RoomList = () => {
       <Flex
         justifyContent="space-between"
         mb={4}
-        wrap="wrap" // Cho phép các nút xuống hàng khi không đủ chỗ
+        mx={{ base: 2, md: 0 }}
+        wrap="wrap"
         gap={4}
       >
         <Button
@@ -723,16 +727,12 @@ const RoomList = () => {
           <Text>Không có phòng nào</Text>
         </Center>
       ) : (
-        <SimpleGrid
-          minChildWidth="250px" // Đảm bảo mỗi mục có chiều rộng tối thiểu
-          spacing={6} // Khoảng cách giữa các mục
-          mb={6}
-        >
+        <SimpleGrid minChildWidth="250px" spacing={6} mb={6}>
           {getCurrentPageData().map((room) => (
             <Box
               key={room.id}
-              w="100%" // Đảm bảo Box chiếm toàn bộ chiều rộng cột
-              p={4} // Padding bên trong
+              w="100%"
+              p={4}
               border={"1px solid"}
               borderColor={"gray.200"}
               rounded={"lg"}
@@ -810,10 +810,10 @@ const RoomList = () => {
                         colorScheme="purple"
                         onClick={async (e) => {
                           e.stopPropagation();
-                          setSelectedRoom(room); // Đặt room hiện tại
+                          setSelectedRoom(room);
                           try {
-                            await fetchSample(room); // Đợi lấy dữ liệu sampleBill
-                            toggleModal("bill", true); // Chỉ mở modal khi dữ liệu đã sẵn sàng
+                            await fetchSample(room);
+                            toggleModal("bill", true);
                           } catch (error) {
                             console.error(
                               "Lỗi khi tải dữ liệu hóa đơn:",

@@ -144,11 +144,11 @@ export const UpdateModal = ({
     <ModalOverlay />
     <ModalContent>
       <ModalHeader
-        textTransform={"capitalize"}
         fontSize={"2xl"}
         fontWeight={"bold"}
         textColor={"brand.700"}
         textAlign={"center"}
+        textTransform={"capitalize"}
       >
         Cập nhật số điện và Số Nước
       </ModalHeader>
@@ -219,7 +219,15 @@ export const BillModal = ({
     <Modal isCentered isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader textAlign="center">Tạo hóa đơn mới</ModalHeader>
+        <ModalHeader
+          fontSize={"2xl"}
+          fontWeight={"bold"}
+          textColor={"brand.700"}
+          textAlign={"center"}
+          textTransform={"capitalize"}
+        >
+          Tạo hóa đơn mới
+        </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Grid templateColumns="repeat(2, 1fr)" gap={4}>
@@ -295,11 +303,11 @@ export const ContractModal = ({
     <ModalOverlay />
     <ModalContent>
       <ModalHeader
-        textTransform={"capitalize"}
         fontSize={"2xl"}
         fontWeight={"bold"}
         textColor={"brand.700"}
         textAlign={"center"}
+        textTransform={"capitalize"}
       >
         Hợp Đồng Thuê Phòng
       </ModalHeader>
@@ -513,11 +521,11 @@ export const EditModal = ({
     <ModalContent>
       <ModalHeader>
         <ModalHeader
-          textTransform={"capitalize"}
           fontSize={"2xl"}
           fontWeight={"bold"}
           textColor={"brand.700"}
           textAlign={"center"}
+          textTransform={"capitalize"}
         >
           chỉnh sửa thông tin {selectedRoom?.roomName || "Đang tải..."}
         </ModalHeader>

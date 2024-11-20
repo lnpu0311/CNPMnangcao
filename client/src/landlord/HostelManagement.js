@@ -48,9 +48,6 @@ const HostelManagement = () => {
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
-  const [showChat, setShowChat] = useState(false);
-  const [selectedTenant, setSelectedTenant] = useState(null);
-  const [unreadMessages, setUnreadMessages] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -135,27 +132,6 @@ const HostelManagement = () => {
 
     fetchCurrentUser();
   }, [token, toast]);
-
-  useEffect(() => {
-    const fetchUnreadMessages = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(
-          `${process.env.REACT_APP_API}/messages/unread`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setUnreadMessages(response.data.data);
-      } catch (error) {
-        console.error("Error fetching unread messages:", error);
-      }
-    };
-
-    if (currentUser) {
-      fetchUnreadMessages();
-    }
-  }, [currentUser]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -244,7 +220,7 @@ const HostelManagement = () => {
           },
         }
       );
-  
+
       if (response.data.success) {
         toast({
           title: "Xóa cơ sở thành công!",
@@ -253,7 +229,7 @@ const HostelManagement = () => {
           duration: 5000,
           isClosable: true,
         });
-  
+
         setFacilities((prev) => prev.filter((facility) => facility.id !== id));
       } else {
         toast({
@@ -356,14 +332,6 @@ const HostelManagement = () => {
                   {facility.district}
                 </Text>
               </Box>
-              <Box display="flex" alignItems="center">
-                <Text fontSize="md" color="gray.600" mr={2}>
-                  Số phòng:
-                </Text>
-                <Text fontSize="md" fontWeight={"bold"}>
-                  {facility.roomCount}
-                </Text>
-              </Box>
             </Box>
 
             {/* Buttons Column */}
@@ -412,13 +380,20 @@ const HostelManagement = () => {
           onClick={onOpen}
           colorScheme="green"
           leftIcon={<PlusSquareIcon />}
+          mr={{ base: 2, md: 0 }}
         >
           Thêm cơ sở mới
         </Button>
         <Modal isCentered isOpen={isOpen} onClose={onClose} size="lg">
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader fontSize="x-large" textAlign="center">
+            <ModalHeader
+              fontSize={"2xl"}
+              fontWeight={"bold"}
+              textColor={"brand.700"}
+              textAlign={"center"}
+              textTransform={"capitalize"}
+            >
               Tạo cơ sở mới
             </ModalHeader>
             <ModalCloseButton />

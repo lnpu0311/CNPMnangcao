@@ -28,10 +28,14 @@ const theme = extendTheme({
   styles: {
     global: () => ({
       "html, body": {
+        width: "100%",
+        overflowX: "hidden",
+        minHeight: "100vh",
         background: "brand.0",
         color: "brand.1",
         transition: "background-color 0.2s ease, color 0.2s ease",
       },
+
       "input:-webkit-autofill": {
         WebkitBoxShadow: `0 0 0px 1000px white inset`,
         backgroundColor: "white !important",
@@ -90,6 +94,21 @@ const theme = extendTheme({
     Text: {
       baseStyle: {
         color: "brand.1",
+      },
+    },
+    Table: {
+      baseStyle: {
+        tableLayout: "auto", // Không cố định chiều rộng cột
+        th: {
+          whiteSpace: "normal", // Nội dung cột xuống dòng
+          wordWrap: "break-word",
+          padding: "4px", // Giảm khoảng cách để tiết kiệm không gian
+        },
+        td: {
+          whiteSpace: "normal",
+          wordWrap: "break-word",
+          padding: "4px",
+        },
       },
     },
   },

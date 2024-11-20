@@ -29,7 +29,7 @@ import RoomDetail from "./tenant/RoomDetail";
 import { jwtDecode } from "jwt-decode";
 import BillList from "./tenant/BillList";
 import BillDetail from "./tenant/BillDetail";
-
+import TenantChatList from "./tenant/TenantChatList";
 
 function App() {
   const toast = useToast();
@@ -182,6 +182,7 @@ function App() {
               <Route path="room-detail/:id" element={<RoomDetail />} />
               <Route path="bills" element={<BillList />} />
               <Route path="bills/:billId" element={<BillDetail />} />
+              <Route path="messages" element={<TenantChatList />} />
               </Route>
 
             <Route path="/search-results" element={<SearchResults />} />

@@ -129,7 +129,7 @@ const Receipt = () => {
       >
         Danh Sách Thanh Toán
       </Heading>
-      <HStack spacing={8} align="center">
+      <HStack spacing={4} align="center">
         {/* Bộ lọc */}
         <Stack
           direction={{ base: "column", md: "row" }}
@@ -141,60 +141,20 @@ const Receipt = () => {
             placeholder="Tìm theo tên phòng"
             value={searchRoomName}
             onChange={(e) => setSearchRoomName(e.target.value)}
-            maxWidth="300px"
           />
-
-          <VStack
-            spacing={2}
-            align="stretch"
-            display={{ base: "flex", md: "none" }}
-          >
-            <Select
-              placeholder="Chọn cơ sở"
-              value={selectedFacility}
-              onChange={(e) => setSelectedFacility(e.target.value)}
-              maxWidth="200px"
-            >
-              {facilities.map((facility) => (
-                <option key={facility._id} value={facility.name}>
-                  {facility.name}
-                </option>
-              ))}
-            </Select>
-            <Select
-              placeholder="Chọn tháng"
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-            >
-              {Array.from({ length: 12 }, (_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  Tháng {i + 1}
-                </option>
-              ))}
-            </Select>
-            <Select
-              placeholder="Chọn năm"
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-            >
-              <option value="2023">2023</option>
-              <option value="2024">2024</option>
-              <option value="2025">2025</option>
-            </Select>
-          </VStack>
 
           {/* Bộ lọc desktop */}
           <Stack
             direction="row"
             spacing={8}
             align="center"
-            display={{ base: "none", md: "flex" }}
+            display={"flex"}
+            w={{ base: "auto", md: "900px" }}
           >
             <Select
               placeholder="Chọn cơ sở"
               value={selectedFacility}
               onChange={(e) => setSelectedFacility(e.target.value)}
-              maxWidth="200px"
             >
               {facilities.map((facility) => (
                 <option key={facility._id} value={facility.name}>
@@ -206,7 +166,6 @@ const Receipt = () => {
               placeholder="Chọn tháng"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              maxWidth="150px"
             >
               {Array.from({ length: 12 }, (_, i) => (
                 <option key={i + 1} value={i + 1}>
@@ -218,7 +177,6 @@ const Receipt = () => {
               placeholder="Chọn năm"
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
-              maxWidth="150px"
             >
               <option value="2023">2023</option>
               <option value="2024">2024</option>

@@ -194,6 +194,7 @@ export const BillModal = ({
   setSampleBill,
   handleInputChange,
   handleCreateBill,
+  parseNumber,
 }) => {
   // Tính toán tổng tiền mỗi khi các giá trị thay đổi
   useEffect(() => {

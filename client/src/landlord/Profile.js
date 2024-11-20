@@ -62,7 +62,6 @@ function ProfilePage() {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
-              timeout: 10000,
             }
           );
           setUser(response.data.data);

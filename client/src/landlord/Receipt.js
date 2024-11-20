@@ -94,14 +94,8 @@ const Receipt = () => {
     const yearMatches = selectedYear
       ? paymentYear === parseInt(selectedYear)
       : true;
-    const facilityMatches = selectedFacility
-      ? receipt.roomId.hostelId.name === selectedFacility
-      : true;
-    const roomNameMatches = searchRoomName
-      ? receipt.roomName.toLowerCase().includes(searchRoomName.toLowerCase())
-      : true;
 
-    return monthMatches && yearMatches && facilityMatches && roomNameMatches;
+    return monthMatches && yearMatches;
   });
 
   const formatCurrency = (amount) => {
@@ -136,19 +130,6 @@ const Receipt = () => {
         Danh Sách Thanh Toán
       </Heading>
       <HStack spacing={8} align="center">
-        <Select
-          placeholder="Chọn cơ sở"
-          value={selectedFacility}
-          onChange={(e) => setSelectedFacility(e.target.value)}
-          maxWidth="200px"
-        >
-          {facilities.map((facility) => (
-            <option key={facility._id} value={facility.name}>
-              {facility.name}
-            </option>
-          ))}
-        </Select>
-
         {/* Bộ lọc */}
         <Stack
           direction={{ base: "column", md: "row" }}
@@ -172,10 +153,13 @@ const Receipt = () => {
               placeholder="Chọn cơ sở"
               value={selectedFacility}
               onChange={(e) => setSelectedFacility(e.target.value)}
+              maxWidth="200px"
             >
-              <option value="Cơ sở A">Cơ sở A</option>
-              <option value="Cơ sở B">Cơ sở B</option>
-              <option value="Cơ sở C">Cơ sở C</option>
+              {facilities.map((facility) => (
+                <option key={facility._id} value={facility.name}>
+                  {facility.name}
+                </option>
+              ))}
             </Select>
             <Select
               placeholder="Chọn tháng"
@@ -212,9 +196,11 @@ const Receipt = () => {
               onChange={(e) => setSelectedFacility(e.target.value)}
               maxWidth="200px"
             >
-              <option value="Cơ sở A">Cơ sở A</option>
-              <option value="Cơ sở B">Cơ sở B</option>
-              <option value="Cơ sở C">Cơ sở C</option>
+              {facilities.map((facility) => (
+                <option key={facility._id} value={facility.name}>
+                  {facility.name}
+                </option>
+              ))}
             </Select>
             <Select
               placeholder="Chọn tháng"

@@ -14,13 +14,24 @@ const billSchema = new mongoose.Schema({
   rentFee: { type: Number, required: true },
   electricityFee: { type: Number, required: true },
   waterFee: { type: Number, required: true },
-  serviceFee: { type: Number, required: false },
+  serviceFee: { type: Number, default: 0 },
   serviceFeeDescription: { type: String, required: false },
   totalAmount: { type: Number, required: true },
-  isPaid: { type: Boolean, default: false },
-  paidAt: { type: Date },
-  dueDate: { type: Date, required: false },
+  status: {
+    type: String,
+    enum: ['PENDING', 'PAID', 'OVERDUE'],
+    default: 'PENDING'
+  },
+  dueDate: { type: Date, required: true },
   createdAt: { type: Date, default: Date.now },
+  paymentMethod: {
+    type: String,
+    enum: ['VNPAY', 'PAYPAL', 'BANK_TRANSFER'],
+  },
+  paymentDate: Date,
+  paypalTransactionId: String
+}, {
+  timestamps: true
 });
 
 module.exports = mongoose.model("Bill", billSchema);

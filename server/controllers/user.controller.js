@@ -158,15 +158,15 @@ const getAllRooms = async (req, res) => {
   try {
     console.log("Fetching all rooms...");
     
-    // Thêm điều kiện lọc phòng có status là "available"
+    // Lấy tất cả phòng có status là available
     const rooms = await Room.find({ status: "available" })
       .populate({
         path: "hostelId",
         select: "name address district city ward landlordId imageUrl",
         populate: {
           path: "landlordId",
-          select: "name email",
-        },
+          select: "name email numPhone"
+        }
       })
       .select("roomTitle roomName images status price area description deposit");
 
@@ -177,42 +177,48 @@ const getAllRooms = async (req, res) => {
       console.log("No rooms found");
       return res.status(200).json({
         success: true,
-        data: [],
+        data: []
       });
     }
 
-    // Format dữ liệu trả về để match với client
-    const formattedRooms = rooms.map(room => ({
-      _id: room._id,
-      roomTitle: room.roomTitle,
-      roomName: room.roomName,
-      hostelId: {
-        _id: room.hostelId._id,
-        name: room.hostelId.name,
-        address: room.hostelId.address,
-        district: room.hostelId.district,
-        city: room.hostelId.city,
-        ward: room.hostelId.ward,
-        landlordId: room.hostelId.landlordId,
-        imageUrl: room.hostelId.imageUrl
-      },
-      images: room.images,
-      status: room.status,
-      price: room.price,
-      area: room.area,
-      description: room.description,
-      deposit: room.deposit
-    }));
+    // Format dữ liệu trả về với kiểm tra null
+    const formattedRooms = rooms.map(room => {
+      // Kiểm tra null cho hostelId
+      const hostel = room.hostelId || {};
+      
+      return {
+        _id: room._id,
+        roomTitle: room.roomTitle || '',
+        roomName: room.roomName || '',
+        hostelId: {
+          _id: hostel._id || '',
+          name: hostel.name || '',
+          address: hostel.address || '',
+          district: hostel.district || '',
+          city: hostel.city || '',
+          ward: hostel.ward || '',
+          landlordId: hostel.landlordId || '',
+          imageUrl: hostel.imageUrl || ''
+        },
+        images: room.images || [],
+        status: room.status || 'unknown',
+        price: room.price || 0,
+        area: room.area || 0,
+        description: room.description || '',
+        deposit: room.deposit || 0
+      };
+    });
 
     res.status(200).json({
       success: true,
-      data: formattedRooms,
+      data: formattedRooms
     });
+
   } catch (error) {
     console.error("Error in getAllRooms:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message || "Lỗi khi lấy danh sách phòng"
     });
   }
 };
@@ -249,7 +255,7 @@ const searchAccommodation = async (req, res) => {
       path: "hostelId",
       select: "name address district city imageUrl", // Khi tìm Room, populate hostelId để biết phòng thuộc nhà trọ nào
     });
-    //Kết hợp và lọc kết quả
+    //Kt hợp và lọc kết quả
     const result = {
       //Lọc hostel có phòng trống
       hostel: hostels

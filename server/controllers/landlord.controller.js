@@ -4,7 +4,7 @@ const Contract = require("../models/contracts.model");
 const RentalRequest = require("../models/rentalRequest.model");
 const UnitRoom = require("../models/unitRoom.model");
 const Bill = require("../models/bill.model");
-
+const Notification = require("../models/notification.model");
 const User = require("../models/user.model");
 const createHostel = async (req, res) => {
   const hostel = req.body;
@@ -474,12 +474,18 @@ const sampleBill = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Không tìm thấy dữ liệu đơn vị" });
     }
-    console.log(unitData[1]);
     const data = {
       elecBill: "",
       waterBill: "",
     };
-
+    console.log(unitData[1]);
+    if (!unitData[0] || !unitData[1]) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Tìm chỉ số điện nước không thành công. Tạo hóa đơn yêu cầu có 2 chỉ số điện nước của 2 tháng liên tiếp",
+      });
+    }
     data.elecBill =
       (unitData[0].elecIndex - unitData[1].elecIndex) * contract.electricityFee;
     data.waterBill =
@@ -501,7 +507,7 @@ const createBill = async (req, res) => {
   try {
     const contract = await Contract.findOne({ roomId: roomId });
     if (!contract) {
-      res.status(400).json({ success: false, message: "Chưa có hợp đồng" });
+      return res.status(400).json({ success: false, message: "Chưa có hợp đồng" });
     }
 
     const unitData = await UnitRoom.find({ roomId: roomId })
@@ -522,16 +528,123 @@ const createBill = async (req, res) => {
       serviceFee: bill.serviceFee,
       serviceFeeDescription: bill.serviceFeeDescription,
       totalAmount: bill.total,
+      status: 'PENDING',
+      dueDate: new Date(Date.now() + 7*24*60*60*1000)
     });
 
-    const data = await newBill.save();
+    const savedBill = await newBill.save();
 
-    res.status(200).json({ success: true, data: data });
+    // Tạo thông báo
+    const notification = await Notification.create({
+      userId: contract.tenantId,
+      title: "Hóa đơn mới",
+      message: `Bạn có hóa đơn mới cần thanh toán. Tổng tiền: ${bill.total}đ`,
+      type: "BILL",
+      billId: savedBill._id
+    });
+
+    // Trả về savedBill thay vì data
+    res.status(200).json({ 
+      success: true, 
+      data: savedBill,
+      notification: notification 
+    });
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "Đã xảy ra lỗi" });
   }
 };
+
+const deleteRoom = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+
+    // Kiểm tra roomId có hợp lệ không
+    if (!roomId) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu ID phòng",
+        data: null
+      });
+    }
+
+    // Kiểm tra phòng có tồn tại không
+    const room = await Room.findById(roomId);
+    if (!room) {
+      return res.status(404).json({
+        success: false,
+        message: "Phòng không tồn tại",
+        data: null
+      });
+    }
+
+    // Kiểm tra xem phòng có đang được thuê không
+    if (room.status === "occupied") {
+      return res.status(400).json({
+        success: false,
+        message: "Không thể xóa phòng đang có người thuê",
+        data: null
+      });
+    }
+
+    // Xóa phòng
+    await Room.findByIdAndDelete(roomId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Xóa phòng thành công",
+      data: null
+    });
+
+  } catch (error) {
+    console.error('Delete room error:', error);
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi server khi xóa phòng",
+      error: error.message,
+      data: null
+    });
+  }
+};
+
+const deleteHostel = async (req, res) => {
+  const { hostelId } = req.params;
+
+  try {
+    // Kiểm tra cơ sở có tồn tại không
+    const hostel = await Hostel.findById(hostelId);
+    if (!hostel) {
+      return res.status(404).json({
+        success: false,
+        message: "Cơ sở không tồn tại",
+      });
+    }
+
+    // Kiểm tra xem có phòng nào trong cơ sở không
+    const rooms = await Room.find({ hostelId: hostelId });
+    if (rooms.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Không thể xóa cơ sở còn phòng",
+      });
+    }
+
+    // Xóa cơ sở
+    await Hostel.findByIdAndDelete(hostelId);
+
+    res.status(200).json({
+      success: true,
+      message: "Xóa cơ sở thành công",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getHostelByLandLordId,
   createHostel,
@@ -543,4 +656,6 @@ module.exports = {
   updateUnit,
   sampleBill,
   createBill,
+  deleteRoom,
+  deleteHostel,
 };

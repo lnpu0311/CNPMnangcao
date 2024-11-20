@@ -40,6 +40,8 @@ const RoomList = () => {
   const [itemPerPage] = useState(12);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  // Thêm state để quản lý loading khi lấy thông tin phòng
+  const [isLoadingRoom, setIsLoadingRoom] = useState(false);
 
   //Tính toán số trang
   const totalPages = Math.ceil(rooms.length / itemPerPage);
@@ -108,25 +110,41 @@ const RoomList = () => {
     }
   }, [hostel]);
 
-  useEffect(() => {
-    const fetchSample = async () => {
-      try {
-        const response = await axios.post(
-          `${process.env.REACT_APP_API}/landlord/${selectedRoom._id}/sampleBill`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+  const fetchSample = async (room) => {
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API}/landlord/${room._id}/sampleBill`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (response.data.success) {
         console.log("Hóa đơn nháp: ", response.data);
         setSampleBill(response.data.data);
-      } catch (error) {
-        console.error(error);
+      } else {
+        toast({
+          title: "Có lỗi xảy ra.",
+          description: response.data.message || "Vui lòng thử lại.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
       }
-    };
-    fetchSample();
-  }, [selectedRoom]);
+    } catch (error) {
+      toast({
+        title: "Có lỗi xảy ra.",
+        description: error.response.data.message || "Vui lòng thử lại.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      console.error("Lỗi khi lấy hóa đơn nháp:", error);
+      throw error; // Ném lỗi để xử lý ở nơi gọi hàm
+    }
+  };
+
   const [isLoading, setIsLoading] = useState({
     roomName: "",
     area: "",
@@ -350,8 +368,19 @@ const RoomList = () => {
   };
 
   const handleDeleteRoom = async (roomId) => {
+    // Kiểm tra roomId có tồn tại không
+    if (!roomId) {
+      toast({
+        title: "Lỗi!",
+        description: "Không tìm thấy ID phòng",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
     try {
-      // Send DELETE request to the API with roomId in the URL
       const response = await axios.delete(
         `${process.env.REACT_APP_API}/landlord/room/${roomId}/delete`,
         {
@@ -361,35 +390,25 @@ const RoomList = () => {
         }
       );
 
-      // Check if the response indicates a successful deletion
-      if (response.data.success) {
+      if (response && response.data && response.data.success) {
         toast({
-          title: "Xóa phòng thành công!",
-          description: "Phòng đã được xóa khỏi danh sách.",
+          title: "Thành công!",
+          description: response.data.message || "Đã xóa phòng thành công",
           status: "success",
           duration: 5000,
           isClosable: true,
         });
 
-        // Update the room list in state by removing the deleted room
-        setRooms((prevRooms) =>
-          prevRooms.filter((room) => room._id !== roomId)
-        );
-      } else {
-        toast({
-          title: "Có lỗi xảy ra.",
-          description: response.data.message || "Vui lòng thử lại.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
+        // Cập nhật danh sách phòng
+        setRooms((prevRooms) => prevRooms.filter((room) => room._id !== roomId));
       }
     } catch (error) {
-      console.error("Lỗi khi xóa phòng:", error);
+      console.error("Delete room error:", error);
+      const errorMessage = error.response?.data?.message || "Có lỗi xảy ra khi xóa phòng";
+      
       toast({
-        title: "Không thể xóa phòng.",
-        description:
-          "Đã xảy ra lỗi trong quá trình xóa phòng. Vui lòng thử lại.",
+        title: "Lỗi!",
+        description: errorMessage,
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -466,10 +485,22 @@ const RoomList = () => {
     const numericValue = val.toString().replace(/[^0-9]/g, ""); // Chuyển sang chuỗi và loại bỏ ký tự không phải số
     return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Thêm dấu chấm
   };
-  const numericFields = ["deposit", "price"];
-  //  loại bỏ dấu chấm và chuyển chuỗi về số
+
+  const numericFields = [
+    "deposit",
+    "price",
+    "total",
+    "depositFee",
+    "rentFee",
+    "electricityFee",
+    "waterFee",
+  ];
   const parseNumber = (formattedValue) => {
-    return Number(formattedValue.replace(/\./g, ""));
+    // Kiểm tra nếu giá trị không tồn tại, trả về 0
+    if (!formattedValue) return 0;
+
+    // Loại bỏ tất cả dấu chấm (.) và chuyển đổi chuỗi thành số
+    return parseInt(formattedValue.toString().replace(/\./g, ""), 10) || 0;
   };
 
   const handleUpdate = async () => {
@@ -765,7 +796,7 @@ const RoomList = () => {
                         colorScheme="red"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDeleteRoom(room.roomId);
+                          handleDeleteRoom(room._id);
                         }}
                       />
                     </Tooltip>
@@ -777,13 +808,30 @@ const RoomList = () => {
                         icon={<IoReceipt />}
                         size="sm"
                         colorScheme="purple"
-                        onClick={(e) => {
-                          setSelectedRoom(room);
+                        onClick={async (e) => {
                           e.stopPropagation();
-                          toggleModal("bill", true);
+                          setSelectedRoom(room); // Đặt room hiện tại
+                          try {
+                            await fetchSample(room); // Đợi lấy dữ liệu sampleBill
+                            toggleModal("bill", true); // Chỉ mở modal khi dữ liệu đã sẵn sàng
+                          } catch (error) {
+                            console.error(
+                              "Lỗi khi tải dữ liệu hóa đơn:",
+                              error
+                            );
+                            toast({
+                              title: "Lỗi",
+                              description:
+                                "Không thể tải dữ liệu hóa đơn. Vui lòng thử lại.",
+                              status: "error",
+                              duration: 5000,
+                              isClosable: true,
+                            });
+                          }
                         }}
                       />
                     </Tooltip>
+
                     <Tooltip label="Cập nhật" aria-label="Cập nhật">
                       <IconButton
                         icon={<FaUpload />}
@@ -845,7 +893,9 @@ const RoomList = () => {
         setSampleBill={setSampleBill}
         handleInputChange={handleInputChange}
         handleCreateBill={handleCreateBill}
+        parseNumber={parseNumber}
       />
+
       <ContractModal
         isOpen={modalState.contract}
         onClose={() => toggleModal("contract", false)}
@@ -861,6 +911,7 @@ const RoomList = () => {
         selectedRoom={selectedRoom}
         setSelectedImage={setSelectedImage}
         formatNumber={formatNumber}
+        isLoadingRoom={isLoadingRoom}
       />
       <EditModal
         isOpen={modalState.editRoom}

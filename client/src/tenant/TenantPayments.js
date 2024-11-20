@@ -11,91 +11,71 @@ import {
   ModalBody,
   ModalFooter,
   Button,
-  FormControl,
-  FormLabel,
-  Input,
   Table,
   Thead,
   Tbody,
   Tr,
   Th,
   Td,
-  HStack,
-  Image,
   Flex,
   Divider,
   Select,
-  Container
+  Container,
+  Input,
+  useToast,
+  Spinner,
+  Badge,
+  Stack,
+  InputGroup,
+  InputLeftElement
 } from "@chakra-ui/react";
-import {  FaArrowLeft } from "react-icons/fa";
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
-
-
-
-// Dữ liệu giả cho thanh toán
-const mockPayments = [
-  {
-    id: 1,
-    roomId: 1,
-    date: "2024-09-20",
-    amount: 2000000,
-    type: "Tháng",
-    method: "Paypal",
-    phone: "0123456789",
-  },
-  {
-    id: 2,
-    roomId: 2,
-    date: "2024-09-25",
-    amount: 2000000,
-    type: "Tháng",
-    method: "Visa",
-    phone: "0123456789",
-  },
-  {
-    id: 3,
-    roomId: 3,
-    date: "2024-10-01",
-    amount: 1800000,
-    type: "Tháng",
-    method: "MasterCard",
-    phone: "0987654321",
-  },
-  {
-    id: 4,
-    roomId: 4,
-    date: "2024-10-05",
-    amount: 2200000,
-    type: "Tháng",
-    method: "Paypal",
-    phone: "0987654321",
-  },
-];
-
+import { FaArrowLeft, FaSearch, FaCalendarAlt } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function TenantPayments() {
+  const [payments, setPayments] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const navigate = useNavigate();
-
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedTimeFrame, setSelectedTimeFrame] = useState("all");
   const [customDate, setCustomDate] = useState("");
-  const [filteredPayments, setFilteredPayments] = useState(mockPayments);
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+  const toast = useToast();
+
+  useEffect(() => {
+    fetchPayments();
+  }, []);
+
+  const fetchPayments = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get(
+        `${process.env.REACT_APP_API}/bills/history`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        }
+      );
+      setPayments(response.data.data);
+    } catch (error) {
+      toast({
+        title: "Lỗi",
+        description: "Không thể tải lịch sử thanh toán",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const formatInputDate = (input) => {
-    // Loại bỏ các ký tự không phải số
     const numbers = input.replace(/\D/g, "");
-
-    // Định dạng thành dd/mm/yyyy
     if (numbers.length <= 2) return numbers;
-    if (numbers.length <= 4)
-      return `${numbers.slice(0, 2)}/${numbers.slice(2)}`;
-    return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}/${numbers.slice(
-      4,
-      8
-    )}`;
+    if (numbers.length <= 4) return `${numbers.slice(0, 2)}/${numbers.slice(2)}`;
+    return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}/${numbers.slice(4, 8)}`;
   };
 
   const handleDateChange = (e) => {
@@ -105,68 +85,62 @@ function TenantPayments() {
   };
 
   const isValidDate = (dateString) => {
-    // Kiểm tra định dạng dd/mm/yyyy
     const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
     if (!regex.test(dateString)) return false;
-
     const [, day, month, year] = dateString.match(regex);
     const date = new Date(year, month - 1, day);
     return date && date.getMonth() === month - 1 && date.getDate() == day;
   };
 
-  useEffect(() => {
-    filterPayments();
-  }, [selectedTimeFrame]);
-
-  const handleFilter = () => {
-    filterPayments();
-  };
-
   const filterPayments = () => {
-    let filteredData = mockPayments;
+    let filtered = [...payments];
     const currentDate = new Date();
 
+    // Lọc theo thời gian
     if (customDate && isValidDate(customDate)) {
       const [day, month, year] = customDate.split("/");
       const searchDate = new Date(year, month - 1, day);
-      filteredData = mockPayments.filter((payment) => {
-        const paymentDate = new Date(payment.date);
+      filtered = filtered.filter(payment => {
+        const paymentDate = new Date(payment.paymentDate);
         return paymentDate.toDateString() === searchDate.toDateString();
       });
     } else {
       switch (selectedTimeFrame) {
         case "month":
-          filteredData = mockPayments.filter((payment) => {
-            const paymentDate = new Date(payment.date);
-            return (
-              paymentDate.getMonth() === currentDate.getMonth() &&
-              paymentDate.getFullYear() === currentDate.getFullYear()
-            );
+          filtered = filtered.filter(payment => {
+            const paymentDate = new Date(payment.paymentDate);
+            return paymentDate.getMonth() === currentDate.getMonth() &&
+                   paymentDate.getFullYear() === currentDate.getFullYear();
           });
           break;
         case "year":
-          filteredData = mockPayments.filter((payment) => {
-            const paymentDate = new Date(payment.date);
+          filtered = filtered.filter(payment => {
+            const paymentDate = new Date(payment.paymentDate);
             return paymentDate.getFullYear() === currentDate.getFullYear();
           });
-          break;
-        default:
-          // "all" - không cần lọc
           break;
       }
     }
 
-    setFilteredPayments(filteredData);
+    // Lọc theo search term
+    if (searchTerm) {
+      filtered = filtered.filter(payment =>
+        payment.roomId.roomName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        payment.totalAmount.toString().includes(searchTerm)
+      );
+    }
+
+    return filtered;
   };
 
-  const handlePaymentClick = (payment) => {
-    setSelectedPayment(payment);
-    setIsOpenDetail(true);
-  };
-
-  const handleCloseDetail = () => {
-    setIsOpenDetail(false);
-    setSelectedPayment(null);
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      PAID: { color: "green", text: "Đã thanh toán" },
+      PENDING: { color: "yellow", text: "Chờ thanh toán" },
+      OVERDUE: { color: "red", text: "Quá hạn" }
+    };
+    const config = statusConfig[status] || { color: "gray", text: status };
+    return <Badge colorScheme={config.color}>{config.text}</Badge>;
   };
 
   const formatDate = (dateString) => {
@@ -181,147 +155,131 @@ function TenantPayments() {
     }).format(amount);
   };
 
-  const handleGoBack = () => {
-    navigate(-1);
-  };
-
   return (
-    
     <Container maxW="container.xl" py={4}>
-      <Flex alignItems="center" justifyContent="space-between" mb={4}>
-      <Button
-        onClick={handleGoBack}
-        colorScheme="teal"
-        leftIcon={<FaArrowLeft />}
-      >
-        Quay lại
-      </Button>
-      </Flex>
+      <Stack spacing={6}>
+        <Flex alignItems="center" justifyContent="space-between">
+          <Button
+            onClick={() => navigate(-1)}
+            colorScheme="teal"
+            leftIcon={<FaArrowLeft />}
+          >
+            Quay lại
+          </Button>
+          <Text fontSize="2xl" fontWeight="bold">
+            Lịch sử thanh toán
+          </Text>
+          <Box w="40px" /> {/* Để cân bằng layout */}
+        </Flex>
 
-    <Text fontSize="2xl" fontWeight="bold" textAlign="center" flex="1" my={2}>
-      Lịch sử thanh toán
-    </Text>
+        <Stack direction={["column", "row"]} spacing={4}>
+          <InputGroup>
+            <InputLeftElement pointerEvents="none">
+              <FaSearch color="gray.300" />
+            </InputLeftElement>
+            <Input
+              placeholder="Tìm kiếm theo phòng hoặc số tiền..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </InputGroup>
 
-    <Box 
-      p={2} 
-      maxWidth="400px" 
-      width="100%" 
-      display="flex" 
-      justifyContent="center" // Căn giữa theo chiều ngang 
-      alignItems="center" // Căn giữa theo chiều dọc
-      mx="auto" // Tự động căn giữa trong không gian
-    >
-      <Text>Member: Nguyễn Văn A</Text>
-    </Box>
+          <Select
+            value={selectedTimeFrame}
+            onChange={(e) => setSelectedTimeFrame(e.target.value)}
+            maxW="200px"
+          >
+            <option value="all">Tất cả thời gian</option>
+            <option value="month">Tháng này</option>
+            <option value="year">Năm này</option>
+            <option value="custom">Tùy chọn</option>
+          </Select>
 
-    <Flex gap={2} alignItems="flex-end" textColor="black" maxWidth="400px" width="100%"> {/* Giảm chiều rộng */}
-      <Box flex={1} mb={2}>
-        <Text mb={1}>Thời gian</Text>
-        <Select
-          value={selectedTimeFrame}
-          onChange={(e) => {
-            setSelectedTimeFrame(e.target.value);
-            if (e.target.value !== "custom") {
-              setCustomDate("");
-              filterPayments();
-            }
-          }}
-          size="sm"
-        >
-          <option value="all">Tất cả</option>
-          <option value="month">Tháng</option>
-          <option value="year">Năm</option>
-        </Select>
-      </Box>
-      
-      <Box flex={1} mb={2}>
-        <Text mb={1}>Ngày cụ thể</Text>
-        <Input
-          type="text"
-          value={customDate}
-          onChange={handleDateChange}
-          placeholder="DD/MM/YYYY"
-          maxLength={10}
-          size="sm"
-        />
-      </Box>
-      
-      <Button
-        colorScheme="teal"
-        onClick={handleFilter}
-        isDisabled={!isValidDate(customDate)}
-        mb={2}
-        size="sm"
-      >
-        Xác nhận
-      </Button>
-    </Flex>
+          {selectedTimeFrame === "custom" && (
+            <InputGroup maxW="200px">
+              <InputLeftElement pointerEvents="none">
+                <FaCalendarAlt color="gray.300" />
+              </InputLeftElement>
+              <Input
+                value={customDate}
+                onChange={handleDateChange}
+                placeholder="DD/MM/YYYY"
+                maxLength={10}
+              />
+            </InputGroup>
+          )}
+        </Stack>
 
-    <Table variant="simple" borderWidth={1} borderRadius="lg">
-      <Thead bg="cyan.100">
-        <Tr>
-          <Th borderRightWidth={1} textAlign="center">Phòng</Th>
-          <Th borderRightWidth={1} textAlign="center">Ngày thanh toán</Th>
-          <Th borderRightWidth={1} textAlign="center">Loại</Th>
-          <Th borderRightWidth={1} textAlign="center">Số tiền</Th>
-          <Th borderRightWidth={1} textAlign="center">Số điện thoại</Th>
-          <Th textAlign="center">Trạng thái</Th>
-        </Tr>
-      </Thead>
-      <Tbody textColor="black">
-        {filteredPayments.map((payment, index) => (
-          <React.Fragment key={payment.id}>
-            {index > 0 && (
-              <Tr>
-                <Td colSpan={7}>
-                  <Divider borderColor="black" borderWidth="1px" />
-                </Td>
-              </Tr>
-            )}
-            <Tr
-              onClick={() => handlePaymentClick(payment)}
-              cursor="pointer"
-              _hover={{ bg: "gray.50" }}
-            >
-              <Td textAlign="center">{payment.roomId}</Td>
-              <Td textAlign="center">{formatDate(payment.date)}</Td>
-              <Td textAlign="center">{payment.type}</Td>
-              <Td textAlign="center">{formatCurrency(payment.amount)}</Td>
-              <Td textAlign="center">{payment.phone}</Td>
-              <Td textAlign="center">Đã thanh toán</Td>
-            </Tr>
-          </React.Fragment>
-        ))}
-      </Tbody>
-    </Table>
+        {isLoading ? (
+          <Flex justify="center" align="center" h="200px">
+            <Spinner size="xl" color="teal.500" />
+          </Flex>
+        ) : (
+          <Box overflowX="auto">
+            <Table variant="simple" borderWidth={1} borderRadius="lg">
+              <Thead bg="teal.50">
+                <Tr>
+                  <Th>Phòng</Th>
+                  <Th>Ngày thanh toán</Th>
+                  <Th>Phương thức</Th>
+                  <Th isNumeric>Số tiền</Th>
+                  <Th>Trạng thái</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {filterPayments().map((payment, index) => (
+                  <Tr
+                    key={payment._id}
+                    cursor="pointer"
+                    _hover={{ bg: "gray.50" }}
+                    onClick={() => {
+                      setSelectedPayment(payment);
+                      setIsOpenDetail(true);
+                    }}
+                  >
+                    <Td>{payment.roomId.roomName}</Td>
+                    <Td>{formatDate(payment.paymentDate)}</Td>
+                    <Td>{payment.paymentMethod}</Td>
+                    <Td isNumeric>{formatCurrency(payment.totalAmount)}</Td>
+                    <Td>{getStatusBadge(payment.status)}</Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </Box>
+        )}
 
-      {/* Modal hiển thị chi tiết thanh toán */}
-      <Modal isOpen={isOpenDetail} onClose={handleCloseDetail}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Chi tiết thanh toán</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            {selectedPayment && (
-              <VStack align="stretch" spacing={2}>
-                <Text fontWeight="bold">RoomID: {selectedPayment.roomId}</Text>
-                <Text>Member: Nguyễn Văn A</Text>
-                <Text>Ngày thanh toán: {formatDate(selectedPayment.date)}</Text>
-                <Text>Loại: {selectedPayment.type}</Text>
-                <Text>Số tiền: {formatCurrency(selectedPayment.amount)}</Text>
-                
-                <Text>Số điện thoại: {selectedPayment.phone}</Text>
-              </VStack>
-            )}
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="teal" onClick={handleCloseDetail}>
-              Đóng
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-      </Container>
+        <Modal isOpen={isOpenDetail} onClose={() => setIsOpenDetail(false)}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Chi tiết thanh toán</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              {selectedPayment && (
+                <VStack align="stretch" spacing={3}>
+                  <Box p={4} borderWidth={1} borderRadius="md" bg="gray.50">
+                    <Text fontWeight="bold" mb={2}>Thông tin phòng</Text>
+                    <Text>Phòng: {selectedPayment.roomId.roomName}</Text>
+                  </Box>
+                  
+                  <Box p={4} borderWidth={1} borderRadius="md" bg="gray.50">
+                    <Text fontWeight="bold" mb={2}>Chi tiết thanh toán</Text>
+                    <Text>Ngày thanh toán: {formatDate(selectedPayment.paymentDate)}</Text>
+                    <Text>Phương thức: {selectedPayment.paymentMethod}</Text>
+                    <Text>Số tiền: {formatCurrency(selectedPayment.totalAmount)}</Text>
+                  </Box>
+                </VStack>
+              )}
+            </ModalBody>
+            <ModalFooter>
+              <Button colorScheme="teal" onClick={() => setIsOpenDetail(false)}>
+                Đóng
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      </Stack>
+    </Container>
   );
 }
 

@@ -220,7 +220,9 @@ const userRoute = require("./routes/user.route.js");
 const authRoutes = require("./routes/auth.route");
 const landlordRoute = require("./routes/landlord.route");
 const messageRoute = require("./routes/message.route");
-
+const notificationRouter = require('./routes/notification.routes');
+const billRoutes = require('./routes/bill.routes');
+const paymentRoutes = require('./routes/payment.routes');
 // Api
 app.use("/api/room", roomRoute);
 app.use("/api/user", userRoute);
@@ -229,6 +231,9 @@ app.use("/api/landlord", landlordRoute);
 app.use("/api/messages", messageRoute);
 app.use("/api/booking", bookingRoutes);
 app.use("/api/rental-request", rentalRequestRoutes);
+app.use('/api/notifications', notificationRouter);
+app.use('/api/bills', billRoutes);
+app.use('/api/payment', paymentRoutes);
 server.listen(PORT, () =>
   console.log(`Server is running on http://localhost:${PORT}`)
 );

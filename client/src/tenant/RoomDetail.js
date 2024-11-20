@@ -37,6 +37,8 @@ const RoomDetail = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [showChat, setShowChat] = useState(false);
   const [landlordInfo, setLandlordInfo] = useState(null);
+  const [isOpenDetail, setIsOpenDetail] = useState(false);
+  const [isOpenBooking, setIsOpenBooking] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -73,7 +75,7 @@ const RoomDetail = () => {
       fetchRoomDetail();
     }
   }, [id, room, toast]);
-
+  const onOpenBooking = () => setIsOpenBooking(true);
   const fetchLandlordInfo = async (landlordId) => {
     try {
       const response = await axios.get(
@@ -195,13 +197,10 @@ const RoomDetail = () => {
                 </Button>
                 <Button
                   colorScheme="blue"
-                  size="lg"
                   onClick={() => {
                     if (currentUser) {
-                      // Chuyển hướng đến trang đặt lịch
-                      navigate(`/tenant/booking/${id}`, {
-                        state: { roomData: room }
-                      });
+                      setIsOpenDetail(false);
+                      onOpenBooking();
                     } else {
                       toast({
                         title: "Vui lòng đăng nhập",

@@ -73,6 +73,7 @@ import {
   useNavigate,
   Link,
 } from "react-router-dom";
+import BillList from "./BillList";
 
 import "../../src/index.css";
 import { Link as RouterLink } from "react-router-dom";
@@ -165,6 +166,11 @@ function TenantHome() {
       path: "payments",
       icon: <FaMoneyCheckAlt />,
     },
+    {
+      name: "Danh sách hóa đơn",
+      path: "bills",
+      icon: <FaFileInvoiceDollar />,
+    }
   ];
 
   // const settingsItem = {

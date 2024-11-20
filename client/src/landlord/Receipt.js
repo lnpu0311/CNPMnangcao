@@ -8,11 +8,13 @@ import {
   Td,
   Text,
   Select,
+  HStack,
   VStack,
   Stack,
   Heading,
   Spinner,
   useToast,
+  Input,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -21,7 +23,7 @@ const Receipt = () => {
   const [selectedMonth, setSelectedMonth] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedFacility, setSelectedFacility] = useState("");
-
+  const [searchRoomName, setSearchRoomName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [receipts, setReceipts] = useState([]);
   const [facilities, setFacilities] = useState([]);
@@ -39,7 +41,7 @@ const Receipt = () => {
       const response = await axios.get(
         `${process.env.REACT_APP_API}/landlord/hostel`,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
       setFacilities(response.data.data);
@@ -61,7 +63,7 @@ const Receipt = () => {
       const response = await axios.get(
         `${process.env.REACT_APP_API}/bills/landlord/paid-bills`,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
       setReceipts(response.data.data);
@@ -82,7 +84,6 @@ const Receipt = () => {
   const filteredReceipts = receipts.filter((receipt) => {
     if (!selectedMonth && !selectedYear && !selectedFacility) return true;
 
-
     const paymentDate = new Date(receipt.paymentDate);
     const paymentMonth = paymentDate.getMonth() + 1;
     const paymentYear = paymentDate.getFullYear();
@@ -97,16 +98,16 @@ const Receipt = () => {
       ? receipt.roomId.hostelId.name === selectedFacility
       : true;
     const roomNameMatches = searchRoomName
-      ? invoice.roomName.toLowerCase().includes(searchRoomName.toLowerCase())
+      ? receipt.roomName.toLowerCase().includes(searchRoomName.toLowerCase())
       : true;
 
     return monthMatches && yearMatches && facilityMatches && roomNameMatches;
   });
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
     }).format(amount);
   };
 
@@ -148,98 +149,98 @@ const Receipt = () => {
           ))}
         </Select>
 
-      {/* Bộ lọc */}
-      <Stack
-        direction={{ base: "column", md: "row" }}
-        spacing={8}
-        align={{ base: "stretch", md: "center" }}
-      >
-        {/* Tìm kiếm theo tên phòng */}
-        <Input
-          placeholder="Tìm theo tên phòng"
-          value={searchRoomName}
-          onChange={(e) => setSearchRoomName(e.target.value)}
-          maxWidth="300px"
-        />
-
-        <VStack
-          spacing={2}
-          align="stretch"
-          display={{ base: "flex", md: "none" }}
-        >
-          <Select
-            placeholder="Chọn cơ sở"
-            value={selectedFacility}
-            onChange={(e) => setSelectedFacility(e.target.value)}
-          >
-            <option value="Cơ sở A">Cơ sở A</option>
-            <option value="Cơ sở B">Cơ sở B</option>
-            <option value="Cơ sở C">Cơ sở C</option>
-          </Select>
-          <Select
-            placeholder="Chọn tháng"
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-          >
-            {Array.from({ length: 12 }, (_, i) => (
-              <option key={i + 1} value={i + 1}>
-                Tháng {i + 1}
-              </option>
-            ))}
-          </Select>
-          <Select
-            placeholder="Chọn năm"
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(e.target.value)}
-          >
-            <option value="2023">2023</option>
-            <option value="2024">2024</option>
-            <option value="2025">2025</option>
-          </Select>
-        </VStack>
-
-        {/* Bộ lọc desktop */}
+        {/* Bộ lọc */}
         <Stack
-          direction="row"
+          direction={{ base: "column", md: "row" }}
           spacing={8}
-          align="center"
-          display={{ base: "none", md: "flex" }}
+          align={{ base: "stretch", md: "center" }}
         >
-          <Select
-            placeholder="Chọn cơ sở"
-            value={selectedFacility}
-            onChange={(e) => setSelectedFacility(e.target.value)}
-            maxWidth="200px"
-          >
-            <option value="Cơ sở A">Cơ sở A</option>
-            <option value="Cơ sở B">Cơ sở B</option>
-            <option value="Cơ sở C">Cơ sở C</option>
-          </Select>
-          <Select
-            placeholder="Chọn tháng"
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            maxWidth="150px"
-          >
-            {Array.from({ length: 12 }, (_, i) => (
-              <option key={i + 1} value={i + 1}>
-                Tháng {i + 1}
-              </option>
-            ))}
-          </Select>
-          <Select
-            placeholder="Chọn năm"
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(e.target.value)}
-            maxWidth="150px"
-          >
-            <option value="2023">2023</option>
-            <option value="2024">2024</option>
-            <option value="2025">2025</option>
-          </Select>
-        </Stack>
-      </Stack>
+          {/* Tìm kiếm theo tên phòng */}
+          <Input
+            placeholder="Tìm theo tên phòng"
+            value={searchRoomName}
+            onChange={(e) => setSearchRoomName(e.target.value)}
+            maxWidth="300px"
+          />
 
+          <VStack
+            spacing={2}
+            align="stretch"
+            display={{ base: "flex", md: "none" }}
+          >
+            <Select
+              placeholder="Chọn cơ sở"
+              value={selectedFacility}
+              onChange={(e) => setSelectedFacility(e.target.value)}
+            >
+              <option value="Cơ sở A">Cơ sở A</option>
+              <option value="Cơ sở B">Cơ sở B</option>
+              <option value="Cơ sở C">Cơ sở C</option>
+            </Select>
+            <Select
+              placeholder="Chọn tháng"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+            >
+              {Array.from({ length: 12 }, (_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  Tháng {i + 1}
+                </option>
+              ))}
+            </Select>
+            <Select
+              placeholder="Chọn năm"
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+            >
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+            </Select>
+          </VStack>
+
+          {/* Bộ lọc desktop */}
+          <Stack
+            direction="row"
+            spacing={8}
+            align="center"
+            display={{ base: "none", md: "flex" }}
+          >
+            <Select
+              placeholder="Chọn cơ sở"
+              value={selectedFacility}
+              onChange={(e) => setSelectedFacility(e.target.value)}
+              maxWidth="200px"
+            >
+              <option value="Cơ sở A">Cơ sở A</option>
+              <option value="Cơ sở B">Cơ sở B</option>
+              <option value="Cơ sở C">Cơ sở C</option>
+            </Select>
+            <Select
+              placeholder="Chọn tháng"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              maxWidth="150px"
+            >
+              {Array.from({ length: 12 }, (_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  Tháng {i + 1}
+                </option>
+              ))}
+            </Select>
+            <Select
+              placeholder="Chọn năm"
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              maxWidth="150px"
+            >
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+            </Select>
+          </Stack>
+        </Stack>
+      </HStack>
       {filteredReceipts.length > 0 ? (
         <Table variant="striped" colorScheme="blue" mt={4}>
           <Thead>
@@ -258,7 +259,9 @@ const Receipt = () => {
                 <Td>{receipt.roomId.roomName}</Td>
                 <Td>{formatCurrency(receipt.totalAmount)}</Td>
                 <Td>{getMonthFromDate(receipt.paymentDate)}</Td>
-                <Td>{new Date(receipt.paymentDate).toLocaleDateString('vi-VN')}</Td>
+                <Td>
+                  {new Date(receipt.paymentDate).toLocaleDateString("vi-VN")}
+                </Td>
               </Tr>
             ))}
           </Tbody>

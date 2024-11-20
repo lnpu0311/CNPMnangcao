@@ -3,7 +3,7 @@ const { Verification_Email_Template } = require("../configs/EmailTemplate");
 const sendVerficationCode = async (email, verficationCode) => {
   try {
     const res = await transporter.sendMail({
-      from: '"VerficationAdmin" <tranquocbao1410@gmail.com>', // sender address
+      from: '"Xác thực Email" <tranquocbao1410@gmail.com>', // sender address
       to: email, // list of receivers
       subject: "Xác thực Email cho Hostel Community", // Subject line
       text: "Mã OTP của bạn là", // plain text body

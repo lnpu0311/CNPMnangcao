@@ -8,12 +8,13 @@ import {
   Td,
   Text,
   Select,
-  HStack,
+  VStack,
+  Stack,
   Heading,
+  Input,
 } from "@chakra-ui/react";
 import { useState } from "react";
 
-// Dữ liệu mẫu
 const paidInvoices = [
   {
     roomName: "Phòng 101",
@@ -56,10 +57,11 @@ const Receipt = () => {
   const [selectedMonth, setSelectedMonth] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedFacility, setSelectedFacility] = useState("");
+  const [searchRoomName, setSearchRoomName] = useState("");
 
-  // Hàm lọc hóa đơn theo tháng, năm và cơ sở
   const filteredInvoices = paidInvoices.filter((invoice) => {
-    if (!selectedMonth && !selectedYear && !selectedFacility) return true;
+    if (!selectedMonth && !selectedYear && !selectedFacility && !searchRoomName)
+      return true;
 
     const invoiceDate = new Date(invoice.invoiceDate);
     const invoiceMonth = invoiceDate.getMonth() + 1;
@@ -74,8 +76,11 @@ const Receipt = () => {
     const facilityMatches = selectedFacility
       ? invoice.facility === selectedFacility
       : true;
+    const roomNameMatches = searchRoomName
+      ? invoice.roomName.toLowerCase().includes(searchRoomName.toLowerCase())
+      : true;
 
-    return monthMatches && yearMatches && facilityMatches;
+    return monthMatches && yearMatches && facilityMatches && roomNameMatches;
   });
 
   const getMonthFromDate = (date) => {
@@ -90,25 +95,78 @@ const Receipt = () => {
         as="h3"
         size="lg"
         mb={{ base: 4, md: 12 }}
+        textAlign={"center"}
       >
         Danh Sách Thanh Toán
       </Heading>
-      <HStack spacing={8} align="center">
-        {/* Bộ lọc cơ sở bên trái */}
-        <Select
-          placeholder="Chọn cơ sở"
-          value={selectedFacility}
-          onChange={(e) => setSelectedFacility(e.target.value)}
-          maxWidth="200px"
+
+      {/* Bộ lọc */}
+      <Stack
+        direction={{ base: "column", md: "row" }}
+        spacing={8}
+        align={{ base: "stretch", md: "center" }}
+      >
+        {/* Tìm kiếm theo tên phòng */}
+        <Input
+          placeholder="Tìm theo tên phòng"
+          value={searchRoomName}
+          onChange={(e) => setSearchRoomName(e.target.value)}
+          maxWidth="300px"
+        />
+
+        <VStack
+          spacing={2}
+          align="stretch"
+          display={{ base: "flex", md: "none" }}
         >
-          <option value="Cơ sở A">Cơ sở A</option>
-          <option value="Cơ sở B">Cơ sở B</option>
-          <option value="Cơ sở C">Cơ sở C</option>
-        </Select>
+          <Select
+            placeholder="Chọn cơ sở"
+            value={selectedFacility}
+            onChange={(e) => setSelectedFacility(e.target.value)}
+          >
+            <option value="Cơ sở A">Cơ sở A</option>
+            <option value="Cơ sở B">Cơ sở B</option>
+            <option value="Cơ sở C">Cơ sở C</option>
+          </Select>
+          <Select
+            placeholder="Chọn tháng"
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+          >
+            {Array.from({ length: 12 }, (_, i) => (
+              <option key={i + 1} value={i + 1}>
+                Tháng {i + 1}
+              </option>
+            ))}
+          </Select>
+          <Select
+            placeholder="Chọn năm"
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+          >
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+          </Select>
+        </VStack>
 
-        <Box flex="1" />
-
-        <HStack spacing={4}>
+        {/* Bộ lọc desktop */}
+        <Stack
+          direction="row"
+          spacing={8}
+          align="center"
+          display={{ base: "none", md: "flex" }}
+        >
+          <Select
+            placeholder="Chọn cơ sở"
+            value={selectedFacility}
+            onChange={(e) => setSelectedFacility(e.target.value)}
+            maxWidth="200px"
+          >
+            <option value="Cơ sở A">Cơ sở A</option>
+            <option value="Cơ sở B">Cơ sở B</option>
+            <option value="Cơ sở C">Cơ sở C</option>
+          </Select>
           <Select
             placeholder="Chọn tháng"
             value={selectedMonth}
@@ -121,7 +179,6 @@ const Receipt = () => {
               </option>
             ))}
           </Select>
-
           <Select
             placeholder="Chọn năm"
             value={selectedYear}
@@ -132,11 +189,17 @@ const Receipt = () => {
             <option value="2024">2024</option>
             <option value="2025">2025</option>
           </Select>
-        </HStack>
-      </HStack>
+        </Stack>
+      </Stack>
 
+      {/* Hiển thị dữ liệu */}
       {filteredInvoices.length > 0 ? (
-        <Table variant="striped" colorScheme="blue" mt={4}>
+        <Table
+          variant="striped"
+          colorScheme="blue"
+          mt={4}
+          size={{ base: "sm", md: "md" }}
+        >
           <Thead>
             <Tr>
               <Th>Cơ Sở</Th>

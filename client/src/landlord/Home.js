@@ -127,7 +127,7 @@ function HomeLayout() {
       }}
       gap={4}
       bg={"brand.2"}
-      h="auto"
+      minHeight="100vh"
       textAlign="center"
     >
       {/* header */}
@@ -237,12 +237,6 @@ function HomeLayout() {
                 <Text textColor={"white"} fontWeight="bold">
                   {userData.name}
                 </Text>
-                {/* <IconButton
-                  aria-label="Notifications"
-                  icon={<BellIcon />}
-                  variant="ghost"
-                  _hover={{ bg: "gray.400" }}
-                /> */}
               </Flex>
 
               {menuItems.map((item) => (
@@ -323,7 +317,7 @@ function HomeLayout() {
             <Image
               src="../../../eco-house.png"
               alt="Logo"
-              boxSize="150px"
+              boxSize="100px"
               mx="auto"
               transition="transform 0.7s"
               _hover={{ transform: "scale(1.1)" }}
@@ -385,13 +379,12 @@ function HomeLayout() {
         area="main"
         ml={{ base: 0, md: isNavOpen ? "100px" : "10px" }}
         mt={{ base: 16, md: 0 }}
-        p={1}
       >
         <Box
           h={"fit-content"}
           bg={"white"}
           mr={{ base: "0", md: "10px" }}
-          p={6}
+          p={{ base: 0, md: 6 }}
         >
           <Outlet />
         </Box>

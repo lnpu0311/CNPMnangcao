@@ -11,15 +11,15 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import Chat from "../components/Chat";
-import { jwtDecode } from 'jwt-decode';
-import socket from '../services/socket';
+import { jwtDecode } from "jwt-decode";
+import socket from "../services/socket";
 
 const MessageManagement = () => {
   const [allMessages, setAllMessages] = useState([]); // Tất cả tin nhắn
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedTenant, setSelectedTenant] = useState(null);
   const [showChat, setShowChat] = useState(false);
-  const [conversations, setConversations] = useState([]); 
+  const [conversations, setConversations] = useState([]);
   const [isMinimized, setIsMinimized] = useState(false);
   const toast = useToast();
 
@@ -28,7 +28,7 @@ const MessageManagement = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-      
+
       const response = await axios.get(
         `${process.env.REACT_APP_API}/messages/all`,
         {
@@ -38,14 +38,14 @@ const MessageManagement = () => {
 
       // Group messages by sender
       const groupedMessages = {};
-      response.data.data.forEach(message => {
+      response.data.data.forEach((message) => {
         const senderId = message.senderId._id;
         if (!groupedMessages[senderId]) {
           groupedMessages[senderId] = {
             sender: message.senderId,
             messages: [],
             lastMessage: message,
-            unreadCount: message.read ? 0 : 1
+            unreadCount: message.read ? 0 : 1,
           };
         } else {
           if (!message.read) {
@@ -53,18 +53,26 @@ const MessageManagement = () => {
           }
         }
         groupedMessages[senderId].messages.push(message);
-        if (new Date(message.timestamp) > new Date(groupedMessages[senderId].lastMessage.timestamp)) {
+        if (
+          new Date(message.timestamp) >
+          new Date(groupedMessages[senderId].lastMessage.timestamp)
+        ) {
           groupedMessages[senderId].lastMessage = message;
         }
       });
 
       // Convert to array and sort
-      const sortedConversations = Object.values(groupedMessages).sort((a, b) => {
-        if (a.unreadCount !== b.unreadCount) {
-          return b.unreadCount - a.unreadCount;
+      const sortedConversations = Object.values(groupedMessages).sort(
+        (a, b) => {
+          if (a.unreadCount !== b.unreadCount) {
+            return b.unreadCount - a.unreadCount;
+          }
+          return (
+            new Date(b.lastMessage.timestamp) -
+            new Date(a.lastMessage.timestamp)
+          );
         }
-        return new Date(b.lastMessage.timestamp) - new Date(a.lastMessage.timestamp);
-      });
+      );
 
       setConversations(sortedConversations);
       setAllMessages(response.data.data);
@@ -87,7 +95,7 @@ const MessageManagement = () => {
       const decodedUser = jwtDecode(token);
       setCurrentUser({
         id: decodedUser.id,
-        name: decodedUser.name
+        name: decodedUser.name,
       });
 
       socket.auth = { token };
@@ -107,14 +115,14 @@ const MessageManagement = () => {
   useEffect(() => {
     if (!currentUser) return;
 
-    socket.on('message_sent', (response) => {
+    socket.on("message_sent", (response) => {
       if (response.success) {
         const message = response.data;
-        
-        setConversations(prev => {
+
+        setConversations((prev) => {
           const newConversations = [...prev];
           const existingConvIndex = newConversations.findIndex(
-            conv => conv.sender._id === message.recipientId
+            (conv) => conv.sender._id === message.recipientId
           );
 
           if (existingConvIndex !== -1) {
@@ -122,13 +130,13 @@ const MessageManagement = () => {
             newConversations[existingConvIndex].lastMessage = message;
           } else {
             newConversations.unshift({
-              sender: message.recipient || { 
+              sender: message.recipient || {
                 _id: message.recipientId,
-                name: 'Unknown User' // Fallback name
+                name: "Unknown User", // Fallback name
               },
               messages: [message],
               lastMessage: message,
-              unreadCount: 0
+              unreadCount: 0,
             });
           }
 
@@ -136,19 +144,22 @@ const MessageManagement = () => {
             if (a.unreadCount !== b.unreadCount) {
               return b.unreadCount - a.unreadCount;
             }
-            return new Date(b.lastMessage.timestamp) - new Date(a.lastMessage.timestamp);
+            return (
+              new Date(b.lastMessage.timestamp) -
+              new Date(a.lastMessage.timestamp)
+            );
           });
         });
       }
     });
 
-    socket.on('receive_message', (message) => {
-      console.log('New message received:', message);
-      
-      setConversations(prev => {
+    socket.on("receive_message", (message) => {
+      console.log("New message received:", message);
+
+      setConversations((prev) => {
         const newConversations = [...prev];
         const existingConvIndex = newConversations.findIndex(
-          conv => conv.sender._id === message.senderId._id
+          (conv) => conv.sender._id === message.senderId._id
         );
 
         if (existingConvIndex !== -1) {
@@ -160,7 +171,7 @@ const MessageManagement = () => {
             sender: message.senderId,
             messages: [message],
             lastMessage: message,
-            unreadCount: 1
+            unreadCount: 1,
           });
         }
 
@@ -168,48 +179,56 @@ const MessageManagement = () => {
           if (a.unreadCount !== b.unreadCount) {
             return b.unreadCount - a.unreadCount;
           }
-          return new Date(b.lastMessage.timestamp) - new Date(a.lastMessage.timestamp);
+          return (
+            new Date(b.lastMessage.timestamp) -
+            new Date(a.lastMessage.timestamp)
+          );
         });
       });
 
       // Show notification
       if (document.hidden && Notification.permission === "granted") {
-        new Notification('Tin nhắn mới', {
-          body: `${message.senderId.name}: ${message.content}`
+        new Notification("Tin nhắn mới", {
+          body: `${message.senderId.name}: ${message.content}`,
         });
       }
     });
 
-    socket.on('messages_marked_read', ({ senderId }) => {
-      setConversations(prev => {
+    socket.on("messages_marked_read", ({ senderId }) => {
+      setConversations((prev) => {
         const newConversations = [...prev];
         const convIndex = newConversations.findIndex(
-          conv => conv.sender._id === senderId
+          (conv) => conv.sender._id === senderId
         );
 
         if (convIndex !== -1) {
           newConversations[convIndex].unreadCount = 0;
-          newConversations[convIndex].messages.forEach(msg => msg.read = true);
+          newConversations[convIndex].messages.forEach(
+            (msg) => (msg.read = true)
+          );
         }
 
         return newConversations.sort((a, b) => {
           if (a.unreadCount !== b.unreadCount) {
             return b.unreadCount - a.unreadCount;
           }
-          return new Date(b.lastMessage.timestamp) - new Date(a.lastMessage.timestamp);
+          return (
+            new Date(b.lastMessage.timestamp) -
+            new Date(a.lastMessage.timestamp)
+          );
         });
       });
     });
 
     // Thêm listener cho event xóa conversation
-    socket.on('conversation_deleted', ({ recipientId }) => {
-      setConversations(prev => {
+    socket.on("conversation_deleted", ({ recipientId }) => {
+      setConversations((prev) => {
         const newConversations = prev.filter(
-          conv => conv.sender._id !== recipientId
+          (conv) => conv.sender._id !== recipientId
         );
         return newConversations;
       });
-      
+
       // Reset selected tenant và đóng chat nếu đang chat với người bị xóa
       if (selectedTenant?.id === recipientId) {
         setSelectedTenant(null);
@@ -218,10 +237,10 @@ const MessageManagement = () => {
     });
 
     return () => {
-      socket.off('message_sent');
-      socket.off('receive_message');
-      socket.off('messages_marked_read');
-      socket.off('conversation_deleted');
+      socket.off("message_sent");
+      socket.off("receive_message");
+      socket.off("messages_marked_read");
+      socket.off("conversation_deleted");
     };
   }, [currentUser, selectedTenant]);
 
@@ -258,8 +277,13 @@ const MessageManagement = () => {
             <Box
               key={conversation.sender._id}
               p={3}
-              bg={selectedTenant?.id === conversation.sender._id ? "blue.50" : 
-                  conversation.unreadCount > 0 ? "gray.100" : "white"}
+              bg={
+                selectedTenant?.id === conversation.sender._id
+                  ? "blue.50"
+                  : conversation.unreadCount > 0
+                  ? "gray.100"
+                  : "white"
+              }
               borderRadius="md"
               cursor="pointer"
               _hover={{ bg: "gray.100" }}
@@ -285,7 +309,9 @@ const MessageManagement = () => {
                     {conversation.lastMessage.content}
                   </Text>
                   <Text fontSize="xs" color="gray.500">
-                    {new Date(conversation.lastMessage.timestamp).toLocaleString()}
+                    {new Date(
+                      conversation.lastMessage.timestamp
+                    ).toLocaleString()}
                   </Text>
                 </Box>
               </HStack>

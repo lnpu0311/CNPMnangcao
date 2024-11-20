@@ -63,6 +63,7 @@ import {
   FaInstagram,
   FaCalendarAlt,
   FaCalendarCheck,
+  FaEnvelope,
 } from "react-icons/fa";
 import {
   NavLink,
@@ -159,6 +160,11 @@ function TenantHome() {
       name: "Lịch sử đặt phòng",
       path: "bookings",
       icon: <FaCalendarCheck />,
+    },
+    {
+      name: "Tin nhắn",
+      path: "messages",
+      icon: <FaEnvelope />,
     },
     
     {

@@ -63,15 +63,16 @@ const Verification_Email_Template = (verficationCode) => {
 </head>
 <body>
     <div class="container">
-        <div class="header">Verify Your Email</div>
+        <div class="header">Xác thực Email của bạn</div>
         <div class="content">
-            <p>Hello,</p>
-            <p>Thank you for signing up! Please confirm your email address by entering the code below:</p>
+            <p>Xin chào,</p>
+            <p>Cảm ơn bạn đã đăng ký tài khoản của chúng tôi. Để kích hoạt xin vui lòng nhập mã OTP bên dưới:</p>
             <span class="verification-code">${verficationCode}</span>
-            <p>If you did not create an account, no further action is required. If you have any questions, feel free to contact our support team.</p>
+            <p>Nếu bạn không đăng ký tài khoản, xin vui lòng bỏ qua email này.</p>
+            <p>Trở thành thành viên của chúng tôi. Truy cập https://hostel-community.vercel.app/</p>
         </div>
         <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} Your Company. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} From Hostel Community. All rights reserved.</p>
         </div>
     </div>
 </body>

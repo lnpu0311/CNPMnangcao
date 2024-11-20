@@ -69,6 +69,7 @@ const TenantRoomList = () => {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [priceRange, setPriceRange] = useState("");
+  const [landlordInfo, setLandlordInfo] = useState(null);
 
   const FilterForm = () => (
     <VStack 
@@ -500,6 +501,24 @@ const TenantRoomList = () => {
     navigate(-1);
   };
 
+  const fetchLandlordInfo = async (landlordId) => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API}/user/${landlordId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (response.data.success) {
+        setLandlordInfo(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching landlord info:", error);
+    }
+  };
+
   return (
     <Container maxW="container.xl" py={4}>
       <Flex 
@@ -801,8 +820,9 @@ const TenantRoomList = () => {
               </Button>
               <Button
                 colorScheme="teal"
-                onClick={() => {
+                onClick={async () => {
                   if (currentUser) {
+                    await fetchLandlordInfo(selectedRoom.landlordId);
                     setShowChat(true);
                     setIsOpenDetail(false);
                   } else {
@@ -843,11 +863,11 @@ const TenantRoomList = () => {
       </Modal>
 
       {showChat && currentUser && selectedRoom && selectedRoom.landlordId && 
-        currentUser.id !== selectedRoom.landlordId && (
+        currentUser.id !== selectedRoom.landlordId && landlordInfo && (
         <Chat
           currentUserId={currentUser.id}
           recipientId={selectedRoom.landlordId.toString()}
-          recipientName={selectedRoom.landlordName || "Chủ trọ"}
+          recipientName={landlordInfo.name}
           onClose={handleCloseChat}
         />
       )}

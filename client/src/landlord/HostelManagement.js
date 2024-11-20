@@ -38,7 +38,7 @@ import {
 import { jwtDecode } from "jwt-decode";
 import vietnamData from "../data/dvhcvn.json";
 
-import Pagination from '../components/Pagination';
+import Pagination from "../components/Pagination";
 
 const HostelManagement = () => {
   const [token, setToken] = useState(localStorage.getItem("token"));
@@ -361,7 +361,6 @@ const HostelManagement = () => {
     );
   };
 
-
   const getCurrentPageData = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -491,6 +490,7 @@ const HostelManagement = () => {
           </ModalContent>
         </Modal>
       </Flex>
+
       {getCurrentPageData().map((facility) => (
         <FacilityItem key={facility.id} facility={facility} />
       ))}

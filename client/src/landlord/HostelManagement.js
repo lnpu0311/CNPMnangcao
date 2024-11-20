@@ -332,14 +332,6 @@ const HostelManagement = () => {
                   {facility.district}
                 </Text>
               </Box>
-              <Box display="flex" alignItems="center">
-                <Text fontSize="md" color="gray.600" mr={2}>
-                  Số phòng:
-                </Text>
-                <Text fontSize="md" fontWeight={"bold"}>
-                  {facility.roomCount}
-                </Text>
-              </Box>
             </Box>
 
             {/* Buttons Column */}

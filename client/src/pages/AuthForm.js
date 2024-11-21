@@ -300,7 +300,7 @@ const AuthForm = () => {
     }
   };
   const handleKeyDown = (event) => {
-    console.log("Key pressed:", event.key); // Kiểm tra sự kiện
+    console.log("Key pressed:", event.key);
     if (event.key === "Enter") {
       if (signinIn) {
         handleLogin();

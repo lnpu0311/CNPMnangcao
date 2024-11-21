@@ -464,16 +464,17 @@ function TenantHome() {
               <Text fontSize="xl" fontWeight="bold" mb={2}>
                 Liên hệ với chúng tôi
               </Text>
-              <Text>Hotline: 0123456789</Text>
-              <Text>Email: info@hostel.com</Text>
-              <Text>
+              <Text textColor={"white"}>Hotline: 0123456789</Text>
+              <Text textColor={"white"}>Email: info@hostel.com</Text>
+              <Text textColor={"white"}>
                 Địa chỉ: 69/68 Đặng Thùy Trâm, P.13, Q. Bình Thạnh, TP. HCM
               </Text>
-              <Text></Text>
             </VStack>
 
             {/* Links */}
+
             <VStack align="start" spacing={3} textColor={"black"} >
+
               <Text fontSize="xl" fontWeight="bold" mb={2}>
                 Khám phá
               </Text>

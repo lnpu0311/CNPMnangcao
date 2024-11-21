@@ -103,10 +103,6 @@ exports.executeRentPayment = async (req, res) => {
         },
         { new: true }
       );
-      const room = await Room.findByIdAndUpdate(updatedBill.roomId, {
-        paymentStatus: "paid",
-      });
-      console.log(room);
       return res.json({
         success: true,
         message: "Thanh toán thành công",

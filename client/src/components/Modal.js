@@ -403,6 +403,7 @@ export const ContractModal = ({
 export const InfoModal = ({
   isOpen,
   onClose,
+  user,
   selectedRoom,
   selectedImage,
   setSelectedImage,
@@ -493,8 +494,10 @@ export const InfoModal = ({
           <HStack spacing={3}>
             {/* <Avatar src={selectedRoom.tenantAvatar} /> */}
             <VStack align="start" spacing={0}>
-              {/* <Text>Tên khách thuê: {selectedRoom.tenantName}</Text>
-              <Text>Số điện thoại: {selectedRoom.tenantPhone}</Text> */}
+              <Text>Tên khách thuê: {user?.name || "Chưa có người thuê"}</Text>
+              <Text>
+                Số điện thoại: {user?.numPhone || "Chưa có người thuê"}
+              </Text>
             </VStack>
           </HStack>
         </Box>

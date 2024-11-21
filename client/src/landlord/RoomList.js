@@ -28,6 +28,7 @@ import { IoReceipt } from "react-icons/io5";
 import data from "../data/monthyear.json";
 import axios from "axios";
 import Pagination from "../components/Pagination";
+import { jwtDecode } from "jwt-decode";
 const RoomList = () => {
   const [hostel, setHostel] = useState();
   const [rooms, setRooms] = useState([]);
@@ -40,6 +41,8 @@ const RoomList = () => {
   const [itemPerPage] = useState(12);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   // Thêm state để quản lý loading khi lấy thông tin phòng
   const [isLoadingRoom, setIsLoadingRoom] = useState(false);
 
@@ -53,10 +56,31 @@ const RoomList = () => {
   };
 
   useEffect(() => {
+    setToken(localStorage.getItem("token"));
+  }, [token]);
+  useEffect(() => {
     // Lấy dữ liệu từ file data.json và cập nhật vào state
     setMonths(data.months);
     setYears(data.years);
   }, []);
+
+  const fetchUser = async (req, res) => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API}/user/${selectedRoom.tenantId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          timeout: 3000,
+        }
+      );
+      console.log(response.data.data);
+      setUser(response.data.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(
     () => {
@@ -743,6 +767,7 @@ const RoomList = () => {
               position="relative"
               onClick={() => {
                 setSelectedRoom(room);
+                fetchUser();
                 toggleModal("infoRoom", true);
               }}
             >
@@ -907,6 +932,7 @@ const RoomList = () => {
       <InfoModal
         isOpen={modalState.infoRoom}
         onClose={() => toggleModal("infoRoom", false)}
+        user={user}
         selectedImage={selectedImage}
         selectedRoom={selectedRoom}
         setSelectedImage={setSelectedImage}

@@ -29,7 +29,7 @@ const theme = extendTheme({
     global: () => ({
       "html, body": {
         width: "100%",
-        overflowX: "hidden",
+
         minHeight: "100vh",
         background: "brand.0",
         color: "brand.1",

@@ -1,7 +1,17 @@
-
-import { useState, useEffect,  } from "react"; 
+import { useState, useEffect } from "react";
 import React from "react";
-import { VStack, Box, Image, Heading, Text, Button, Grid, Stack, Link, Icon, HStack,  
+import {
+  VStack,
+  Box,
+  Image,
+  Heading,
+  Text,
+  Button,
+  Grid,
+  Stack,
+  Link,
+  Icon,
+  HStack,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -13,34 +23,33 @@ import { VStack, Box, Image, Heading, Text, Button, Grid, Stack, Link, Icon, HSt
   Container,
   Flex,
   useToast,
-  Tag
- } from "@chakra-ui/react";
-import { FaFacebook, FaYoutube, FaInstagram, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+  Tag,
+} from "@chakra-ui/react";
+import {
+  FaFacebook,
+  FaYoutube,
+  FaInstagram,
+  FaChevronLeft,
+  FaChevronRight,
+} from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Banner from "./Banner";
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 import axios from "axios"; // Import axios để gọi API
 
- const categories = [
-   { name: "Quận 1", image: "./houses/house1.png" },
-   { name: "Quận 2", image: "./houses/house2.png" },
-   { name: "Quận 3", image: "./houses/house3.png" },
-   { name: "Quận 4", image: "./houses/house4.png" }, // Thêm danh mục mới
-   { name: "Quận 5", image: "./houses/house5.png" }, // Thêm danh mục mới
-   { name: "Quận 6", image: "./houses/house6.png" }, // Thêm danh mục mới
- 
-   // Thêm các quận khác
- ];
+const categories = [
+  { name: "Quận 1", image: "./houses/house1.png" },
+  { name: "Quận 2", image: "./houses/house2.png" },
+  { name: "Quận 3", image: "./houses/house3.png" },
+  { name: "Quận 4", image: "./houses/house4.png" }, // Thêm danh mục mới
+  { name: "Quận 5", image: "./houses/house5.png" }, // Thêm danh mục mới
+  { name: "Quận 6", image: "./houses/house6.png" }, // Thêm danh mục mới
 
-
-
-
-const heroImages = [
-  "./house1.png",
-  "./house2.png", 
-  "./house3.png", 
+  // Thêm các quận khác
 ];
+
+const heroImages = ["./house1.png", "./house2.png", "./house3.png"];
 const images = [
   "./house1.png",
   "./house2.png",
@@ -50,57 +59,62 @@ const images = [
 
 const testimonials = [
   {
-    quote: "Sống ở đây quả là một trải nghiệm tuyệt vời. Các phòng đều rộng rãi và được bảo trì tốt.",
+    quote:
+      "Sống ở đây quả là một trải nghiệm tuyệt vời. Các phòng đều rộng rãi và được bảo trì tốt.",
     author: "Minh",
-    avatar: "https://via.placeholder.com/50" 
+    avatar: "https://via.placeholder.com/50",
   },
   {
-    quote: "Đội ngũ quản lý luôn tích cực và đáp ứng mọi nhu cầu. Tôi cảm thấy an toàn như ở nhà.",
+    quote:
+      "Đội ngũ quản lý luôn tích cực và đáp ứng mọi nhu cầu. Tôi cảm thấy an toàn như ở nhà.",
     author: "Lan",
-    avatar: "https://via.placeholder.com/50" 
+    avatar: "https://via.placeholder.com/50",
   },
   {
-    quote: "Một địa điểm tuyệt vời! Gần phương tiện giao thông công cộng và tiện ích địa phương. Rất khuyến khích!",
+    quote:
+      "Một địa điểm tuyệt vời! Gần phương tiện giao thông công cộng và tiện ích địa phương. Rất khuyến khích!",
     author: "Hùng",
-    avatar: "https://via.placeholder.com/50" 
+    avatar: "https://via.placeholder.com/50",
   },
   {
-    quote: "Tôi yêu không khí cộng đồng ở đây.Một nơi tuyệt vời để gặp gỡ những người bạn mới.",
+    quote:
+      "Tôi yêu không khí cộng đồng ở đây.Một nơi tuyệt vời để gặp gỡ những người bạn mới.",
     author: "An",
-    avatar: "https://via.placeholder.com/50" 
+    avatar: "https://via.placeholder.com/50",
   },
-  
 ];
 
-// Profile 
+// Profile
 const curriculumPathways = [
-  { 
-    name: "Bảo", 
-    avatar: "./profile1.png", 
-    role: "BE", 
-    description: "Bảo is responsible for overseeing the project and ensuring everything runs smoothly." 
+  {
+    name: "Bảo",
+    avatar: "./profile1.png",
+    role: "BE",
+    description:
+      "Bảo is responsible for overseeing the project and ensuring everything runs smoothly.",
   },
-  { 
-    name: "Uyên", 
-    avatar: "./profile2.png", 
-    role: "FE", 
-    description: "Uyên leads the development team and is passionate about creating user-friendly applications." 
+  {
+    name: "Uyên",
+    avatar: "./profile2.png",
+    role: "FE",
+    description:
+      "Uyên leads the development team and is passionate about creating user-friendly applications.",
   },
-  { 
-    name: "Hưng", 
-    avatar: "./profile1.png", 
-    role: "FE", 
-    description: "Hưng focuses on designing intuitive interfaces and enhancing user experience." 
+  {
+    name: "Hưng",
+    avatar: "./profile1.png",
+    role: "FE",
+    description:
+      "Hưng focuses on designing intuitive interfaces and enhancing user experience.",
   },
-  { 
-    name: "Hào", 
-    avatar: "./profile1.png", 
-    role: "BE", 
-    description: "Hào is in charge of marketing strategies and community engagement." 
+  {
+    name: "Hào",
+    avatar: "./profile1.png",
+    role: "BE",
+    description:
+      "Hào is in charge of marketing strategies and community engagement.",
   },
 ];
-
-
 
 // About & Values Section
 const contentData = [
@@ -109,52 +123,84 @@ const contentData = [
     title: "Sứ Mệnh và Giá Trị Của Chúng Tôi",
     description: (
       <>
-        Tại <Link color="blue.500" fontWeight="bold" href="/hostel-community">Hostel Community</Link>, chúng tôi cam kết tạo ra một môi trường sống an toàn và thoải mái cho tất cả cư dân. 
-        Sứ mệnh của chúng tôi là cung cấp không gian sống lý tưởng, nơi mọi người có thể phát triển và kết nối. 
-        Chúng tôi tin tưởng vào:
+        Tại{" "}
+        <Link color="blue.500" fontWeight="bold" href="/hostel-community">
+          Hostel Community
+        </Link>
+        , chúng tôi cam kết tạo ra một môi trường sống an toàn và thoải mái cho
+        tất cả cư dân. Sứ mệnh của chúng tôi là cung cấp không gian sống lý
+        tưởng, nơi mọi người có thể phát triển và kết nối. Chúng tôi tin tưởng
+        vào:
       </>
     ),
     values: [
-      { title: "1. Sự An Toàn:", description: "Chúng tôi đảm bảo rằng mọi cư dân đều cảm thấy an toàn và được bảo vệ trong không gian sống của mình." },
-      { title: "2. Cộng Đồng Gắn Kết:", description: "Chúng tôi khuyến khích sự giao lưu và hỗ trợ lẫn nhau giữa các cư dân, tạo nên một cộng đồng vững mạnh." },
-      { title: "3. Phát Triển Bền Vững:", description: "Chúng tôi cam kết cung cấp các dịch vụ và tiện ích bền vững, góp phần vào sự phát triển của cộng đồng." },
+      {
+        title: "1. Sự An Toàn:",
+        description:
+          "Chúng tôi đảm bảo rằng mọi cư dân đều cảm thấy an toàn và được bảo vệ trong không gian sống của mình.",
+      },
+      {
+        title: "2. Cộng Đồng Gắn Kết:",
+        description:
+          "Chúng tôi khuyến khích sự giao lưu và hỗ trợ lẫn nhau giữa các cư dân, tạo nên một cộng đồng vững mạnh.",
+      },
+      {
+        title: "3. Phát Triển Bền Vững:",
+        description:
+          "Chúng tôi cam kết cung cấp các dịch vụ và tiện ích bền vững, góp phần vào sự phát triển của cộng đồng.",
+      },
     ],
   },
 
   {
-    image: "./house2.png", 
+    image: "./house2.png",
     title: "Giá Trị Cốt Lõi",
     description: (
       <>
-        Chúng tôi tin rằng mỗi cư dân đều có giá trị và xứng đáng được tôn trọng. Chúng tôi tạo ra một không gian nơi mọi người có thể tự do thể hiện bản thân và phát triển.
+        Chúng tôi tin rằng mỗi cư dân đều có giá trị và xứng đáng được tôn
+        trọng. Chúng tôi tạo ra một không gian nơi mọi người có thể tự do thể
+        hiện bản thân và phát triển.
       </>
     ),
     values: [
-      { title: "4. Tôn Trọng Đa Dạng:", description: "Chúng tôi chào đón mọi nền văn hóa và phong cách sống khác nhau." },
-      { title: "5. Hỗ Trợ Lẫn Nhau:", description: "Chúng tôi khuyến khích sự hỗ trợ và giúp đỡ lẫn nhau giữa các cư dân." },
+      {
+        title: "4. Tôn Trọng Đa Dạng:",
+        description:
+          "Chúng tôi chào đón mọi nền văn hóa và phong cách sống khác nhau.",
+      },
+      {
+        title: "5. Hỗ Trợ Lẫn Nhau:",
+        description:
+          "Chúng tôi khuyến khích sự hỗ trợ và giúp đỡ lẫn nhau giữa các cư dân.",
+      },
     ],
   },
-  
+
   {
-    image: "house3.png", 
+    image: "house3.png",
     title: "Cộng Đồng Đoàn Kết",
     description: (
       <>
-        Chúng tôi xây dựng một cộng đồng nơi mọi người có thể kết nối và hỗ trợ lẫn nhau, tạo ra một môi trường sống tích cực và thân thiện.
+        Chúng tôi xây dựng một cộng đồng nơi mọi người có thể kết nối và hỗ trợ
+        lẫn nhau, tạo ra một môi trường sống tích cực và thân thiện.
       </>
     ),
     values: [
-      { title: "6. Giao Lưu Văn Hóa:", description: "Chúng tôi tổ chức các sự kiện để cư dân có thể giao lưu và học hỏi từ nhau." },
-      { title: "7. Hoạt Động Cộng Đồng:", description: "Chúng tôi khuyến khích cư dân tham gia vào các hoạt động cộng đồng để xây dựng mối quan hệ." },
+      {
+        title: "6. Giao Lưu Văn Hóa:",
+        description:
+          "Chúng tôi tổ chức các sự kiện để cư dân có thể giao lưu và học hỏi từ nhau.",
+      },
+      {
+        title: "7. Hoạt Động Cộng Đồng:",
+        description:
+          "Chúng tôi khuyến khích cư dân tham gia vào các hoạt động cộng đồng để xây dựng mối quan hệ.",
+      },
     ],
   },
 ];
 
-
-
-
 function TenantDashboard() {
-
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
@@ -162,17 +208,23 @@ function TenantDashboard() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const toast = useToast();
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [rooms, setRooms] = useState([]); // State để lưu danh sách phòng
-  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [rooms, setRooms] = useState([]); // Danh sách phòng
+  const [currentSlide, setCurrentSlide] = useState(0); // Slide hiện tại
+  const [selectedRoom, setSelectedRoom] = useState(null); // Phòng được chọn
 
+  // Lấy danh sách phòng từ API
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API}/user/rooms`,{
-          headers:{Authorization:`Bearer ${localStorage.getItem("token")}`}
-        }); // Gọi API để lấy danh sách phòng
-        console.log(response.data.data)
-        setRooms(response.data.data); // Lưu dữ liệu vào state
+        const response = await axios.get(
+          `${process.env.REACT_APP_API}/user/rooms`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        setRooms(response.data.data);
       } catch (error) {
         console.error("Error fetching rooms:", error);
         toast({
@@ -184,17 +236,31 @@ function TenantDashboard() {
         });
       }
     };
-
     fetchRooms();
   }, []);
 
+  // Điều hướng carousel
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % Math.ceil(rooms.length / 3));
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) =>
+      prev === 0 ? Math.ceil(rooms.length / 3) - 1 : prev - 1
+    );
+  };
+
+  // Xử lý khi chọn phòng
   const handleRoomClick = async (roomId) => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API}/user/rooms/${roomId}`,{
-        headers:{Authorization:`Bearer ${localStorage.getItem("token")}`}
-      });
+      const response = await axios.get(
+        `${process.env.REACT_APP_API}/user/rooms/${roomId}`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
       if (response.data.success) {
-        setSelectedRoom(response.data.data); // Lưu thông tin phòng đã chọn vào state
+        setSelectedRoom(response.data.data);
       }
     } catch (error) {
       console.error("Error fetching room detail:", error);
@@ -212,14 +278,15 @@ function TenantDashboard() {
     setSelectedCategory(categoryName);
   };
 
-  const filteredRooms = rooms.filter(room => room.category === selectedCategory);
+  const filteredRooms = rooms.filter(
+    (room) => room.category === selectedCategory
+  );
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-
-    // Hàm mở modal
+  // Hàm mở modal
   const handleOpenDetails = (name) => {
-    const member = curriculumPathways.find(member => member.name === name);
+    const member = curriculumPathways.find((member) => member.name === name);
     setSelectedMember(member);
     setIsOpen(true);
   };
@@ -235,8 +302,6 @@ function TenantDashboard() {
   const nextImage = () => {
     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
   };
-  
-  
 
   // Tự động chuyển đổi hình ảnh sau mỗi 5 giây
   useEffect(() => {
@@ -247,7 +312,7 @@ function TenantDashboard() {
   // About & Values Section
 
   // Hàm chuyển đổi nội dung
-   const nextContent = () => {
+  const nextContent = () => {
     setCurrentContentIndex((prevIndex) => (prevIndex + 1) % contentData.length);
   };
 
@@ -257,16 +322,15 @@ function TenantDashboard() {
     return () => clearInterval(interval); // Dọn dẹp interval khi component unmount
   }, []);
 
-
   return (
     <VStack spacing={10} align="center" p={4} w="100%">
       {/* Banner Section */}
-      <Box mb={20}> 
+      <Box mb={20}>
         <Banner />
       </Box>
-      
-        {/* Hiển thị thông tin phòng đã chọn nếu có */}
-        {selectedRoom && (
+
+      {/* Hiển thị thông tin phòng đã chọn nếu có */}
+      {selectedRoom && (
         <Box>
           <Heading size="lg">Thông tin phòng đã chọn:</Heading>
           <Text fontWeight="bold">Tên phòng: {selectedRoom.category}</Text>
@@ -274,81 +338,102 @@ function TenantDashboard() {
           <Text>Giá: {selectedRoom.price}</Text>
           <Text>Diện tích: {selectedRoom.area}</Text>
           <Text>Đặt cọc: {selectedRoom.deposit}</Text>
-          <Text>Tiện ích: {selectedRoom.amenities.join(', ')}</Text>
+          <Text>Tiện ích: {selectedRoom.amenities.join(", ")}</Text>
         </Box>
-        )}
+      )}
 
-      {/* Danh sách phòng */}
-      <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap={4}>
-        {rooms.map((room) => (
-          <Box
-          key={room.id}
-          borderWidth="1px"
-          borderRadius="lg"
-          overflow="hidden"
-          boxShadow="md"
-          bg="white"
-          height="100%"
+      <Heading size="lg">Danh sách phòng</Heading>
+
+      {/* Carousel */}
+      <Flex
+        position="relative"
+        w="100%"
+        maxW="1200px"
+        overflow="hidden"
+        alignItems="center"
+      >
+        {/* Nút điều hướng */}
+        <IconButton
+          icon={<FaChevronLeft />}
+          position="absolute"
+          left="0"
+          zIndex="10"
+          bg="gray.700"
+          color="white"
+          borderRadius="full"
+          _hover={{ bg: "gray.500" }}
+          onClick={prevSlide}
+          aria-label="Previous slide"
+        />
+        <IconButton
+          icon={<FaChevronRight />}
+          position="absolute"
+          right="0"
+          zIndex="10"
+          bg="gray.700"
+          color="white"
+          borderRadius="full"
+          _hover={{ bg: "gray.500" }}
+          onClick={nextSlide}
+          aria-label="Next slide"
+        />
+
+        {/* Phòng hiển thị */}
+        <Flex
+          as={motion.div}
+          w="100%"
           display="flex"
-          flexDirection="column"
-          onClick={() => handleRoomClick(room)}
-          cursor="pointer"
-          _hover={{ transform: "scale(1.02)", transition: "all 0.2s" }}
-          p={2}
+          gap={4}
+          transform={`translateX(-${currentSlide * 100}%)`}
+          transition="transform 0.5s ease-in-out"
         >
-          <Image
-            src={room.images[0]}
-            alt={room.roomName}
-            w="100%"
-            h="200px"
-            objectFit="cover"
-            fallbackSrc="https://via.placeholder.com/200"
-            borderRadius={{ base: "8px", lg: "8px" }}
-          />
-          <VStack p={4} align="stretch" spacing={2} flex="1">
-            <Text 
-              fontWeight="bold" 
-              fontSize="lg"
-              noOfLines={1}  // Giới hạn tiêu đề 1 dòng
+          {rooms.map((room, index) => (
+            <Box
+              key={index}
+              flex="0 0 33.333%"
+              maxW="33.333%"
+              p={4}
+              bg="white"
+              borderWidth="1px"
+              borderRadius="lg"
+              overflow="hidden"
+              boxShadow="md"
+              onClick={() => handleRoomClick(room.id)}
+              cursor="pointer"
+              _hover={{ transform: "scale(1.02)", transition: "all 0.2s" }}
             >
-              {room.roomTitle}
-            </Text>
-            {/* <Flex alignItems="flex-start">
-               <Text fontWeight="bold" width="70px" flexShrink={0}>
-                Địa chỉ:
-              </Text>
-              <Text 
-                color="gray.600" 
-                fontSize="sm"  
-                noOfLines={2}  // Giới hạn địa chỉ 2 dòng
-              >
-                {room.address}
-              </Text> 
-            </Flex> */}
-            <Flex justifyContent="space-between" alignItems="center">
-              <Text fontWeight="bold">Tình trạng:</Text>
-              <Tag
-                colorScheme={room.status === "Còn trống" ? "green" : "red"}
-              >
-                {room.status}
-              </Tag>
-            </Flex>
-            {/* <Flex justifyContent="space-between">
-              <Text fontWeight="bold">Giá:</Text>
-              <Text>
-                {new Intl.NumberFormat("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                }).format(room.price)}
-              </Text>
-            </Flex> */}
-          </VStack>
-        </Box>
-        ))}
-      </Grid>
+              <Image
+                src={room.images[0]}
+                alt={room.roomName}
+                w="100%"
+                h="200px"
+                objectFit="cover"
+                fallbackSrc="https://via.placeholder.com/200"
+              />
+              <VStack p={4} align="start" spacing={2}>
+                <Text fontWeight="bold" fontSize="lg" noOfLines={1}>
+                  {room.roomTitle}
+                </Text>
+                <Flex justifyContent="space-between" alignItems="center" mt="2">
+                  <Text fontWeight="bold">Tình trạng:</Text>
+                  <Tag
+                    colorScheme={room.status === "available" ? "green" : "red"}
+                  >
+                    {room.status === "available" ? "Còn trống" : "Đã thuê"}
+                  </Tag>
+                </Flex>
+              </VStack>
+            </Box>
+          ))}
+        </Flex>
+      </Flex>
 
-      {/* Modal */}
-      <Modal isOpen={!!selectedRoom} onClose={() => setSelectedRoom(null)} size="md">
+      {/* Modal hiển thị thông tin phòng */}
+      <Modal
+        isOpen={!!selectedRoom}
+        onClose={() => setSelectedRoom(null)}
+        size="md"
+      >
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Thông tin phòng</ModalHeader>
@@ -361,12 +446,44 @@ function TenantDashboard() {
                 <Text fontWeight="bold">Diện tích: {selectedRoom.area}</Text>
                 <Text fontWeight="bold">Đặt cọc: {selectedRoom.deposit}</Text>
                 <Text fontWeight="bold">Tiện ích:</Text>
-                <Text>{selectedRoom.amenities.join(', ')}</Text>
+                <Text>{selectedRoom.amenities.join(", ")}</Text>
               </VStack>
             )}
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" onClick={() => setSelectedRoom(null)}>Đóng</Button>
+            <Button colorScheme="blue" onClick={() => setSelectedRoom(null)}>
+              Đóng
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Modal */}
+      <Modal
+        isOpen={!!selectedRoom}
+        onClose={() => setSelectedRoom(null)}
+        size="md"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Thông tin phòng</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {selectedRoom && (
+              <VStack spacing={4}>
+                <Text fontWeight="bold">Địa chỉ: {selectedRoom.address}</Text>
+                <Text fontWeight="bold">Giá: {selectedRoom.price}</Text>
+                <Text fontWeight="bold">Diện tích: {selectedRoom.area}</Text>
+                <Text fontWeight="bold">Đặt cọc: {selectedRoom.deposit}</Text>
+                <Text fontWeight="bold">Tiện ích:</Text>
+                <Text>{selectedRoom.amenities.join(", ")}</Text>
+              </VStack>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={() => setSelectedRoom(null)}>
+              Đóng
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
@@ -410,9 +527,9 @@ function TenantDashboard() {
         </Box>
       )}
     </VStack> */}
-  
-        {/* Danh mục */}
-        {/* <Flex overflow="hidden" mb={10} w="100%" justifyContent="center">
+
+      {/* Danh mục */}
+      {/* <Flex overflow="hidden" mb={10} w="100%" justifyContent="center">
           <Flex as={motion.div} whileTap={{ cursor: "grabbing" }} w="100%" overflowX="auto" justifyContent="center">
             {categories.map((category, index) => (
               <Box 
@@ -433,23 +550,18 @@ function TenantDashboard() {
           </Flex>
         </Flex> */}
 
-       {/* RoomList button */}
-       <Box 
-        display="flex" 
-        justifyContent="center" 
-        mb={20}
-      >
+      {/* RoomList button */}
+      <Box display="flex" justifyContent="center" mb={20}>
         <Button
           size="lg"
           height="60px"
           width={{ base: "90%", md: "300px" }}
           bg="orange.400"
-          
-          onClick={() => navigate('room-list')}
+          onClick={() => navigate("room-list")}
           fontSize="xl"
           _hover={{
-            transform: 'translateY(-2px)',
-            boxShadow: 'xl',
+            transform: "translateY(-2px)",
+            boxShadow: "xl",
           }}
           transition="all 0.2s"
         >
@@ -465,63 +577,57 @@ function TenantDashboard() {
           <Text>Giá: {selectedRoom.price}</Text>
           <Text>Diện tích: {selectedRoom.area}</Text>
           <Text>Đặt cọc: {selectedRoom.deposit}</Text>
-          <Text>Tiện ích: {selectedRoom.amenities.join(', ')}</Text>
+          <Text>Tiện ích: {selectedRoom.amenities.join(", ")}</Text>
         </Box>
       )}
 
-      
-      
       {/* Profile Section */}
-      <Box 
-        py={10} 
-        px={{ base: 4, md: 8 }} 
-        mt={5} 
-      >
+      <Box py={10} px={{ base: 4, md: 8 }} mt={5}>
         <Container maxW="container.xl">
           <VStack spacing={16}>
-            <Heading 
-              fontSize={{ base: "3xl", md: "4xl" }} 
+            <Heading
+              fontSize={{ base: "3xl", md: "4xl" }}
               textAlign="center"
               bgGradient="linear(to-r, blue.400, blue.600)"
               bgClip="text"
             >
               Đội ngũ của chúng tôi
             </Heading>
-            
-            <Grid 
-              templateColumns={{ 
-                base: "1fr", 
-                md: "repeat(2, 1fr)", 
-                lg: "repeat(4, 1fr)" 
-              }} 
-              gap={8} 
+
+            <Grid
+              templateColumns={{
+                base: "1fr",
+                md: "repeat(2, 1fr)",
+                lg: "repeat(4, 1fr)",
+              }}
+              gap={8}
               w="100%"
             >
               {curriculumPathways.map(({ name, avatar, role, description }) => (
-                <Box 
-                  key={name} 
-                  bg="white" 
-                  borderRadius="xl" 
+                <Box
+                  key={name}
+                  bg="white"
+                  borderRadius="xl"
                   overflow="hidden"
                   boxShadow="lg"
                   transition="all 0.3s"
                   cursor="pointer"
                   onClick={() => handleOpenDetails(name)}
-                  _hover={{ 
+                  _hover={{
                     transform: "translateY(-8px)",
-                    boxShadow: "xl"
+                    boxShadow: "xl",
                   }}
                 >
                   <Box position="relative" h="280px">
                     <Image
-                      src={avatar} 
+                      src={avatar}
                       alt={name}
                       w="100%"
                       h="100%"
                       objectFit="cover"
                     />
                     {/* Gradient overlay */}
-                    <Box 
+                    <Box
                       position="absolute"
                       bottom={0}
                       left={0}
@@ -530,7 +636,7 @@ function TenantDashboard() {
                       bgGradient="linear(to-t, blackAlpha.700, transparent)"
                     />
                     {/* Content overlay */}
-                    <VStack 
+                    <VStack
                       position="absolute"
                       bottom={4}
                       left={0}
@@ -539,8 +645,8 @@ function TenantDashboard() {
                       color="white"
                     >
                       <Heading fontSize="xl">{name}</Heading>
-                      <Text 
-                        fontSize="md" 
+                      <Text
+                        fontSize="md"
                         color="whiteAlpha.900"
                         fontWeight="medium"
                       >
@@ -572,11 +678,7 @@ function TenantDashboard() {
               />
               <VStack align="start" spacing={1}>
                 <Heading size="md">{selectedMember?.name}</Heading>
-                <Text 
-                  color="blue.500" 
-                  fontWeight="medium"
-                  fontSize="sm"
-                >
+                <Text color="blue.500" fontWeight="medium" fontSize="sm">
                   {selectedMember?.role}
                 </Text>
               </VStack>
@@ -587,19 +689,12 @@ function TenantDashboard() {
             <Text lineHeight="tall">{selectedMember?.description}</Text>
           </ModalBody>
           <ModalFooter borderTopWidth="1px" py={4}>
-            <Button 
-              colorScheme="blue" 
-              onClick={handleClose}
-              size="lg"
-              w="full"
-            >
+            <Button colorScheme="blue" onClick={handleClose} size="lg" w="full">
               Đóng
             </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
-
-
 
       {/* News & Updates */}
       {/* <Heading fontSize="2xl" textAlign="center">Tin tức & Thành tựu</Heading>
@@ -610,8 +705,6 @@ function TenantDashboard() {
               transition="transform 0.2s" />
         ))}
       </Grid> */}
-
-      
     </VStack>
   );
 }

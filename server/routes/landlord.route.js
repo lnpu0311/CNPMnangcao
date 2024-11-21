@@ -41,10 +41,14 @@ router.post(
   createRoom
 );
 //Tạo tài khoản Manager (chỉ Landlord làm được)
-router.post("/manager/create", authMiddleware(["landlord"]));
+// router.post("/manager/create", authMiddleware(["landlord"]));
 
 router.get("/tenant-list", authMiddleware(["landlord"]), getTenantList);
-router.delete('/room/:roomId/delete', authMiddleware(["landlord"]), deleteRoom);
-router.delete('/hostel/:hostelId/delete', authMiddleware(["landlord"]), deleteHostel);
+router.delete("/room/:roomId/delete", authMiddleware(["landlord"]), deleteRoom);
+router.delete(
+  "/hostel/:hostelId/delete",
+  authMiddleware(["landlord"]),
+  deleteHostel
+);
 
 module.exports = router;

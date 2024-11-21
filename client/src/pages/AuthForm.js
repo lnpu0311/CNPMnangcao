@@ -113,6 +113,8 @@ const AuthForm = () => {
   };
 
   const handleFormToggle = () => {
+    setSigninIn((prev) => !prev);
+    console.log("SigninIn toggled:", !signinIn);
     if (signinIn) {
       navigate("/register");
     } else {
@@ -297,13 +299,24 @@ const AuthForm = () => {
       console.error(error);
     }
   };
+  const handleKeyDown = (event) => {
+    console.log("Key pressed:", event.key); // Kiểm tra sự kiện
+    if (event.key === "Enter") {
+      if (signinIn) {
+        handleLogin();
+      } else {
+        handleRegister();
+      }
+    }
+  };
+
   return (
     <Flex
       bg="white"
       height="fit-content"
       align="center"
       justify="center"
-      p={{ base: 4, md: 12, lg: 16 }}
+      p={{ base: 2, md: 8 }}
       flexDirection={{ base: "column", lg: "row" }}
     >
       {/* left content */}
@@ -318,7 +331,6 @@ const AuthForm = () => {
         alignItems="center"
         mr={{ base: 0, lg: 6 }}
         mb={{ base: 6, lg: 0 }}
-        p={4}
       >
         <Box
           as={"section"}
@@ -336,7 +348,7 @@ const AuthForm = () => {
           <img src="../eco-house-black.png" alt="Eco Green" width="100%" />
         </Box>
         <Text
-          mt={4}
+          mt={{ base: 0, md: 4 }}
           fontSize={{ base: "3xl", md: "xxx-large" }}
           fontWeight="bold"
           bgGradient="linear(to-l, #07c8f9, #0d41e1)"
@@ -367,6 +379,8 @@ const AuthForm = () => {
         >
           {/* Sign In Form */}
           <Box
+            as="form"
+            onKeyDown={handleKeyDown}
             alignContent={"center"}
             position="absolute"
             left={
@@ -378,7 +392,7 @@ const AuthForm = () => {
             transition="all 0.8s cubic-bezier(0.65, 0.05, 0.36, 1)"
             width={{ base: "100%", md: "50%" }}
             height={{ base: "fit-content", md: "100%" }}
-            p={{ base: 6, md: 10 }}
+            p={6}
             opacity={signinIn ? 1 : 0}
             zIndex={signinIn ? 2 : 1}
           >
@@ -447,6 +461,8 @@ const AuthForm = () => {
               textAlign={"center"}
               onClick={handleFormToggle}
               display={{ base: "block", md: "none" }}
+              cursor={"pointer"}
+              mt={2}
             >
               Chưa có tài khoản? Đăng ký tại đây
             </Text>
@@ -462,13 +478,15 @@ const AuthForm = () => {
           </Box>
           {/* Sign Up Form */}
           <Box
+            as="form"
+            onKeyDown={handleKeyDown}
             alignContent={"center"}
             position="absolute"
             left={signinIn ? "100%" : "0"}
             transition="all 0.8s cubic-bezier(0.65, 0.05, 0.36, 1)"
             width={{ base: "100%", md: "50%" }}
             height="100%"
-            p={10}
+            p={4}
             opacity={!signinIn ? 1 : 0}
             zIndex={!signinIn ? 2 : 1}
           >
@@ -628,6 +646,8 @@ const AuthForm = () => {
               textAlign={"center"}
               onClick={handleFormToggle}
               display={{ base: "block", md: "none" }}
+              cursor={"pointer"}
+              mt={2}
             >
               Đã có tài khoản? Đăng nhập tại đây
             </Text>

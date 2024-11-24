@@ -5,7 +5,6 @@ const sendverificationCode = require("../middlewares/sendEmail");
 
 //Đăng ký, tạo user
 const createUser = async (req, res) => {
-
   const user = req.body;
 
   if (
@@ -43,7 +42,7 @@ const createUser = async (req, res) => {
   const verificationCode = Math.floor(
     100000 + Math.random() * 900000
   ).toString();
-  const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+  const otpExpires = new Date(Date.now() + 60 * 1000);
   // Xử lý ảnh upload
   let imageUrl =
     "https://asset.cloudinary.com/cnpmnc/17da4fe9a04710f6b649531eef6c33e4"; // Ảnh mặc định
@@ -144,7 +143,7 @@ const forgotPassword = async (req, res) => {
     const verificationCode = Math.floor(
       100000 + Math.random() * 900000
     ).toString();
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); //10 phút
+    const otpExpires = new Date(Date.now() + 60 * 1000); //10 phút
     //Cập nhật OTP mới vào database
     await User.findByIdAndUpdate(user._id, {
       otpVerification: verificationCode,
@@ -244,7 +243,7 @@ const resendOtp = async (req, res) => {
   const verificationCode = Math.floor(
     100000 + Math.random() * 900000
   ).toString();
-  const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+  const otpExpires = new Date(Date.now() + 60 * 1000);
   try {
     const user = await User.findOne({ email: email });
     if (!user) {

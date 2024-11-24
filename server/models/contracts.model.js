@@ -35,7 +35,7 @@ const contractsSchema = new mongoose.Schema({
   tenantId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Tenant",
-    required: false,
+    required: true,
   },
   landlordId: {
     type: mongoose.Schema.Types.ObjectId,

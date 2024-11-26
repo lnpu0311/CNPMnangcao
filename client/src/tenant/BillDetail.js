@@ -34,7 +34,7 @@ const getErrorMessage = (errorCode) => {
     case "11":
       return "Đã hết hạn chờ thanh toán";
     case "12":
-      return "Thẻ/Tài khoản của khách hàng b khóa";
+      return "Thẻ/Tài khoản của khách hàng bị khóa";
     case "13":
       return "Khách hàng nhập sai mật khẩu xác thực giao dịch";
     case "51":

@@ -130,9 +130,6 @@ const RentalRequest = () => {
     }
   }, [toast]);
   // Thêm fetchRentalRequests vào dependency array của useEffect
-  useEffect(() => {
-    fetchRentalRequests();
-  }, [fetchRentalRequests]);
 
   // Thêm fetchBookings function
   const fetchBookings = useCallback(async () => {

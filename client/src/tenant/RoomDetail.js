@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, useLocation  } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
   Container,
@@ -18,14 +18,14 @@ import {
   Flex,
   Center,
   Sp,
-  Spinner
+  Spinner,
 } from "@chakra-ui/react";
 import { MdCheckCircle } from "react-icons/md";
 import Chat from "../components/Chat";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 
-import {  FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 
 const RoomDetail = () => {
   const { id } = useParams();
@@ -56,7 +56,9 @@ const RoomDetail = () => {
     if (!room) {
       const fetchRoomDetail = async () => {
         try {
-          const response = await axios.get(`${process.env.REACT_APP_API}/user/room-detail/${id}`);
+          const response = await axios.get(
+            `${process.env.REACT_APP_API}/user/room-detail/${id}`
+          );
           if (response.data.success) {
             setRoom(response.data.data);
           }
@@ -95,17 +97,21 @@ const RoomDetail = () => {
   };
 
   if (!room) {
-    return <Center><Spinner size="xl" /></Center>;
+    return (
+      <Center>
+        <Spinner size="xl" />
+      </Center>
+    );
   }
 
   return (
     <Container maxW="container.xl" py={8}>
-       {/* Nút Quay lại */}
-       <Button
+      {/* Nút Quay lại */}
+      <Button
         onClick={() => navigate(-1)} // Quay lại trang trước
         colorScheme="teal"
         leftIcon={<FaArrowLeft />}
-        mb={4} // Thêm margin-bottom nếu cần
+        mb={4}
       >
         Quay lại
       </Button>
@@ -120,11 +126,11 @@ const RoomDetail = () => {
               objectFit="cover"
             />
           </GridItem>
-          
+
           <GridItem p={6}>
             <VStack align="stretch" spacing={6}>
               <Heading size="lg">{room.roomTitle}</Heading>
-              
+
               <Box>
                 <Text fontSize="2xl" fontWeight="bold" color="blue.500">
                   {new Intl.NumberFormat("vi-VN", {
@@ -142,7 +148,9 @@ const RoomDetail = () => {
               </Box>
 
               <Box>
-                <Text fontWeight="bold" mb={2}>Địa chỉ:</Text>
+                <Text fontWeight="bold" mb={2}>
+                  Địa chỉ:
+                </Text>
                 <Text>{room.address}</Text>
               </Box>
 
@@ -163,7 +171,9 @@ const RoomDetail = () => {
               </Grid>
 
               <Box>
-                <Text fontWeight="bold" mb={2}>Tiện ích:</Text>
+                <Text fontWeight="bold" mb={2}>
+                  Tiện ích:
+                </Text>
                 <List spacing={2}>
                   {room.amenities.map((amenity, index) => (
                     <ListItem key={index}>
@@ -220,17 +230,18 @@ const RoomDetail = () => {
         </Grid>
       </Box>
 
-      {showChat && currentUser && room.landlordId && 
-        currentUser.id !== room.landlordId && landlordInfo && (
-        <Chat
-          currentUserId={currentUser.id}
-          recipientId={room.landlordId.toString()}
-          recipientName={landlordInfo.name}
-          onClose={() => setShowChat(false)}
-        />
-      )}
-
-      
+      {showChat &&
+        currentUser &&
+        room.landlordId &&
+        currentUser.id !== room.landlordId &&
+        landlordInfo && (
+          <Chat
+            currentUserId={currentUser.id}
+            recipientId={room.landlordId.toString()}
+            recipientName={landlordInfo.name}
+            onClose={() => setShowChat(false)}
+          />
+        )}
     </Container>
   );
 };

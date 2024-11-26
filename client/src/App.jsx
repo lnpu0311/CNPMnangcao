@@ -38,7 +38,7 @@ function App() {
   const paypalOptions = {
     "client-id": process.env.REACT_APP_PAYPAL_CLIENT_ID,
     currency: "USD",
-    intent: "capture"
+    intent: "capture",
   };
 
   console.log("PayPal Options:", paypalOptions);
@@ -137,7 +137,7 @@ function App() {
                 </ProtectedRoute>
               }
             ></Route>
-            {/* Landlord and Manager routes */}
+            {/* Landlord routes */}
             <Route
               path="/landlord"
               element={
@@ -183,7 +183,7 @@ function App() {
               <Route path="bills" element={<BillList />} />
               <Route path="bills/:billId" element={<BillDetail />} />
               <Route path="messages" element={<TenantChatList />} />
-              </Route>
+            </Route>
 
             <Route path="/search-results" element={<SearchResults />} />
           </Routes>

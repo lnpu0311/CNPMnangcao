@@ -27,11 +27,6 @@ const userSchema = new mongoose.Schema({
     default:
       "https://asset.cloudinary.com/cnpmnc/17da4fe9a04710f6b649531eef6c33e4",
   },
-  landlordId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    require: false,
-  },
 });
 
 module.exports = mongoose.model(`User`, userSchema);

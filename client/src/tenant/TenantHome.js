@@ -33,10 +33,8 @@ import {
   InputGroup,
   InputRightElement,
   SimpleGrid,
-  useColorModeValue
+  useColorModeValue,
 } from "@chakra-ui/react";
-import { motion } from "framer-motion";
-import { debounce } from "lodash";
 import {
   HamburgerIcon,
   BellIcon,
@@ -82,8 +80,6 @@ import { IoHomeSharp } from "react-icons/io5";
 import NotificationBell from "../components/NotificationBell";
 import { Link as ChakraLink } from "@chakra-ui/react";
 
-const MotionBox = motion.create(Box);
-
 function TenantHome() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -105,52 +101,8 @@ function TenantHome() {
     onClose();
   };
 
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
-
-  const handleScroll = () => {
-    const scrollTop = window.scrollY;
-    setIsScrolled(scrollTop > 50);
-  };
-
-  useEffect(() => {
-    const debouncedHandleScroll = debounce(handleScroll, 20);
-    window.addEventListener("scroll", debouncedHandleScroll);
-    return () => window.removeEventListener("scroll", debouncedHandleScroll);
-  }, []);
-
-  const searchVariants = {
-    initial: {
-      width: "30%", // Giảm kích thước xuống
-      height: "40px",
-      position: "relative", // Thay đổi thành relative
-      top: "0",
-      left: "0",
-      transform: "none",
-    },
-    // scrolled: {
-    //   width: "300px",
-    //   height: "40px",
-    //   position: "relative",
-    //   top: "0",
-    //   left: "0",
-    //   transform: "translateX(0)",
-    //   transition: {
-    //     type: "spring",
-    //     stiffness: 1000,
-    //     damping: 100,
-    //   },
-    // },
-  };
-
   // Cập nhật menu items cho Tenant
   const menuItems = [
-    // { name: "Trang chủ", path: "/tenant", icon: <IoHomeSharp /> },
-    // {
-    //   name: "Danh sách phòng",
-    //   path: "room-list",
-    //   icon: <FaBuilding />,
-    // },
     {
       name: "Thông tin hợp đồng",
       path: "contract",
@@ -166,7 +118,7 @@ function TenantHome() {
       path: "messages",
       icon: <FaEnvelope />,
     },
-    
+
     {
       name: "Lịch sử thanh toán",
       path: "payments",
@@ -176,14 +128,8 @@ function TenantHome() {
       name: "Danh sách hóa đơn",
       path: "bills",
       icon: <FaFileInvoiceDollar />,
-    }
+    },
   ];
-
-  // const settingsItem = {
-  //   name: "Cài đặt",
-  //   path: "settings",
-  //   icon: <FaCog />,
-  // };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -195,32 +141,31 @@ function TenantHome() {
     setIsNavOpen(!isNavOpen);
   };
 
-  const bgColor = useColorModeValue('white', 'gray.800');
-
-  const features = [
-    {
-      title: 'Hóa đơn',
-      icon: FaFileInvoiceDollar,
-      description: 'Xem và thanh toán hóa đơn',
-      path: '/tenant/bills'
-    },
-    // Giữ nguyên các card khác
-  ];
-
   return (
     <Grid
       templateAreas={{
-        base: `"header"
-              "main"
-              "footer"`,
+        base: `"header" 
+             "main"
+             "footer"`,
+        md: `"header header"
+           "main main"
+           "footer footer"`,
       }}
-      gridTemplateRows={{ base: "70px 1fr auto" }}
-      gridTemplateColumns="1fr"
-      minH="100vh"
+      gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }}
+      gridTemplateRows={{
+        base: "auto 1fr",
+        sm: "auto 1fr",
+        md: "70px 1fr",
+        lg: "70px 1fr auto",
+      }}
+      gap={4}
+      bg={"brand.2"}
+      minHeight="100vh"
+      textAlign="center"
     >
       {/* header */}
       <GridItem
-        h="100px"
+        h={{ base: "70px", md: "100px" }}
         as="header"
         p={4}
         bg={"gray.200"}
@@ -234,13 +179,13 @@ function TenantHome() {
         left={0}
         right={0}
         w="100%"
-        zIndex={1}
+        zIndex={100}
       >
         {/* Logo */}
         <Box ml={{ base: "0", md: "4" }}>
           <RouterLink to="/tenant">
             <Text
-              bgGradient="linear(to-l, #9fccfa, #0974f1)"
+              bgGradient="linear(to-l, #07c8f9, #0d41e1)"
               bgClip="text"
               fontSize={{ base: "2xl", md: "2xl", lg: "4xl" }}
               fontWeight="bold"
@@ -250,78 +195,8 @@ function TenantHome() {
           </RouterLink>
         </Box>
 
-        {/* Trang chủ trên header */}
-        {/* <HStack 
-          spacing={4} 
-          display={{ base: "none", md: "flex" }}
-          ml={8}
-        >
-        <NavLink
-          to="/tenant"
-          style={({ isActive }) => ({
-            color: isActive ? "#0974f1" : "inherit",
-            textDecoration: "none"
-          })}
-        >
-          <Button
-            leftIcon={<IoHomeSharp />}
-            variant="ghost"
-            _hover={{ bg: "gray.300" }}
-          >
-            Trang chủ
-          </Button>
-        </NavLink>
-      </HStack> */}
-
-        {/* Searchbar */}
-        {/* <MotionBox
-          variants={searchVariants}
-          initial="initial"
-          animate={isScrolled ? "scrolled" : "initial"}
-          border={1}
-          padding={2}
-          boxShadow="sm"
-          display={{ base: "none", md: "flex" }}
-          alignItems="center"
-        >
-          <Input
-            placeholder="Tìm kiếm phòng..."
-            size="sm"
-            borderRadius="md"
-            bg="white"
-            mr={2}
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-          <Button bg="brand.500" size="sm">
-            Tìm
-          </Button>
-        </MotionBox> */}
-
         {/* Right Section */}
         <Flex alignItems="center" gap={8}>
-          {/* <Box position="relative">
-            <IconButton
-              color="brand.1"
-              aria-label="Notifications"
-              icon={<BellIcon />}
-              variant="ghost"
-              _hover={{ bg: "gray.300" }}
-            />
-            {hasNewNotification && (
-              <Badge
-                bg="red"
-                color="white"
-                position="absolute"
-                top="-2px"
-                right="-2px"
-                borderRadius="full"
-                boxSize="15px"
-                border="2px solid white"
-              />
-            )}
-          </Box> */}
-
           <NotificationBell />
 
           {/* User Menu */}
@@ -343,7 +218,7 @@ function TenantHome() {
                   </MenuItem>
                 ))}
 
-                <MenuDivider borderColor="black" borderWidth="1px"/>
+                <MenuDivider borderColor="black" borderWidth="1px" />
               </Box>
 
               {/* Chỉnh sửa thông tin cá nhân - hiển thị ở cả desktop và mobile */}
@@ -367,6 +242,8 @@ function TenantHome() {
           display={{ base: "flex", md: "none" }}
           onClick={onOpen}
           ml={2}
+          bg={"inherit"}
+          _hover={{ bgColor: "brand.2" }}
         />
 
         {/* Mobile Drawer */}
@@ -376,14 +253,6 @@ function TenantHome() {
             <DrawerCloseButton />
             <DrawerBody pt={10}>
               <VStack spacing={4} align="stretch">
-                {/* Mobile Search */}
-                {/* <InputGroup>
-                  <Input placeholder="Tìm kiếm phòng..." />
-                  <InputRightElement>
-                    <IconButton icon={<SearchIcon />} variant="ghost" />
-                  </InputRightElement>
-                </InputGroup> */}
-
                 {/* Mobile Menu Items */}
                 {menuItems.map((item) => (
                   <NavLink
@@ -407,7 +276,6 @@ function TenantHome() {
                 ))}
 
                 <Divider borderColor="black" borderWidth="1px" />
-                
 
                 {/* Mobile Logout */}
                 <Button
@@ -422,21 +290,6 @@ function TenantHome() {
                 >
                   Đăng xuất
                 </Button>
-
-                {/* Mobile Settings */}
-                {/* <Button
-                  leftIcon={<FaCog />}
-                  variant="ghost"
-                  w="100%"
-                  justifyContent="flex-start"
-                  as={RouterLink}
-                  to={settingsItem.path}
-                  onClick={onClose}
-                >
-                  {settingsItem.name}
-                </Button> */}
-
-                
               </VStack>
             </DrawerBody>
           </DrawerContent>
@@ -444,19 +297,20 @@ function TenantHome() {
       </GridItem>
 
       {/* Main */}
-      <GridItem as="main" area="main" mt="4" p={8}>
-        <Outlet />
+      <GridItem as="main" area="main" mt={{ base: 20, md: 0 }}>
+        <Box
+          w={"fit-content"}
+          h={"fit-content"}
+          bg={"white"}
+          p={{ base: 0, md: 6 }}
+          mx={"auto"}
+        >
+          <Outlet />
+        </Box>
       </GridItem>
 
       {/* Footer */}
-      <GridItem
-        as="footer"
-        area="footer"
-        w="100%"
-        bg="gray.500"
-        color="white"
-        mt="auto" // Đẩy footer xuống dưới cùng
-      >
+      <GridItem as="footer" area="footer" w="100%" bg="gray.500" color="white">
         <Box maxW="1200px" mx="auto" py={10} px={{ base: 4, md: 6 }}>
           <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8}>
             {/* Thông tin liên hệ */}
@@ -464,28 +318,40 @@ function TenantHome() {
               <Text fontSize="xl" fontWeight="bold" mb={2}>
                 Liên hệ với chúng tôi
               </Text>
-              <Text>Hotline: 0123456789</Text>
-              <Text>Email: info@hostel.com</Text>
-              <Text>
-                Địa chỉ: 69/68 Đặng Thùy Trâm, P.13, Q. Bình Thạnh, TP. HCM
+              <Text textColor={"white"}>Hotline: 0123456789</Text>
+              <Text textColor={"white"}>Email: info@hostel.com</Text>
+              <Text textColor={"white"}>
+                Địa chỉ: 828 Sư Vạn Hạnh, P.13, Q. 10, TP. HCM
               </Text>
-              <Text></Text>
             </VStack>
 
             {/* Links */}
-            <VStack align="start" spacing={3} textColor={"black"} >
+
+            <VStack align="start" spacing={3} textColor={"black"}>
               <Text fontSize="xl" fontWeight="bold" mb={2}>
                 Khám phá
               </Text>
-              <Link href="/ve-chung-toi" _hover={{ color: "blue.300" }}>
+              <Text
+                cursor={"pointer"}
+                textColor={"white"}
+                _hover={{ color: "blue.300" }}
+              >
                 Về chúng tôi
-              </Link>
-              <Link href="/dich-vu" _hover={{ color: "blue.300" }}>
+              </Text>
+              <Text
+                cursor={"pointer"}
+                textColor={"white"}
+                _hover={{ color: "blue.300" }}
+              >
                 Dịch vụ
-              </Link>
-              <Link href="/lien-he" _hover={{ color: "blue.300" }}>
+              </Text>
+              <Text
+                cursor={"pointer"}
+                textColor={"white"}
+                _hover={{ color: "blue.300" }}
+              >
                 Liên hệ
-              </Link>
+              </Text>
             </VStack>
 
             {/* Social Media */}
